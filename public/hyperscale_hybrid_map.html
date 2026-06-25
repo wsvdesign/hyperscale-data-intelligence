@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyperscale Data Center — Hybrid Intelligence Map</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#07080f;color:#e8e9f0;font-family:Inter,-apple-system,sans-serif;overflow:hidden;width:100vw;height:100vh}
+#toolbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:300;background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 18px;gap:10px}
+#toolbar h1{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap}
+#toolbar h1 span{color:#1e2035}
+.mg{display:flex;border:1px solid rgba(255,255,255,.1);border-radius:5px;overflow:hidden;flex-shrink:0}
+.mb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;background:transparent;color:#3a3e58;cursor:pointer;border:none;border-right:1px solid rgba(255,255,255,.07);transition:all .2s;white-space:nowrap}
+.mb:last-child{border-right:none}
+.mb.on{background:rgba(255,255,255,.09);color:#e8e9f0}
+.mb:hover:not(.on){color:#8a8eb0}
+.tb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:#3a3e58;cursor:pointer;transition:all .2s;white-space:nowrap}
+.tb:hover{border-color:rgba(255,255,255,.3);color:#e8e9f0}
+.tb.lit{border-color:#ff4444;color:#ff4444;background:rgba(255,68,68,.1)}
+#mstrip{position:fixed;top:52px;left:0;right:0;height:3px;z-index:299;transition:background .3s}
+
+/* views */
+.view{position:fixed;top:55px;left:0;right:0;bottom:0;display:none}
+.view.on{display:block}
+
+/* view 1 & 3: canvas */
+#vhub,#vcross{background:#07080f;cursor:grab}
+#vhub canvas,#vcross canvas{display:block;width:100%;height:100%}
+
+/* view 2: layers — pure HTML scroll */
+#vlayers{background:#07080f;overflow-y:auto;overflow-x:hidden}
+#vlayers::-webkit-scrollbar{width:4px}
+#vlayers::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+.lpage{max-width:760px;margin:0 auto;padding:44px 36px 100px}
+.lpage-title{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1e2035;margin-bottom:28px;display:block}
+.lrow{display:flex;gap:0;margin-bottom:0}
+.lspine{width:44px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
+.lletter{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;z-index:1;position:relative;flex-shrink:0}
+.lline{flex:1;width:1px;margin:0 auto}
+.lconnector{height:22px;display:flex;align-items:center;justify-content:center;margin-left:21px}
+.lconnector-inner{width:1px;height:100%;position:relative}
+.lconnector-arrow{position:absolute;bottom:-5px;left:-4px;color:rgba(255,255,255,.1);font-size:9px}
+.lcard{flex:1;margin-left:14px;margin-bottom:6px;border:1px solid rgba(255,255,255,.07);border-radius:8px;padding:15px 17px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.lcard:hover{border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.02)}
+.lcard.exp{border-color:rgba(255,255,255,.18)!important}
+.lcard-bar{position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:8px 0 0 8px}
+.lcard-head{display:flex;gap:10px;align-items:flex-start}
+.lcard-name{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.lcard-desc{font-size:11px;color:#5a5e78;line-height:1.6}
+.lcard-actors{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto;flex-shrink:0;align-items:flex-start}
+.achip{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:3px;white-space:nowrap}
+.lnodes{margin-top:13px;padding-top:13px;border-top:1px solid rgba(255,255,255,.05);display:none;flex-wrap:wrap;gap:5px}
+.lnodes.op{display:flex}
+.lnode{font-size:10px;color:#3a3e58;border:1px solid rgba(255,255,255,.06);padding:4px 9px;border-radius:3px}
+.lwhy{margin-top:10px;font-size:11px;color:#4a4e68;line-height:1.6;font-style:italic;display:none}
+.lwhy.op{display:block}
+
+/* panel */
+#panel{position:fixed;top:52px;right:-430px;bottom:0;width:420px;background:#090a18;border-left:1px solid rgba(255,255,255,.06);transition:right .3s ease;z-index:250;display:flex;flex-direction:column;overflow:hidden}
+#panel.op{right:0}
+#ph{padding:18px 22px 14px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;position:relative}
+#pt{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:6px}
+#pn{font-size:15px;font-weight:700;line-height:1.35}
+#ps{font-size:12px;color:#5a5e78;margin-top:5px;line-height:1.55}
+#pc{position:absolute;top:14px;right:18px;width:26px;height:26px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:#4a4e68;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+#pc:hover{color:#e8e9f0;border-color:rgba(255,255,255,.3)}
+#pb{flex:1;overflow-y:auto;padding:18px 22px}
+#pb::-webkit-scrollbar{width:3px}
+#pb::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px}
+.ss{margin-bottom:18px}
+.sl{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1e2035;display:block;margin-bottom:7px}
+.sp{font-size:12px;color:#5a5e78;line-height:1.65}
+.ir{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
+.ir:last-child{border-bottom:none}
+.ik{color:#1e2035;min-width:80px;flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:1px}
+.iv{color:#5a5e78;line-height:1.55}
+.tgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.tg{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:3px}
+.tg-c{background:rgba(255,68,68,.12);color:#ff7070;border:1px solid rgba(255,68,68,.25)}
+.tg-p{background:rgba(76,178,76,.12);color:#6ed06e;border:1px solid rgba(76,178,76,.25)}
+.tg-r{background:rgba(200,150,50,.12);color:#d4a040;border:1px solid rgba(200,150,50,.25)}
+.tg-t{background:rgba(100,140,210,.12);color:#80a8e8;border:1px solid rgba(100,140,210,.25)}
+.tg-risk{background:rgba(150,80,200,.1);color:#b070d8;border:1px solid rgba(150,80,200,.2)}
+.dc{font-size:10px;color:#3a3e58;padding:5px 8px;border:1px solid rgba(255,255,255,.04);border-radius:3px;margin-bottom:3px;display:flex;gap:6px}
+.dc::before{content:'▸';flex-shrink:0;color:#1e2035}
+.li{font-size:11px;color:rgba(255,80,80,.75);padding:5px 0;border-bottom:1px solid rgba(255,68,68,.07);display:flex;gap:6px;line-height:1.5}
+.li:last-child{border-bottom:none}
+.ld{color:#ff4444;flex-shrink:0}
+.qi{font-size:11px;color:rgba(255,195,60,.8);padding:5px 0;border-bottom:1px solid rgba(255,195,60,.06);display:flex;gap:5px;line-height:1.5}
+.qi:last-child{border-bottom:none}
+.qm{color:rgba(255,195,60,.45);flex-shrink:0;font-weight:700}
+.lci{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.lci:last-child{border-bottom:none}
+.lcl{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;display:block}
+.lch{font-size:11px;color:#5a5e78;line-height:1.55}
+
+/* legend & zoom */
+#legend{position:fixed;left:16px;bottom:16px;z-index:200;background:rgba(9,10,24,.95);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:12px 14px}
+#legend h3{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1e2035;margin-bottom:9px}
+.leg{display:flex;align-items:center;gap:7px;font-size:9px;color:#4a4e68;margin-bottom:5px}
+.lc{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.ll{width:16px;height:1.5px;flex-shrink:0}
+.ld2{width:16px;height:0;border-top:1.5px dashed #ff4444;flex-shrink:0}
+.lsep{border-top:1px solid rgba(255,255,255,.04);margin:6px 0}
+#zb{position:fixed;right:16px;bottom:16px;z-index:200;display:flex;flex-direction:column;gap:4px}
+.zbt{width:30px;height:30px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:rgba(9,10,24,.9);color:#4a4e68;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.zbt:hover{color:#e8e9f0;border-color:rgba(255,255,255,.25)}
+#hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#1a1d30;pointer-events:none;transition:opacity 1s;z-index:100;white-space:nowrap}
+</style>
+
+<style id="site-nav-style">
+.site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
+.sn:hover{border-color:rgba(255,255,255,.25);color:#dde0f0}
+.sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
+.sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
+.sn.sn-active{background:rgba(255,255,255,.07);color:#dde0f0;border-color:rgba(255,255,255,.18)}
+@media(max-width:780px){.sn{font-size:7px;padding:3px 7px}}
+@media(max-width:520px){.site-nav .sn-label{display:none}.sn{padding:4px 7px}}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <h1>HYPERSCALE DATA CENTER <span>/ Hybrid Intelligence Map</span></h1>
+  <div class="mg">
+    <button class="mb on" id="b1" onclick="setMode('hub')">① Hub &amp; Spoke</button>
+    <button class="mb"    id="b2" onclick="setMode('layers')">② Control Layers A–H</button>
+    <button class="mb"    id="b3" onclick="setMode('cross')">③ Cross-Section</button>
+  </div>
+  <button class="tb" id="litbtn" onclick="toggleLit()">⬤ Litigation</button>
+  <button class="tb" onclick="resetView()">↺ Reset</button>
+  <nav class="site-nav">
+    <a class="sn sn-home" href="index.html"><span>⌂</span> <span class="sn-label">Home</span></a>
+    <a class="sn" href="hyperscale_intelligence_map.html"><span>①</span> <span class="sn-label">Hub Map</span></a>
+    <a class="sn sn-active" href="hyperscale_hybrid_map.html"><span>②</span> <span class="sn-label">Hybrid Map</span></a>
+    <a class="sn" href="hyperscale_linear_timeline.html"><span>③</span> <span class="sn-label">Timeline</span></a>
+    <a class="sn" href="hyperscale_growth_pressure.html"><span>④</span> <span class="sn-label">Growth Pressure</span></a>
+  </nav>
+</div>
+<div id="mstrip"></div>
+
+<div id="vhub" class="view on"><canvas id="c1"></canvas></div>
+<div id="vlayers" class="view"><div class="lpage"><span class="lpage-title">Control Layers A–H — how power flows through the system, top to bottom. Click any layer to expand.</span><div id="lc"></div></div></div>
+<div id="vcross" class="view"><canvas id="c2"></canvas></div>
+
+<div id="panel">
+  <button id="pc" onclick="closeP()">✕</button>
+  <div id="ph"><span id="pt"></span><div id="pn"></div><div id="ps"></div></div>
+  <div id="pb"></div>
+</div>
+
+<div id="legend"><h3 id="lgh">Legend</h3><div id="lgb"></div></div>
+<div id="zb"><button class="zbt" onclick="za(1.15)">+</button><button class="zbt" onclick="za(.87)">−</button></div>
+<div id="hint">Click any node · Switch views in toolbar · Drag to pan</div>
+
+<script>
+const S=[
+{id:'dev',label:'Developer\n/ Hyperscaler',icon:'🏢',color:'#6c8ebf',angle:0,pl:'A',
+ controls:'Site selection, capital allocation, project code names, LLC structures',
+ wants:'Power, land, tax incentives, water, fiber, permitting speed',
+ provides:'Capital investment, jobs promise, technology positioning',
+ receives:'Tax exemptions, infrastructure, utility agreements, political support',
+ transp:'CONFIDENTIAL — initial recruitment, land options, LLC identity',
+ risks:['Schedule risk','Grid risk','Political risk','Reputational risk'],
+ docs:['Project code-name file','NDA with state','Site-selection RFI','Land options via LLC','Load request to utility','Incentive application','Performance agreement'],
+ lit:['LLC identity challenge via FOIA','Land option disclosure dispute','Breach of incentive agreement','Failure to meet job thresholds'],
+ qs:['Was full buildout scale disclosed?','Who controls the shell LLCs?','Is project phased to avoid review thresholds?'],
+ lc:[{l:'B',h:'Approaches state econ-dev agency under NDA; project code name assigned'},{l:'C',h:'Shell LLCs assemble parcels before public announcement'},{l:'D',h:'Load request to utility; fiber and road routing determined'},{l:'F',h:'REIT or co-location structure chosen; tax credits layered'}],
+ subs:[{id:'hyper',label:'Hyperscaler',icon:'☁',tag:'CONF',tc:'tg-c',detail:'Amazon, Microsoft, Google, Meta, Oracle. Conceals identity behind project code names and subsidiaries.'},{id:'sitec',label:'Site Consultant',icon:'📍',tag:'PRIV',tc:'tg-r',detail:'Third-party firm issuing RFIs to states, negotiating confidentially under NDA.'},{id:'sllc',label:'Shell LLC',icon:'🔲',tag:'CONF',tc:'tg-c',detail:'Anonymous entity assembling land parcels without revealing buyer identity or project scale.'},{id:'redev',label:'RE Developer',icon:'🏗',tag:'PRIV',tc:'tg-r',detail:'May construct the facility and lease to hyperscaler, keeping ownership off public record.'}]},
+{id:'state',label:'State\nGovernment',icon:'🏛',color:'#7cb87c',angle:36,pl:'B',
+ controls:'Tax exemptions, economic development incentives, environmental permits, utility regulation',
+ wants:'Capital investment, job announcements, AI/tech positioning',
+ provides:'Tax exemptions, infrastructure grants, fast-track permitting',
+ receives:'Investment commitments, job pledges, construction activity',
+ transp:'PARTIALLY DISCLOSED — incentive negotiations confidential until approved',
+ risks:['Political risk','Financial risk — foregone tax revenue','Reputational risk'],
+ docs:['RFI response','Confidentiality agreement','Incentive application','Tax exemption certification','Performance agreement','Clawback agreement'],
+ lit:['Tax incentive clawback dispute','Open meetings challenge','FOIA for NDA and RFI records','Constitutional challenge to tax exemption'],
+ qs:['Were projections independently verified?','What taxes are waived over 10+ years?','Can state recover incentives if thresholds missed?'],
+ lc:[{l:'A',h:'Receives confidential RFI; prepares site and incentive package under NDA'},{l:'E',h:'Issues or delegates air, water, wetlands, and environmental permits'},{l:'F',h:'Negotiates performance agreement, clawback provisions, statutory exemptions'},{l:'G',h:'Controls what job and investment data is publicly reported'}],
+ subs:[{id:'gov',label:"Governor's\nOffice",icon:'⭐',tag:'CONF',tc:'tg-c',detail:"First contact. Governor may personally recruit projects under NDA. Announcement timed for political benefit."},{id:'econ',label:'Econ Dev\nAgency',icon:'📊',tag:'CONF',tc:'tg-c',detail:'Prepares incentive package, manages confidential negotiations, drafts performance and clawback agreements.'},{id:'tax',label:'Tax Dept',icon:'💲',tag:'PART',tc:'tg-t',detail:'Administers statutory exemptions. Individual project data sometimes aggregated in public reports.'},{id:'leg',label:'Legislature',icon:'📜',tag:'PUB',tc:'tg-p',detail:'Creates enabling legislation. Votes are public but often framed as general business incentives.'}]},
+{id:'local',label:'Local\nGovernment',icon:'🏘',color:'#b87c6c',angle:72,pl:'E',
+ controls:'Zoning, land-use permits, site plan approval, development agreements, annexation',
+ wants:'Tax base, construction jobs, county investment, infrastructure upgrades',
+ provides:'Rezoning, special-use permits, development agreements, road access',
+ receives:'Tax revenue net of abatements, infrastructure contributions',
+ transp:'PUBLIC — zoning hearings public, but often after major commitments already made',
+ risks:['Political risk','Community risk','Land risk — deed restrictions'],
+ docs:['Zoning application','Special-use permit','Site plan','Development agreement','Infrastructure reimbursement agreement','Annexation petition'],
+ lit:['Zoning appeal by neighbors','Special-use permit challenge','Open meetings violation','Deed restriction enforcement'],
+ qs:['Who builds the roads and water lines?','Can residents challenge the decision?','Is farmland permanently removed?'],
+ lc:[{l:'C',h:'Rezoning and annexation convert agricultural land to industrial use'},{l:'D',h:'Commits municipal water and sewer; grants road access for utility corridors'},{l:'G',h:'First to absorb noise, traffic, groundwater, and community burden'},{l:'H',h:'Primary defendant in zoning appeals, deed restriction claims, open meetings challenges'}],
+ subs:[{id:'council',label:'City / County\nBoard',icon:'🗳',tag:'PUB',tc:'tg-p',detail:'Votes on rezoning and development agreements. Public vote but often after the done-deal sequence.'},{id:'plan',label:'Planning\nCommission',icon:'📐',tag:'PUB',tc:'tg-p',detail:'Reviews zoning applications. Hearings are public. Neighbors may testify.'},{id:'build',label:'Building Dept',icon:'🔧',tag:'PUB',tc:'tg-p',detail:'Issues construction permits. Phased projects receive separate permits per building, obscuring total scale.'},{id:'town',label:'Township /\nCounty',icon:'🗺',tag:'PUB',tc:'tg-p',detail:'May have initial land-use authority. Annexation can rapidly shift authority to municipality.'}]},
+{id:'land',label:'Landowners\n/ Community',icon:'🌾',color:'#c4a84f',angle:108,pl:'C',
+ controls:'Deed restrictions, voluntary sale decisions, water rights, agricultural use, legal standing',
+ wants:'Fair price, transparency about buyer, protection of deed conditions',
+ provides:'Land, water rights, political legitimacy, community opposition or support',
+ receives:'Purchase price, displacement pressure, possible eminent domain on infrastructure',
+ transp:'PRIVATE — land option terms confidential until deed recording',
+ risks:['Land risk','Water risk','Community risk — displacement'],
+ docs:['Land option agreement','Purchase and sale agreement','Deed restrictions','Easement agreements','Eminent domain filing'],
+ lit:['Deed restriction enforcement','Groundwater injury claim','Eminent domain challenge','Nuisance and noise claims'],
+ qs:['Was eminent domain used directly or indirectly?','Is farmland permanently removed?','Did LLC concealment prevent fair pricing?'],
+ lc:[{l:'C',h:'Primary subject of land assembly — options, purchase, easements'},{l:'G',h:'Permanent farmland loss and displacement are direct public consequences'},{l:'H',h:'May bring deed restriction claims, groundwater injury suits, nuisance actions'}],
+ subs:[{id:'farm',label:'Farmer /\nLandowner',icon:'🌱',tag:'PRIV',tc:'tg-r',detail:'LLC-based assembly prevents sellers from understanding full project scale, limiting negotiating power.'},{id:'comm',label:'Community\nGroups',icon:'👥',tag:'PUB',tc:'tg-p',detail:'May testify at hearings, file FOIA requests, fund legal challenges.'},{id:'wtr',label:'Water Rights',icon:'💧',tag:'PRIV',tc:'tg-r',detail:'Agricultural water rights may be implicated by large industrial withdrawals.'},{id:'deed',label:'Deed\nRestrictions',icon:'📋',tag:'PART',tc:'tg-t',detail:'Key litigation trigger. Taylor TX: farmer donated land for park; city sold to data-center developer.'}]},
+{id:'elec',label:'Electric Utility\n/ Grid',icon:'⚡',color:'#8c6cb8',angle:144,pl:'D',
+ controls:'Power supply, interconnection queue, transmission capacity, substation locations, tariff structures',
+ wants:'Load growth revenue, cost recovery, ratepayer protection, schedule certainty',
+ provides:'Power supply, interconnection study, service agreement, approved tariff',
+ receives:'Infrastructure cost contributions, minimum monthly payments, long-term commitment',
+ transp:'PARTIALLY DISCLOSED — service agreements often redacted; tariff approved by PSC',
+ risks:['Grid risk','Financial risk — stranded infrastructure','Schedule risk'],
+ docs:['Load request letter','Interconnection/load study','Electric service agreement','Special tariff filing','PSC filing','Transmission upgrade plan'],
+ lit:['Utility rate case — ratepayer subsidy challenge','Transmission siting challenge','Cost-allocation dispute','PSC appeal'],
+ qs:['Who pays for substations and transmission upgrades?','Are ratepayers subsidizing data-center infrastructure?','Who bears grid risk if project abandoned?'],
+ lc:[{l:'A',h:'Power availability is a primary site selection factor'},{l:'D',h:'Core utility actor — confirms capacity, builds infrastructure, prices service agreement'},{l:'F',h:'Minimum demand payments and infrastructure contributions enter financial model'},{l:'G',h:'Ratepayer exposure and grid strain are direct public consequences'}],
+ subs:[{id:'util',label:'Electric\nUtility',icon:'🔌',tag:'PART',tc:'tg-t',detail:'Evaluates whether system can serve the load. Negotiates service agreement with minimum payments and termination charges.'},{id:'grid',label:'Grid Operator',icon:'📡',tag:'PART',tc:'tg-t',detail:'Regional transmission organization (PJM, MISO) manages interconnection queue. Studies can take years.'},{id:'psc',label:'Public Service\nCommission',icon:'⚖',tag:'PUB',tc:'tg-p',detail:'Regulates utility tariffs. Must approve cost allocation to ratepayers. Proceedings are public.'},{id:'sub',label:'Substation /\nTransmission',icon:'🔋',tag:'PRIV',tc:'tg-r',detail:'New substations and lines may require easements across third-party land — potentially triggering eminent domain.'}]},
+{id:'water',label:'Water &\nSewer',icon:'💧',color:'#4fa8b8',angle:180,pl:'D',
+ controls:'Water supply, withdrawal permits, wastewater discharge, treatment capacity, reclaimed water',
+ wants:'Revenue, infrastructure cost recovery, regulatory compliance',
+ provides:'Water availability letter, service agreement, sewer capacity',
+ receives:'Infrastructure contributions, connection fees, ongoing revenue',
+ transp:'PARTIALLY DISCLOSED — municipal use aggregated; private withdrawal permits may be public',
+ risks:['Water risk','Environmental risk — watershed','Regulatory risk'],
+ docs:['Water availability letter','Water service agreement','Sewer agreement','Water withdrawal permit','Wastewater discharge permit'],
+ lit:['Water withdrawal dispute — stream impact','Groundwater injury claim','Wastewater permit challenge','FOIA for facility-level water use'],
+ qs:['Is drinking water or reclaimed water used for cooling?','Was reclaimed water evaluated first?','Are cumulative watershed impacts reviewed?'],
+ lc:[{l:'D',h:'Parallel utility dependency alongside electricity — negotiated simultaneously'},{l:'E',h:'Withdrawal and discharge permits issued by state environmental agency'},{l:'G',h:'Water demand and potable-vs-reclaimed choice are direct public consequences'},{l:'H',h:'Groundwater injury claims and stream impact disputes are active litigation pathways'}],
+ subs:[{id:'mun',label:'Municipal\nWater Auth',icon:'🚰',tag:'PART',tc:'tg-t',detail:'Authority may hold the formal withdrawal permit, making facility-level water use invisible in public records.'},{id:'pot',label:'Potable Water',icon:'🥤',tag:'PART',tc:'tg-t',detail:'Drinking-quality water used for cooling. Should drinking water be used for industrial cooling?'},{id:'rec',label:'Reclaimed\nWater',icon:'♻',tag:'PART',tc:'tg-t',detail:'Treated wastewater reused for cooling. Not always evaluated before potable commitments are made.'},{id:'gw',label:'Groundwater\nWithdrawal',icon:'⛏',tag:'PART',tc:'tg-t',detail:'Private wells at large scale require registration and possibly state permits. Can affect neighboring wells.'}]},
+{id:'env',label:'Environmental\nRegulators',icon:'🌿',color:'#4fb87c',angle:216,pl:'E',
+ controls:'Air permits, water permits, wetlands jurisdiction, stormwater authorization, cumulative impact review',
+ wants:'Regulatory compliance, environmental protection, legal defensibility',
+ provides:'Air permits, water withdrawal permits, wetlands approvals, stormwater authorization',
+ receives:'Application fees, monitoring data, compliance reports',
+ transp:'PARTIALLY DISCLOSED — permit applications public; enforcement sometimes redacted',
+ risks:['Environmental risk','Legal risk — permit challenges','Regulatory risk — NEPA gap'],
+ docs:['Air permit application','Stormwater permit NPDES','Wastewater NPDES permit','Wetlands authorization','Generator emissions inventory'],
+ lit:['Air permit challenge — generator aggregation','Clean Water Act wetlands dispute','Stormwater violation','Cumulative impact review demand'],
+ qs:['Are generator emissions evaluated individually or as one source?','Are cumulative impacts reviewed if no federal nexus?','Does NEPA apply?'],
+ lc:[{l:'E',h:'Issues permits — each a separate proceeding with its own public comment window'},{l:'G',h:'Generator emissions, water discharge, and wetlands loss are environmental public consequences'},{l:'H',h:'Environmental permits are primary targets for litigation by advocacy groups'}],
+ subs:[{id:'senv',label:'State Env\nAgency',icon:'🏭',tag:'PUB',tc:'tg-p',detail:'Issues air, water, wetlands, and stormwater permits. Each is a separate proceeding. No cross-permit coordination.'},{id:'epa',label:'EPA / Federal',icon:'🇺🇸',tag:'PUB',tc:'tg-p',detail:'NEPA applies only with a federal nexus. Private data centers may not trigger federal review despite cumulative impacts.'},{id:'gen',label:'Generator\nEmissions',icon:'🔥',tag:'PART',tc:'tg-t',detail:'Hundreds of backup diesel generators may collectively constitute a major emission source. Evaluated individually or aggregated?'},{id:'wet',label:'Wetlands /\nStreams',icon:'🌊',tag:'PUB',tc:'tg-p',detail:'Filling wetlands requires Clean Water Act Section 404 authorization. Army Corps may have jurisdiction.'}]},
+{id:'fin',label:'Financial\nInstitutions',icon:'🏦',color:'#b84f8c',angle:252,pl:'F',
+ controls:'Project financing, bond issuance, equity investment, public authority financing, REIT structures',
+ wants:'Returns, security, tax efficiency, predictable cash flows',
+ provides:'Capital, debt financing, equity, bond issuance, tax-credit investment',
+ receives:'Interest, returns, tax benefits, performance guarantees',
+ transp:'PRIVATE — financing terms, investor identity, and bond covenants largely private',
+ risks:['Financial risk','Schedule risk','Legal risk — default or clawback'],
+ docs:['Loan agreement','Bond documents','Investment agreement','REIT structure filings','Tax credit agreements','Letter of credit'],
+ lit:['Bond default challenge','Clawback triggering investor loss','Tax credit recapture dispute','Public authority financing challenge'],
+ qs:['Is public authority financing being used?','Are tax-exempt bonds subsidizing private infrastructure?','Who bears financial risk if project abandoned?'],
+ lc:[{l:'B',h:'Financing structure shapes the incentive asks — tax exemptions enter pro forma'},{l:'F',h:'Core layer — provides debt, equity, bond financing, and tax credit investment'},{l:'G',h:'Foregone tax revenue and public authority financing are direct public cost consequences'}],
+ subs:[{id:'lend',label:'Institutional\nLenders',icon:'💳',tag:'PRIV',tc:'tg-r',detail:'Banks and infrastructure lenders provide project finance. Loan agreements are private.'},{id:'eq',label:'Private Equity\n/ REIT',icon:'📈',tag:'PRIV',tc:'tg-r',detail:'Infrastructure funds and REITs increasingly finance data-center campuses.'},{id:'pub',label:'Public\nAuthority',icon:'🏛',tag:'PART',tc:'tg-t',detail:'Industrial development authority may provide tax-exempt financing, triggering disclosure requirements.'},{id:'tc',label:'Tax Credits\n/ Bonds',icon:'🎫',tag:'PART',tc:'tg-t',detail:'Federal and state tax credits and tax-exempt bonds may layer on top of direct incentives invisibly.'}]},
+{id:'infra',label:'Contractors\n/ Infrastructure',icon:'🔩',color:'#b8874f',angle:288,pl:'D',
+ controls:'Construction timeline, labor sourcing, infrastructure specs, fiber/road routing, cooling design',
+ wants:'Contracts, timeline certainty, payment, site access',
+ provides:'Construction, electrical, plumbing, mechanical, fiber, roads, cooling',
+ receives:'Contract payments, subcontract work, maintenance contracts',
+ transp:'PRIVATE — contract terms private; labor conditions rarely disclosed',
+ risks:['Schedule risk','Community risk — labor displacement','Environmental risk'],
+ docs:['Construction contracts','Subcontract agreements','Labor compliance certifications','Construction stormwater permits','Building permits'],
+ lit:['Prevailing wage dispute','Construction lien claims','Environmental violation','Stormwater enforcement'],
+ qs:['Are local workers being hired?','Are prevailing wage requirements met?','Who owns infrastructure built at public expense?'],
+ lc:[{l:'D',h:'Builds the physical infrastructure — substations, fiber, roads, cooling systems'},{l:'E',h:'Subject to building permits, stormwater permits, and labor compliance'},{l:'G',h:'Construction employment is the primary temporary public labor benefit'}],
+ subs:[{id:'gc',label:'General\nContractor',icon:'🏗',tag:'PRIV',tc:'tg-r',detail:'Manages construction. Contract terms private. May receive infrastructure reimbursement from local government.'},{id:'fr',label:'Fiber / Roads',icon:'🛣',tag:'PRIV',tc:'tg-r',detail:'Fiber and road infrastructure ownership determines who controls access after construction.'},{id:'cool',label:'Cooling\nSystems',icon:'❄',tag:'PRIV',tc:'tg-r',detail:'Cooling technology choice determines water consumption. Made privately with major public consequences.'},{id:'sec',label:'Security /\nFencing',icon:'🔐',tag:'PRIV',tc:'tg-r',detail:'High-security perimeters can fragment agricultural land and create barriers for neighboring properties.'}]},
+{id:'courts',label:'Courts &\nAdmin Review',icon:'⚖',color:'#bf6c6c',angle:324,pl:'H',
+ controls:'Legal validity of permits, zoning decisions, incentive agreements, environmental approvals',
+ wants:'Legal compliance, procedural fairness, complete administrative record',
+ provides:'Injunctions, remand orders, enforcement, damage awards, settlement pressure',
+ receives:'Appeals, lawsuits, administrative filings, public records requests',
+ transp:'PUBLIC — court proceedings and records generally public after filing',
+ risks:['Legal risk','Schedule risk — injunctions halt construction','Financial risk'],
+ docs:['Zoning appeal','Environmental permit challenge','FOIA request','Eminent domain complaint','Deed restriction claim','Utility rate case filing'],
+ lit:['Zoning appeal by neighbors','Environmental permit challenge','Utility rate case','Deed restriction enforcement','FOIA litigation','Constitutional challenge to tax exemption','Nuisance claims'],
+ qs:['Can residents challenge a decision already made?','What stays confidential after litigation begins?','Can the state recover incentives through court enforcement?'],
+ lc:[{l:'H',h:'Core actor in litigation overlay — all challenges flow through courts and admin bodies'},{l:'B',h:'FOIA litigation targets confidential incentive negotiations and NDAs'},{l:'E',h:'Environmental permit appeals and zoning challenges heard in administrative proceedings'},{l:'G',h:'Court outcomes determine whether communities receive mitigation, damages, or cancellation'}],
+ subs:[{id:'sc',label:'State Courts',icon:'⚖',tag:'PUB',tc:'tg-p',detail:'Primary venue for zoning appeals, deed restriction claims, nuisance suits, eminent domain challenges.'},{id:'adm',label:'Admin Appeals',icon:'📩',tag:'PUB',tc:'tg-p',detail:'Environmental permit challenges and utility tariff appeals heard by administrative bodies before court.'},{id:'foia',label:'FOIA /\nPublic Records',icon:'🗂',tag:'PUB',tc:'tg-p',detail:'Requests for NDAs, incentive applications, utility agreements. FOIA litigation is a key accountability tool.'},{id:'inj',label:'Injunction /\nDelay',icon:'🛑',tag:'PUB',tc:'tg-p',detail:'Courts may issue preliminary injunctions halting construction. Even temporary injunctions shift project economics.'}]}
+];
+
+const L=[
+{id:'A',label:'Strategic Intent',color:'#5a8abd',desc:'AI demand, cloud expansion, geographic redundancy, market access, tax strategy, energy access. The invisible first layer — never disclosed publicly.',actors:['dev'],nodes:['Market feasibility study','Latency / fiber map','Energy-availability study','Tax strategy memo','Project code-name file','Regional site scan'],why:'This layer determines which states are even considered. It happens entirely inside the corporation, before any government entity is contacted.'},
+{id:'B',label:'Political & Economic Recruitment',color:'#6aaa6a',desc:'Governor, state economic-development agency, local authority, incentive package, NDA, project code name, public announcement. The layer where government becomes a partner — under confidentiality.',actors:['state'],nodes:['NDA with state','RFI and state response','MOU','Incentive application','Performance agreement','Clawback agreement','Public announcement'],why:'States compete for projects under nondisclosure. The public announcement is a political event, not the start of the process.'},
+{id:'C',label:'Land Control',color:'#b8a048',desc:'Farmland targeting, option agreements, shell LLCs, parcel assembly, annexation, rezoning, easements, infrastructure corridors. Physical taking of land — usually before any public hearing.',actors:['land'],nodes:['Land option via LLC','Purchase agreement','Parcel assembly map','Annexation petition','Rezoning application','Easement filings','Deed restriction review'],why:'By the time zoning hearings are held, the land is often already under option or contract. The public responds to decisions already financially locked in.'},
+{id:'D',label:'Utility Dependency',color:'#7a5aaa',desc:'Power reservation, transmission study, substation, water availability, potable vs. reclaimed water, sewer capacity, fiber, roads, cooling. Six parallel infrastructure negotiations that run simultaneously.',actors:['elec','water','infra'],nodes:['Load request','Interconnection study','Electric service agreement','Water availability letter','Water service agreement','Sewer agreement','Fiber routing plan','Road access plan','Cooling system design'],why:'The largest public costs hide here. Ratepayers may absorb substation and transmission costs. Water source decisions are made privately. None of this is a single public vote.'},
+{id:'E',label:'Regulatory Authorization',color:'#4aaa70',desc:'Zoning, site plan, air permit, water withdrawal, wastewater, wetlands, stormwater, generator approval, building permits. The layer that looks like public process — but is fragmented.',actors:['local','env'],nodes:['Zoning / special-use permit','Site plan','Air permit','Water withdrawal permit','Wastewater permit','Wetlands authorization','Stormwater permit','Building permits','Certificate of occupancy'],why:'Each permit is a separate proceeding with its own agency, timeline, and public comment window. No single agency coordinates them or sees the cumulative picture.'},
+{id:'F',label:'Financial & Contractual Structure',color:'#aa4a80',desc:'Tax exemptions, grants, utility tariff, infrastructure reimbursement, development agreement, performance agreement, clawbacks, bonds, financing. The layer that determines the actual public cost.',actors:['fin','state'],nodes:['Tax exemption certification','Clawback agreement','Development agreement','Infrastructure reimbursement','Bond documents','REIT structure','Tax credit agreement','Annual compliance report'],why:'The financial layer is where the deal is actually made. Clawbacks and infrastructure reimbursement determine whether the public investment is recoverable. Most of this is never in one public document.'},
+{id:'G',label:'Public Consequences',color:'#aa8040',desc:'Permanent jobs, construction jobs, tax revenue, foregone taxes, ratepayer exposure, water demand, farmland loss, noise, emissions, community benefits, displacement risk.',actors:['land'],nodes:['Permanent jobs count','Construction jobs count','Tax exemptions waived ($)','Ratepayer cost exposure','Water demand (gal/day)','Farmland acres converted','Noise / emissions reports','Community benefit agreement'],why:'This is the layer the public is promised but rarely gets to audit. Permanent job counts are often small relative to incentives. Tax exemptions may be reported in aggregate.'},
+{id:'H',label:'Legal Challenge & Accountability',color:'#aa5050',desc:'Litigation, administrative appeal, public records, open meetings, eminent domain, deed enforcement, environmental review, utility commission challenge, contract default, clawback enforcement.',actors:['courts'],nodes:['Zoning appeal','Environmental permit challenge','FOIA litigation','Deed restriction claim','Utility rate case','Eminent domain challenge','Open meetings complaint','Nuisance claim','Clawback enforcement'],why:'Legal challenge is not a last resort — it runs in parallel with every other layer. Communities can challenge at zoning, permitting, utility approval, and the incentive agreement stage.'}
+];
+
+const LP=[['dev','courts'],['state','courts'],['local','courts'],['land','courts'],['elec','courts'],['water','courts'],['env','courts'],['fin','courts'],['dev','land'],['dev','state'],['local','land'],['elec','state'],['water','env'],['env','local']];
+
+// STATE
+let mode='hub',litOn=false,actSec=null;
+let hSc=1,hPx=0,hPy=0,cSc=1,cPx=0,cPy=0;
+let hHov=null,cHov=null;
+const D=()=>window.devicePixelRatio||1;
+
+// CANVASES
+const c1=document.getElementById('c1'),ctx1=c1.getContext('2d');
+const c2=document.getElementById('c2'),ctx2=c2.getContext('2d');
+
+function fit(cv){const d=D();cv.width=cv.offsetWidth*d;cv.height=cv.offsetHeight*d;cv.style.width=cv.offsetWidth+'px';cv.style.height=cv.offsetHeight+'px';}
+function resAll(){fit(c1);fit(c2);}
+window.addEventListener('resize',resAll);resAll();
+
+// GEOMETRY
+const OR=195,SD=95,HR=44,SR=33,SUB=19;
+function ha(h,a){const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return 'rgba('+r+','+g+','+b+','+a+')';}
+function sXY(ang){const r=(ang-90)*Math.PI/180;return[Math.cos(r)*OR,Math.sin(r)*OR];}
+function snXY(sec,i){const n=sec.subs.length,b=(sec.angle-90)*Math.PI/180,off=(i-(n-1)/2)*0.42,d=OR+SD+Math.abs(i-(n-1)/2)*8;return[Math.cos(b+off)*d,Math.sin(b+off)*d];}
+function ts(cv,wx,wy,px,py,sc){const d=D();return[cv.width/2+(wx+px)*sc*d,cv.height/2+(wy+py)*sc*d];}
+
+// DRAW HELPERS
+function dc(ctx,cv,wx,wy,r,fill,stroke,sw,px,py,sc){const[x,y]=ts(cv,wx,wy,px,py,sc),d=D(),rs=r*sc*d;ctx.beginPath();ctx.arc(x,y,rs,0,Math.PI*2);if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=sw*d;ctx.stroke();}}
+function dl(ctx,cv,x1,y1,x2,y2,col,w,dash,px,py,sc){const[ax,ay]=ts(cv,x1,y1,px,py,sc),[bx,by]=ts(cv,x2,y2,px,py,sc),d=D();ctx.beginPath();ctx.setLineDash(dash?[5*sc*d,4*sc*d]:[]);ctx.strokeStyle=col;ctx.lineWidth=w*sc*d;ctx.moveTo(ax,ay);ctx.lineTo(bx,by);ctx.stroke();ctx.setLineDash([]);}
+function dt(ctx,cv,text,wx,wy,dy,sz,col,align,bold,px,py,sc){const[x,y]=ts(cv,wx,wy,px,py,sc),d=D();ctx.fillStyle=col;ctx.font=(bold?'700':'400')+' '+(sz*sc*d)+'px Inter,-apple-system,sans-serif';ctx.textAlign=align||'center';ctx.textBaseline='middle';text.split('\n').forEach((ln,i,a)=>{ctx.fillText(ln,x,y+dy*sc*d+(i-(a.length-1)/2)*(sz+2.5)*sc*d);});}
+function de(ctx,cv,e,wx,wy,dy,sz,px,py,sc){const[x,y]=ts(cv,wx,wy,px,py,sc),d=D();ctx.font=(sz*sc*d)+'px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(e,x,y+dy*sc*d);}
+function dtag(ctx,cv,text,wx,wy,cls,px,py,sc){const[x,y]=ts(cv,wx,wy,px,py,sc),d=D(),rs=(SUB+4)*sc*d,tx=x+rs*.6,ty=y-rs*.65,w=22*sc*d,h=10*sc*d;const m={'tg-c':['rgba(255,68,68,.22)','#ff7070'],'tg-p':['rgba(76,178,76,.22)','#6ed06e'],'tg-r':['rgba(200,150,50,.22)','#d4a040'],'tg-t':['rgba(100,140,210,.22)','#80a8e8']};const[bg,fg]=(m[cls]||['rgba(100,100,100,.2)','#aaa']);ctx.fillStyle=bg;ctx.beginPath();ctx.rect(tx-w/2,ty-h/2,w,h);ctx.fill();ctx.font='700 '+(7*sc*d)+'px Inter,sans-serif';ctx.fillStyle=fg;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,tx,ty);}
+
+// HIT TEST
+function hit(cv,mx,my,px,py,sc){const d=D(),[hx,hy]=ts(cv,0,0,px,py,sc);if(Math.hypot(mx*d-hx,my*d-hy)<HR*sc*d*1.2)return{type:'hub'};if(actSec){for(let i=0;i<actSec.subs.length;i++){const[sx,sy]=snXY(actSec,i),[px2,py2]=ts(cv,sx,sy,px,py,sc);if(Math.hypot(mx*d-px2,my*d-py2)<SUB*sc*d*1.8)return{type:'sub',sector:actSec,sub:actSec.subs[i]};}}for(const sec of S){const[sx,sy]=sXY(sec.angle),[px2,py2]=ts(cv,sx,sy,px,py,sc);if(Math.hypot(mx*d-px2,my*d-py2)<SR*sc*d*1.5)return{type:'sector',sector:sec};}return null;}
+
+// DRAW CANVAS (shared, badges flag for cross mode)
+function drawCV(ctx,cv,px,py,sc,badges,hov){
+  const d=D();ctx.clearRect(0,0,cv.width,cv.height);
+  // grid
+  ctx.strokeStyle='rgba(255,255,255,0.013)';ctx.lineWidth=1;
+  const gs=60*sc*d,ox=(cv.width/2+px*sc*d)%gs,oy=(cv.height/2+py*sc*d)%gs;
+  for(let x=ox-gs;x<cv.width+gs;x+=gs){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,cv.height);ctx.stroke();}
+  for(let y=oy-gs;y<cv.height+gs;y+=gs){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(cv.width,y);ctx.stroke();}
+  // lit
+  if(litOn)LP.forEach(([a,b])=>{const sa=S.find(s=>s.id===a),sb=S.find(s=>s.id===b);const[ax,ay]=sXY(sa.angle),[bx,by]=sXY(sb.angle);dl(ctx,cv,ax,ay,bx,by,'rgba(255,68,68,0.38)',1.2,true,px,py,sc);});
+  // cross arcs
+  if(badges&&actSec)(actSec.lc||[]).forEach(item=>{const lay=L.find(l=>l.id===item.l);if(!lay)return;const[sx,sy]=sXY(actSec.angle),[spx,spy]=ts(cv,sx,sy,px,py,sc),ang=(actSec.angle-90)*Math.PI/180;ctx.beginPath();ctx.arc(spx,spy,62*sc*d,ang-1.1,ang+1.1);ctx.strokeStyle=ha(lay.color,.45);ctx.lineWidth=1.5*d;ctx.setLineDash([4*sc*d,3*sc*d]);ctx.stroke();ctx.setLineDash([]);const lx=spx+Math.cos(ang)*98*sc*d,ly=spy+Math.sin(ang)*98*sc*d;ctx.font='700 '+(8*sc*d)+'px Inter,sans-serif';ctx.fillStyle=ha(lay.color,.65);ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('['+item.l+']',lx,ly);});
+  // sub connections
+  if(actSec){const[sx,sy]=sXY(actSec.angle);actSec.subs.forEach((_,i)=>{const[bx,by]=snXY(actSec,i);dl(ctx,cv,sx,sy,bx,by,ha(actSec.color,.2),1,false,px,py,sc);});}
+  // spokes
+  S.forEach(sec=>{const[sx,sy]=sXY(sec.angle);dl(ctx,cv,0,0,sx,sy,ha(sec.color,.28),1.4,false,px,py,sc);});
+  // subs
+  if(actSec)actSec.subs.forEach((sub,i)=>{const[bx,by]=snXY(actSec,i),isH=hov&&hov.type==='sub'&&hov.sub&&hov.sub.id===sub.id,r=isH?SUB*1.2:SUB;dc(ctx,cv,bx,by,r,ha(actSec.color,isH?.25:.1),ha(actSec.color,isH?.9:.45),1,px,py,sc);de(ctx,cv,sub.icon,bx,by,-2,11,px,py,sc);sub.label.split('\n').forEach((ln,li)=>dt(ctx,cv,ln,bx,by,(r+10)+li*11,7.5,'rgba(255,255,255,.48)','center',false,px,py,sc));dtag(ctx,cv,sub.tag,bx,by,sub.tc,px,py,sc);});
+  // sectors
+  S.forEach(sec=>{const[sx,sy]=sXY(sec.angle),isA=actSec&&actSec.id===sec.id,isH=hov&&hov.type==='sector'&&hov.sector&&hov.sector.id===sec.id,r=(isA||isH)?SR*1.14:SR;if(isA){const[spx,spy]=ts(cv,sx,sy,px,py,sc),g=ctx.createRadialGradient(spx,spy,0,spx,spy,r*2.5*sc*d);g.addColorStop(0,ha(sec.color,.14));g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(spx,spy,r*2.5*sc*d,0,Math.PI*2);ctx.fill();}dc(ctx,cv,sx,sy,r,ha(sec.color,isA?.22:.1),ha(sec.color,isA?1:.48),isA?2:1.5,px,py,sc);de(ctx,cv,sec.icon,sx,sy,-8,15,px,py,sc);sec.label.split('\n').forEach((ln,li)=>dt(ctx,cv,ln,sx,sy,9+li*10,8,isA?'#ffffff':'rgba(255,255,255,.72)','center',isA,px,py,sc));
+  if(badges){const lay=L.find(l=>l.id===sec.pl);if(lay){const[spx,spy]=ts(cv,sx,sy,px,py,sc),bx=spx+r*sc*d*.72,by=spy-r*sc*d*.72,bw=16*sc*d,bh=12*sc*d;ctx.fillStyle=ha(lay.color,.4);ctx.beginPath();ctx.rect(bx-bw/2,by-bh/2,bw,bh);ctx.fill();ctx.font='700 '+(7.5*sc*d)+'px Inter,sans-serif';ctx.fillStyle=lay.color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sec.pl,bx,by);}}});
+  // hub
+  const isHH=hov&&hov.type==='hub',hR=isHH?HR*1.07:HR,[hpx,hpy]=ts(cv,0,0,px,py,sc),pulse=(Date.now()%3000)/3000;
+  ctx.beginPath();ctx.arc(hpx,hpy,(hR+18+pulse*22)*sc*d,0,Math.PI*2);ctx.strokeStyle='rgba(255,255,255,'+(0.05*(1-pulse))+')';ctx.lineWidth=1.5*d;ctx.stroke();
+  dc(ctx,cv,0,0,hR,'rgba(255,255,255,.06)','rgba(255,255,255,.42)',2,px,py,sc);
+  dt(ctx,cv,'HYPERSCALE',0,0,-9,7,'rgba(255,255,255,.9)','center',true,px,py,sc);
+  dt(ctx,cv,'DATA CENTER',0,0,1,7,'rgba(255,255,255,.9)','center',true,px,py,sc);
+  dt(ctx,cv,badges?'CROSS':'HUB',0,0,12,5.5,badges?'rgba(255,195,60,.5)':'rgba(255,255,255,.3)','center',false,px,py,sc);
+}
+
+// LOOP
+function loop(){if(mode==='hub')drawCV(ctx1,c1,hPx,hPy,hSc,false,hHov);if(mode==='cross')drawCV(ctx2,c2,cPx,cPy,cSc,true,cHov);requestAnimationFrame(loop);}
+loop();
+
+// WIRE CANVAS
+function wire(cv,gPx,sPx,gPy,sPy,gSc,sSc,gHov,sHov){
+  let drag=false,moved=false,sx,sy,bpx,bpy;
+  cv.addEventListener('mousedown',e=>{drag=true;moved=false;const r=cv.getBoundingClientRect();sx=e.clientX-r.left;sy=e.clientY-r.top;bpx=gPx();bpy=gPy();cv.style.cursor='grabbing';});
+  window.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;if(drag){if(Math.hypot(mx-sx,my-sy)>4)moved=true;sPx(bpx+(mx-sx)/gSc());sPy(bpy+(my-sy)/gSc());}else{sHov(hit(cv,mx,my,gPx(),gPy(),gSc()));cv.style.cursor=gHov()?'pointer':'grab';}});
+  window.addEventListener('mouseup',()=>{drag=false;cv.style.cursor='grab';});
+  cv.addEventListener('click',e=>{if(moved)return;const r=cv.getBoundingClientRect(),h=hit(cv,e.clientX-r.left,e.clientY-r.top,gPx(),gPy(),gSc());if(!h){closeP();actSec=null;return;}if(h.type==='hub'){openHub();actSec=null;return;}if(h.type==='sector'){if(actSec&&actSec.id===h.sector.id){actSec=null;closeP();return;}actSec=h.sector;mode==='cross'?openCross(h.sector):openSec(h.sector);return;}if(h.type==='sub')openSub(h.sector,h.sub);});
+  cv.addEventListener('wheel',e=>{e.preventDefault();sSc(Math.max(.2,Math.min(3,gSc()*(e.deltaY>0?.9:1.1))));},{passive:false});
+}
+wire(c1,()=>hPx,v=>{hPx=v},()=>hPy,v=>{hPy=v},()=>hSc,v=>{hSc=v},()=>hHov,v=>{hHov=v});
+wire(c2,()=>cPx,v=>{cPx=v},()=>cPy,v=>{cPy=v},()=>cSc,v=>{cSc=v},()=>cHov,v=>{cHov=v});
+
+// BUILD LAYERS VIEW
+function buildLayers(){
+  const el=document.getElementById('lc');el.innerHTML='';
+  L.forEach((lay,i)=>{
+    if(i>0){const conn=document.createElement('div');conn.className='lconnector';conn.innerHTML='<div class="lconnector-inner"><span class="lconnector-arrow">▾</span></div>';el.appendChild(conn);}
+    const actors=lay.actors.map(aid=>S.find(s=>s.id===aid)).filter(Boolean);
+    const row=document.createElement('div');row.className='lrow';
+    const achips=actors.map(sec=>'<span class="achip" style="background:'+ha(sec.color,.15)+';color:'+sec.color+';border:1px solid '+ha(sec.color,.35)+'">'+sec.icon+' '+sec.id.toUpperCase()+'</span>').join('');
+    const nchips=lay.nodes.map(n=>'<div class="lnode">'+n+'</div>').join('');
+    row.innerHTML='<div class="lspine"><div class="lletter" style="background:'+ha(lay.color,.18)+';color:'+lay.color+'">'+lay.id+'</div><div class="lline" style="background:'+ha(lay.color,.15)+'"></div></div><div class="lcard" id="lc-'+lay.id+'"><div class="lcard-bar" style="background:'+lay.color+'"></div><div class="lcard-head"><div style="flex:1"><div class="lcard-name" style="color:'+lay.color+'">'+lay.label+'</div><div class="lcard-desc">'+lay.desc+'</div></div><div class="lcard-actors">'+achips+'</div></div><div class="lnodes" id="ln-'+lay.id+'">'+nchips+'</div><div class="lwhy" id="lw-'+lay.id+'">'+lay.why+'</div></div>';
+    row.querySelector('.lcard').addEventListener('click',function(){
+      const isExp=this.classList.contains('exp');
+      document.querySelectorAll('.lcard').forEach(c=>c.classList.remove('exp'));
+      document.querySelectorAll('.lnodes,.lwhy').forEach(n=>{n.classList.remove('op');});
+      if(!isExp){this.classList.add('exp');document.getElementById('ln-'+lay.id).classList.add('op');document.getElementById('lw-'+lay.id).classList.add('op');openLayer(lay);}else closeP();
+    });
+    el.appendChild(row);
+  });
+}
+buildLayers();
+
+// MODE SWITCHING
+const STRIP={hub:'rgba(108,142,191,.5)',layers:'rgba(106,170,106,.5)',cross:'rgba(255,195,60,.4)'};
+function setMode(m){
+  mode=m;actSec=null;closeP();
+  ['hub','layers','cross'].forEach((id,i)=>{
+    document.getElementById('v'+id).style.display=id===m?'block':'none';
+    document.getElementById('b'+(i+1)).classList.toggle('on',id===m);
+  });
+  document.getElementById('mstrip').style.background=STRIP[m]||'transparent';
+  document.getElementById('zb').style.display=m==='layers'?'none':'flex';
+  updLegend(m);
+  if(m==='hub')setTimeout(()=>fit(c1),10);
+  if(m==='cross')setTimeout(()=>fit(c2),10);
+}
+
+// init view display
+document.getElementById('vhub').style.display='block';
+document.getElementById('vlayers').style.display='none';
+document.getElementById('vcross').style.display='none';
+
+function updLegend(m){
+  const t=document.getElementById('lgh'),b=document.getElementById('lgb');
+  if(m==='hub'){t.textContent='Hub & Spoke';b.innerHTML='<div class="leg"><div class="lc" style="background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.45)"></div>Hub</div><div class="leg"><div class="lc" style="background:rgba(108,142,191,.2);border:1.5px solid rgba(108,142,191,.6)"></div>Sector</div><div class="leg"><div class="lc" style="width:9px;height:9px;background:rgba(108,142,191,.12);border:1px solid rgba(108,142,191,.5)"></div>Sub-node</div><div class="leg"><div class="ll" style="background:rgba(255,255,255,.2)"></div>Spoke</div><div class="leg"><div class="ld2"></div>Litigation</div><div class="lsep"></div><div class="leg"><span style="font-size:8px;background:rgba(255,68,68,.15);color:#ff7070;padding:1px 5px;border-radius:2px;font-weight:700">CONF</span>Confidential</div><div class="leg"><span style="font-size:8px;background:rgba(76,178,76,.15);color:#6ed06e;padding:1px 5px;border-radius:2px;font-weight:700">PUB</span>Public</div><div class="leg"><span style="font-size:8px;background:rgba(200,150,50,.15);color:#d4a040;padding:1px 5px;border-radius:2px;font-weight:700">PRIV</span>Private</div>';}
+  else if(m==='layers'){t.textContent='A–H Layers';b.innerHTML=L.map(l=>'<div class="leg"><div class="lc" style="background:'+ha(l.color,.25)+';border:1.5px solid '+ha(l.color,.7)+'"></div>'+l.id+': '+l.label+'</div>').join('');}
+  else{t.textContent='Cross-Section';b.innerHTML='<p style="font-size:9px;color:#3a3e58;line-height:1.6;margin-bottom:8px">Each sector shows its primary layer badge. Click a sector to see all its layer connections.</p>'+L.map(l=>'<div class="leg"><div class="lc" style="background:'+ha(l.color,.25)+';border:1.5px solid '+ha(l.color,.7)+'"></div>'+l.id+': '+l.label+'</div>').join('');}
+}
+
+function toggleLit(){litOn=!litOn;document.getElementById('litbtn').classList.toggle('lit',litOn);}
+function resetView(){hSc=1;hPx=0;hPy=0;cSc=1;cPx=0;cPy=0;actSec=null;closeP();}
+function za(f){if(mode==='hub')hSc=Math.max(.2,Math.min(3,hSc*f));if(mode==='cross')cSc=Math.max(.2,Math.min(3,cSc*f));}
+
+// PANELS
+function ps(id,val,col){const e=document.getElementById(id);e.textContent=val;e.style.color=col||'';}
+function closeP(){document.getElementById('panel').classList.remove('op');}
+function openP(){document.getElementById('panel').classList.add('op');}
+
+function tagsHTML(tags,pre){return tags.map(t=>'<span class="tg '+pre+t+'">'+(t==='c'?'CONF':t==='p'?'PUB':t==='r'?'PRIV':'PART')+'</span>').join('');}
+function docsHTML(docs){return docs.map(d=>'<div class="dc">'+d+'</div>').join('');}
+function litHTML(items){return items.map(l=>'<div class="li"><span class="ld">⬤</span>'+l+'</div>').join('');}
+function qHTML(items){return items.map(q=>'<div class="qi"><span class="qm">?</span>'+q+'</div>').join('');}
+
+function openHub(){
+  ps('pt','HYBRID INTELLIGENCE MAP','rgba(255,255,255,.25)');
+  ps('pn','Hyperscale Data Center Hub');
+  ps('ps','Three genuinely different views. Switch in the toolbar.');
+  document.getElementById('pb').innerHTML='<div class="ss"><span class="sl">Three views</span><div class="ir"><div class="ik" style="color:#6c8ebf">① Hub & Spoke</div><div class="iv">Dark canvas. 10 sectors radiate from hub. Click a sector to expand 4 sub-nodes. Full intelligence brief for each actor.</div></div><div class="ir"><div class="ik" style="color:#6aaa6a">② Control Layers</div><div class="iv">A scrollable document — 8 colored layer cards stacked top to bottom. Completely different visual. Click any card to expand its node inventory and open the brief.</div></div><div class="ir"><div class="ik" style="color:#e8c060">③ Cross-Section</div><div class="iv">Hub-and-spoke returns but with layer badges on every sector node. Click any sector to see exactly which A–H layers it connects to and how.</div></div></div><div class="ss"><span class="sl">Core finding</span><p class="sp">A hyperscale data center is not one contract. It is a fragmented network of decisions across 10 sectors and 8 control layers — each with its own timeline, authority, and transparency level.</p><p class="sp" style="margin-top:10px;color:rgba(255,195,60,.85);font-style:italic">"After tax benefits, water, electricity, infrastructure, environmental effects and permanent employment are combined — is this project actually in the public interest?"</p></div>';
+  openP();
+}
+
+function openSec(sec){
+  const lay=L.find(l=>l.id===sec.pl);
+  ps('pt',sec.label.replace('\n',' / ').toUpperCase(),sec.color);
+  ps('pn',sec.label.replace('\n',' / '));
+  ps('ps',sec.icon+'  Primary layer: ['+sec.pl+'] '+(lay?lay.label:'')+' · '+sec.transp);
+  document.getElementById('pb').innerHTML='<div class="ss"><span class="sl">Controls</span><p class="sp">'+sec.controls+'</p></div><div class="ss"><span class="sl">Wants</span><p class="sp">'+sec.wants+'</p></div><div class="ss"><span class="sl">Provides</span><p class="sp">'+sec.provides+'</p></div><div class="ss"><span class="sl">Receives</span><p class="sp">'+sec.receives+'</p></div><div class="ss"><span class="sl">Risk tags</span><div class="tgs">'+sec.risks.map(r=>'<span class="tg tg-risk">'+r+'</span>').join('')+'</div></div><div class="ss"><span class="sl">Key documents</span>'+docsHTML(sec.docs)+'</div><div class="ss"><span class="sl">Litigation exposure</span>'+litHTML(sec.lit)+'</div><div class="ss"><span class="sl">Public-interest questions</span>'+qHTML(sec.qs)+'</div>';
+  openP();
+}
+
+function openSub(sec,sub){
+  ps('pt',sec.label.replace('\n',' ').toUpperCase()+' › '+sub.label.replace('\n',' '),sec.color);
+  ps('pn',sub.label.replace('\n',' '));
+  ps('ps',sub.detail);
+  document.getElementById('pb').innerHTML='<div class="ss"><span class="sl">Transparency</span><div class="tgs"><span class="tg '+sub.tc+'">'+sub.tag+'</span></div></div><div class="ss"><span class="sl">Sector context</span><div class="ir"><div class="ik">Controls</div><div class="iv">'+sec.controls+'</div></div><div class="ir"><div class="ik">Wants</div><div class="iv">'+sec.wants+'</div></div></div><div class="ss"><span class="sl">Litigation exposure</span>'+litHTML(sec.lit)+'</div><div class="ss"><span class="sl">Public-interest questions</span>'+qHTML(sec.qs)+'</div>';
+  openP();
+}
+
+function openCross(sec){
+  const lay=L.find(l=>l.id===sec.pl);
+  ps('pt','CROSS-SECTION · '+sec.label.replace('\n',' / ').toUpperCase(),sec.color);
+  ps('pn',sec.label.replace('\n',' / ')+' — Layer Connections');
+  ps('ps','Primary layer: ['+sec.pl+'] '+(lay?lay.label:''));
+  const conns=(sec.lc||[]).map(function(item){const layer=L.find(function(l){return l.id===item.l;});return '<div class="lci"><span class="lcl" style="color:'+(layer?layer.color:'#666')+'">['+item.l+'] '+(layer?layer.label:item.l)+'</span><span class="lch">'+item.h+'</span></div>';}).join('');
+  document.getElementById('pb').innerHTML='<div class="ss"><span class="sl">How this sector connects across the A–H layers</span>'+conns+'</div><div class="ss"><span class="sl">Sector detail</span><div class="ir"><div class="ik">Controls</div><div class="iv">'+sec.controls+'</div></div><div class="ir"><div class="ik">Wants</div><div class="iv">'+sec.wants+'</div></div></div><div class="ss"><span class="sl">Litigation exposure</span>'+litHTML(sec.lit)+'</div><div class="ss"><span class="sl">Public-interest questions</span>'+qHTML(sec.qs)+'</div>';
+  openP();
+}
+
+function openLayer(lay){
+  ps('pt','CONTROL LAYER '+lay.id,lay.color);
+  ps('pn','['+lay.id+'] '+lay.label);
+  ps('ps',lay.desc);
+  const actors=lay.actors.map(function(aid){return S.find(function(s){return s.id===aid;});}).filter(Boolean);
+  document.getElementById('pb').innerHTML='<div class="ss"><span class="sl">Why this layer matters</span><p class="sp">'+lay.why+'</p></div><div class="ss"><span class="sl">What it controls</span><p class="sp">'+lay.desc+'</p></div><div class="ss"><span class="sl">Primary sector actors</span>'+actors.map(function(sec){return '<div class="ir"><div class="ik" style="color:'+sec.color+'">'+sec.icon+' '+sec.id.toUpperCase()+'</div><div class="iv">'+sec.label.replace('\n',' ')+' — '+sec.controls.slice(0,90)+'…</div></div>';}).join('')+'</div><div class="ss"><span class="sl">Key nodes and documents</span>'+docsHTML(lay.nodes)+'</div>';
+  openP();
+}
+
+updLegend('hub');
+setTimeout(openHub,400);
+setTimeout(function(){document.getElementById('hint').style.opacity='0';},5000);
+
+</script>
+</body>
+</html>
