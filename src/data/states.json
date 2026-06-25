@@ -1,0 +1,17 @@
+[
+  {"state":"Georgia","operating":94,"planned":141,"total":235,"ratio":1.5,"plannedShare":60.0},
+  {"state":"Indiana","operating":38,"planned":54,"total":92,"ratio":1.42,"plannedShare":58.7},
+  {"state":"Illinois","operating":139,"planned":123,"total":262,"ratio":0.88,"plannedShare":46.9},
+  {"state":"Arizona","operating":98,"planned":86,"total":184,"ratio":0.88,"plannedShare":46.7},
+  {"state":"Virginia","operating":398,"planned":287,"total":685,"ratio":0.72,"plannedShare":41.9},
+  {"state":"Pennsylvania","operating":78,"planned":51,"total":129,"ratio":0.65,"plannedShare":39.5},
+  {"state":"Iowa","operating":64,"planned":41,"total":105,"ratio":0.64,"plannedShare":39.0},
+  {"state":"Texas","operating":296,"planned":170,"total":466,"ratio":0.57,"plannedShare":36.5},
+  {"state":"North Carolina","operating":72,"planned":41,"total":113,"ratio":0.57,"plannedShare":36.3},
+  {"state":"Ohio","operating":166,"planned":57,"total":223,"ratio":0.34,"plannedShare":25.6},
+  {"state":"Oregon","operating":115,"planned":27,"total":142,"ratio":0.23,"plannedShare":19.0},
+  {"state":"California","operating":277,"planned":54,"total":331,"ratio":0.19,"plannedShare":16.3},
+  {"state":"Washington","operating":124,"planned":11,"total":135,"ratio":0.09,"plannedShare":8.1},
+  {"state":"Florida","operating":120,"planned":8,"total":128,"ratio":0.07,"plannedShare":6.3},
+  {"state":"New York","operating":148,"planned":6,"total":154,"ratio":0.04,"plannedShare":3.9}
+]

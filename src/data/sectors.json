@@ -1,0 +1,12 @@
+[
+  {"id":"dev","name":"Developer / Hyperscaler","color":"#6c8ebf"},
+  {"id":"state","name":"State Government","color":"#7cb87c"},
+  {"id":"local","name":"Local Government","color":"#b87c6c"},
+  {"id":"land","name":"Landowners / Community","color":"#c4a84f"},
+  {"id":"elec","name":"Electric Utility / Grid","color":"#8c6cb8"},
+  {"id":"water","name":"Water & Sewer","color":"#4fa8b8"},
+  {"id":"env","name":"Environmental Regulators","color":"#4fb87c"},
+  {"id":"fin","name":"Financial Institutions","color":"#b84f8c"},
+  {"id":"infra","name":"Contractors / Infrastructure","color":"#b8874f"},
+  {"id":"courts","name":"Courts & Admin Review","color":"#bf6c6c"}
+]

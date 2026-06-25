@@ -1,0 +1,10 @@
+[
+  {"id":"A","name":"Strategic Intent","color":"#5a8abd","actors":["dev"]},
+  {"id":"B","name":"Political & Economic Recruitment","color":"#6aaa6a","actors":["state"]},
+  {"id":"C","name":"Land Control","color":"#b8a048","actors":["land"]},
+  {"id":"D","name":"Utility Dependency","color":"#7a5aaa","actors":["elec","water","infra"]},
+  {"id":"E","name":"Regulatory Authorization","color":"#4aaa70","actors":["local","env"]},
+  {"id":"F","name":"Financial & Contractual Structure","color":"#aa4a80","actors":["fin","state"]},
+  {"id":"G","name":"Public Consequences","color":"#aa8040","actors":["land"]},
+  {"id":"H","name":"Legal Challenge & Accountability","color":"#aa5050","actors":["courts"]}
+]
