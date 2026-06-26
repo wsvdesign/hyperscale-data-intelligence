@@ -207,9 +207,9 @@ const S = {
     fontFamily:"'Space Mono',monospace",
     fontSize:'8px', fontWeight:700,
     letterSpacing:'0.12em', textTransform:'uppercase',
-    color:'#2e3050', marginBottom:'2px', display:'block',
+    color:'#8a8eb0', marginBottom:'2px', display:'block',
   },
-  leftSub: { fontSize:'11px', color:'#5a5e78' },
+  leftSub: { fontSize:'11px', color:'#9a9eb8' },
   leftScroll: { flex:1, overflowY:'auto', padding:'12px 14px' },
   // schema table
   schemaTable: { marginBottom:'18px' },
@@ -228,9 +228,9 @@ const S = {
   schemaCol: { color:'#dde0f0', minWidth:'80px' },
   schemaType: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'8px', color:'#3a3e58',
+    fontSize:'8px', color:'#8a8eb0',
   },
-  schemaNoteText: { fontSize:'9px', color:'#2e3050' },
+  schemaNoteText: { fontSize:'9px', color:'#6a6e90' },
   // starter queries
   starterHead: {
     padding:'10px 14px 6px',
@@ -365,9 +365,10 @@ const S = {
     fontFamily:"'Space Mono',monospace",
     fontSize:'10px', fontWeight:700,
     letterSpacing:'0.08em', textTransform:'uppercase',
+    color:'#6a6e90',
     marginBottom:'6px',
   },
-  emptySub: { fontSize:'12px', color:'#252838' },
+  emptySub: { fontSize:'12px', color:'#5a5e78' },
 }
 
 const DATAQUERY_NAV_CSS = `
