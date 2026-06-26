@@ -1,0 +1,34 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', 'DM Sans', -apple-system, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  background: #06070e;
+  color: #dde0f0;
+}
+
+#toolbar h1 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sn {
+  font-size: 11px;
+  padding: 5px 12px;
+}
+
+.site-nav .sn {
+  font-size: 12px;
+  padding: 5px 13px;
+}
+
+#toolbar h1 {
+  font-size: 14px;
+}
+
+body {
+  font-size: 16px;
+}
