@@ -370,6 +370,17 @@ const S = {
   emptySub: { fontSize:'12px', color:'#252838' },
 }
 
+const DATAQUERY_NAV_CSS = `
+.data-query-page .site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
+.data-query-page .sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
+.data-query-page .sn:hover{border-color:rgba(255,255,255,.25);color:#dde0f0}
+.data-query-page .sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
+.data-query-page .sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
+.data-query-page .sn.sn-active{background:rgba(255,255,255,.07);color:#dde0f0;border-color:rgba(255,255,255,.18)}
+@media(max-width:780px){.data-query-page .sn{font-size:7px;padding:3px 7px}}
+@media(max-width:520px){.data-query-page .site-nav .sn-label{display:none}.data-query-page .sn{padding:4px 7px}}
+`;
+
 // ── COMPONENT ─────────────────────────────────────────────────────────────────
 
 export default function DataQuery() {
@@ -514,6 +525,8 @@ export default function DataQuery() {
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
     <div className="data-query-page" style={S.page}>
+      <style>{DATAQUERY_NAV_CSS}</style>
+
       {/* TOOLBAR */}
       <div id="toolbar">
         <h1>
