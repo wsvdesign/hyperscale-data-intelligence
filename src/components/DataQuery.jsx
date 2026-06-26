@@ -542,9 +542,10 @@ export default function DataQuery() {
       <style>{DATAQUERY_NAV_CSS}</style>
 
       {/* TOOLBAR */}
-      <div style={S.toolbar}>
-        <h1 style={S.h1}>
-          HYPERSCALE DATA CENTER <span style={S.h1span}>/ Data Query</span>
+      <div id="toolbar">
+        <h1>
+          HYPERSCALE DATA CENTER{' '}
+          <span>/ Data Query</span>
         </h1>
         <Nav />
       </div>
