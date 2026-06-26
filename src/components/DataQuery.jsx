@@ -187,20 +187,6 @@ const S = {
     fontFamily:"'Inter',-apple-system,sans-serif",
     overflow:'hidden',
   },
-  toolbar: {
-    flexShrink:0, height:'52px',
-    background:'rgba(6,7,14,0.98)',
-    borderBottom:'1px solid rgba(255,255,255,0.07)',
-    display:'flex', alignItems:'center',
-    padding:'0 18px', gap:'10px', zIndex:300,
-  },
-  h1: {
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'9.5px', fontWeight:700,
-    letterSpacing:'0.1em', textTransform:'uppercase',
-    flex:1, margin:0, whiteSpace:'nowrap',
-  },
-  h1span: { color:'#2e3050', fontWeight:400 },
   body: {
     flex:1, display:'flex', overflow:'hidden',
   },
