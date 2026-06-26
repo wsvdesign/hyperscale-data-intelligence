@@ -205,7 +205,7 @@ const S = {
   },
   leftTitle: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'8px', fontWeight:700,
+    fontSize:'11px', fontWeight:700,
     letterSpacing:'0.12em', textTransform:'uppercase',
     color:'#8a8eb0', marginBottom:'2px', display:'block',
   },
@@ -223,14 +223,14 @@ const S = {
   schemaRow: {
     display:'flex', gap:'6px', alignItems:'baseline',
     padding:'3px 0', borderBottom:'1px solid rgba(255,255,255,0.04)',
-    fontSize:'10px',
+    fontSize:'12px',
   },
-  schemaCol: { color:'#dde0f0', minWidth:'80px' },
+  schemaCol: { color:'#dde0f0', minWidth:'80px', flexShrink:0, fontSize:'13px' },
   schemaType: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'8px', color:'#8a8eb0',
+    fontSize:'12px', color:'#8a8eb0',
   },
-  schemaNoteText: { fontSize:'9px', color:'#6a6e90' },
+  schemaNoteText: { fontSize:'12px', color:'#8a8eb0' },
   // starter queries
   starterHead: {
     padding:'10px 14px 6px',
@@ -250,7 +250,7 @@ const S = {
     borderRadius:'3px', padding:'6px 9px', marginBottom:'4px',
     cursor:'pointer', transition:'all 0.15s',
     fontFamily:"'Space Mono',monospace",
-    fontSize:'8.5px', fontWeight:700,
+    fontSize:'11px', fontWeight:700,
     letterSpacing:'0.04em', textTransform:'uppercase',
     color:'#5a5e78',
   },
