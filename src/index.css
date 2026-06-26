@@ -45,3 +45,25 @@ body {
 body {
   font-size: 16px;
 }
+
+#toolbar .sn {
+  font-size: 12px !important;
+  padding: 5px 12px !important;
+}
+
+#toolbar h1 {
+  font-size: 13px !important;
+}
+
+/* Readable secondary text */
+.schema-col-type,
+.schema-col-note,
+[style*="color: var(--text3)"],
+[style*="color:#2e3050"],
+[style*="color: #2e3050"] {
+  color: #6a6e90 !important;
+}
+
+/* Left panel text in DataQuery */
+.ps-l { color: #6a6e90 !important; }
+.iv { color: #8a8eb0 !important; }
