@@ -785,6 +785,7 @@ const SUB_EXTRA = 100;
 const HUB_R = 46;
 const SEC_R = 34;
 const SUB_R = 20;
+const BASE_SCALE = 1.3;
 
 function hexAlpha(hex, a) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -806,7 +807,7 @@ export default function HubMap() {
     H: 0,
     CX: 0,
     CY: 0,
-    scale: 1,
+    scale: BASE_SCALE,
     panX: 0,
     panY: 0,
     litOn: false,
@@ -932,6 +933,7 @@ export default function HubMap() {
       const [x, y] = toScreen(wx, wy);
       const dpr = window.devicePixelRatio;
       const scale = stateRef.current.scale;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const rs = (SUB_R + 4) * scale * dpr;
       const tx = x + rs * 0.6;
       const ty = y - rs * 0.6;
@@ -957,7 +959,7 @@ export default function HubMap() {
       ctx.roundRect(tx - w / 2, ty - h / 2, w, h, 2 * scale * dpr);
       ctx.fill();
       ctx.font = `700 ${7 * scale * dpr}px Inter, sans-serif`;
-      ctx.fillStyle = fg;
+      ctx.fillStyle = isLight ? '#0f172a' : fg;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(text, tx, ty);
@@ -965,6 +967,7 @@ export default function HubMap() {
 
     function draw() {
       const state = stateRef.current;
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       ctx.clearRect(0, 0, state.W, state.H);
 
       ctx.strokeStyle = 'rgba(255,255,255,0.015)';
@@ -1028,7 +1031,7 @@ export default function HubMap() {
           drawEmoji(sub.icon, sbx, sby, -3, 11);
           const lines = sub.label.split('\n');
           lines.forEach((ln, li) => {
-            drawText(ln, sbx, sby, r + 10 + li * 11, 8, 'rgba(255,255,255,0.55)', 'center', false);
+            drawText(ln, sbx, sby, r + 10 + li * 11, 8, isLight ? '#0f172a' : 'rgba(255,255,255,0.55)', 'center', false);
           });
           drawTag(sub.tag, sbx, sby, sub.tagcls);
         });
@@ -1069,7 +1072,7 @@ export default function HubMap() {
             sy,
             10 + li * 10,
             8.5,
-            isActive ? '#ffffff' : 'rgba(255,255,255,0.75)',
+            isLight ? '#0f172a' : isActive ? '#ffffff' : 'rgba(255,255,255,0.75)',
             'center',
             isActive
           );
@@ -1088,9 +1091,9 @@ export default function HubMap() {
       ctx.stroke();
 
       drawCircle(0, 0, hubR, 'rgba(255,255,255,0.07)', 'rgba(255,255,255,0.45)', 2);
-      drawText('HYPERSCALE', 0, 0, -10, 7.5, 'rgba(255,255,255,0.9)', 'center', true);
-      drawText('DATA CENTER', 0, 0, 1, 7.5, 'rgba(255,255,255,0.9)', 'center', true);
-      drawText('HUB', 0, 0, 12, 6.5, 'rgba(255,255,255,0.4)', 'center', false);
+      drawText('HYPERSCALE', 0, 0, -10, 7.5, isLight ? '#0f172a' : 'rgba(255,255,255,0.9)', 'center', true);
+      drawText('DATA CENTER', 0, 0, 1, 7.5, isLight ? '#0f172a' : 'rgba(255,255,255,0.9)', 'center', true);
+      drawText('HUB', 0, 0, 12, 6.5, isLight ? '#0f172a' : 'rgba(255,255,255,0.4)', 'center', false);
 
       rafRef.current = requestAnimationFrame(draw);
     }
@@ -1359,7 +1362,7 @@ export default function HubMap() {
 
   function resetView() {
     const state = stateRef.current;
-    state.scale = 1;
+    state.scale = BASE_SCALE;
     state.panX = 0;
     state.panY = 0;
     state.activeSector = null;
@@ -1374,22 +1377,53 @@ export default function HubMap() {
     <div className="hub-map-root">
       <style>{`
 * { box-sizing: border-box; margin: 0; padding: 0; }
-.hub-map-root { background: #07080f; color: #e8e9f0; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+.hub-map-root { background: #06070e; color: #e8e9f0; font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; width: 100vw; height: 100vh; }
+:root {
+  --hm-text-main: #e8e9f0;
+  --hm-text-sub: #b3bdd8;
+  --hm-text-muted: #98a3c2;
+  --hm-text-faint: #8792b3;
+}
+html[data-theme='light'] .hub-map-root {
+  background: #f3f6fb;
+  color: #0f172a;
+  --hm-text-main: #0f172a;
+  --hm-text-sub: #334155;
+  --hm-text-muted: #475569;
+  --hm-text-faint: #64748b;
+}
 
 #toolbar {
   position: fixed; top: 0; left: 0; right: 0; height: 50px; z-index: 100;
-  background: rgba(7,8,15,0.97); border-bottom: 1px solid rgba(255,255,255,0.07);
+  background: rgba(6,7,14,0.98); border-bottom: 1px solid rgba(255,255,255,0.07);
   display: flex; align-items: center; padding: 0 20px; gap: 10px;
 }
-#toolbar h1 { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; flex: 1; color: #e8e9f0; }
-#toolbar h1 span { color: #3a3d55; font-weight: 400; }
+html[data-theme='light'] #toolbar {
+  background: rgba(255,255,255,0.98);
+  border-bottom: 1px solid rgba(15,23,42,0.14);
+}
+#toolbar h1 { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; flex: 1; color: var(--hm-text-main); }
+#toolbar h1 span { color: var(--hm-text-faint); font-weight: 500; }
 .tb-btn {
   font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
   padding: 5px 12px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;
-  background: transparent; color: #6b6f8a; cursor: pointer; transition: all 0.2s;
+  background: transparent; color: var(--hm-text-sub); cursor: pointer; transition: all 0.2s;
 }
 .tb-btn:hover { border-color: rgba(255,255,255,0.3); color: #e8e9f0; }
 .tb-btn.lit-on { border-color: #ff4444; color: #ff4444; background: rgba(255,68,68,0.1); }
+html[data-theme='light'] .tb-btn {
+  border-color: rgba(15,23,42,0.22);
+  color: var(--hm-text-sub);
+  background: #ffffff;
+}
+html[data-theme='light'] .tb-btn:hover {
+  border-color: rgba(15,23,42,0.4);
+  color: var(--hm-text-main);
+}
+.tb-btn:focus-visible, #panel-close:focus-visible, .zbtn:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 2px;
+}
 
 #canvas-wrap {
   position: fixed; top: 50px; left: 0; right: 0; bottom: 0;
@@ -1401,9 +1435,13 @@ canvas#map { display: block; width: 100%; height: 100%; }
 
 #panel {
   position: fixed; top: 50px; right: -430px; bottom: 0; width: 420px;
-  background: #0d0f1b; border-left: 1px solid rgba(255,255,255,0.07);
+  background: #0d1020; border-left: 1px solid rgba(255,255,255,0.07);
   transition: right 0.3s ease; z-index: 200; display: flex; flex-direction: column;
   overflow: hidden;
+}
+html[data-theme='light'] #panel {
+  background: #ffffff;
+  border-left: 1px solid rgba(15,23,42,0.14);
 }
 #panel.open { right: 0; }
 #panel-head {
@@ -1411,11 +1449,11 @@ canvas#map { display: block; width: 100%; height: 100%; }
 }
 #panel-tag { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; display: block; margin-bottom: 6px; }
 #panel-title { font-size: 15px; font-weight: 700; letter-spacing: 0.03em; line-height: 1.35; }
-#panel-sub { font-size: 12px; color: #7a7e98; margin-top: 5px; line-height: 1.55; }
+#panel-sub { font-size: 12px; color: var(--hm-text-sub); margin-top: 5px; line-height: 1.55; }
 #panel-close {
   position: absolute; top: 14px; right: 18px;
   width: 26px; height: 26px; border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 4px; background: transparent; color: #6b6f8a;
+  border-radius: 4px; background: transparent; color: var(--hm-text-sub);
   cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center;
 }
 #panel-close:hover { color: #e8e9f0; border-color: rgba(255,255,255,0.3); }
@@ -1424,12 +1462,12 @@ canvas#map { display: block; width: 100%; height: 100%; }
 #panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
 .ps { margin-bottom: 18px; }
-.ps-label { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3a3d55; display: block; margin-bottom: 7px; }
-.ps p { font-size: 12px; color: #7a7e98; line-height: 1.65; }
+.ps-label { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hm-text-faint); display: block; margin-bottom: 7px; }
+.ps p { font-size: 12px; color: var(--hm-text-sub); line-height: 1.65; }
 .irow { display: flex; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 11px; }
 .irow:last-child { border-bottom: none; }
-.ik { color: #3a3d55; min-width: 80px; flex-shrink: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding-top: 1px; }
-.iv { color: #7a7e98; line-height: 1.55; }
+.ik { color: var(--hm-text-faint); min-width: 80px; flex-shrink: 0; font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding-top: 1px; }
+.iv { color: var(--hm-text-sub); line-height: 1.55; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
 .tag { font-size: 9px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; }
 .tag-c { background: rgba(255,68,68,0.12); color: #ff7070; border: 1px solid rgba(255,68,68,0.25); }
@@ -1437,7 +1475,7 @@ canvas#map { display: block; width: 100%; height: 100%; }
 .tag-r { background: rgba(200,150,50,0.12); color: #d4a040; border: 1px solid rgba(200,150,50,0.25); }
 .tag-t { background: rgba(100,140,210,0.12); color: #80a8e8; border: 1px solid rgba(100,140,210,0.25); }
 .tag-risk { background: rgba(150,80,200,0.12); color: #b070d8; border: 1px solid rgba(150,80,200,0.25); }
-.doc { font-size: 10px; color: #4a4e68; padding: 5px 8px; border: 1px solid rgba(255,255,255,0.04); border-radius: 3px; margin-bottom: 3px; display: flex; gap: 6px; }
+.doc { font-size: 10px; color: var(--hm-text-muted); padding: 5px 8px; border: 1px solid rgba(255,255,255,0.08); border-radius: 3px; margin-bottom: 3px; display: flex; gap: 6px; }
 .doc::before { content: '▸'; flex-shrink: 0; }
 .lit-item { font-size: 11px; color: rgba(255,90,90,0.75); padding: 5px 0; border-bottom: 1px solid rgba(255,68,68,0.07); display: flex; gap: 6px; line-height: 1.5; }
 .lit-item:last-child { border-bottom: none; }
@@ -1448,21 +1486,33 @@ canvas#map { display: block; width: 100%; height: 100%; }
 
 #legend {
   position: fixed; left: 16px; bottom: 16px; z-index: 100;
-  background: rgba(13,15,27,0.92); border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(13,16,32,0.92); border: 1px solid rgba(255,255,255,0.07);
   border-radius: 6px; padding: 12px 14px; backdrop-filter: blur(8px);
 }
-#legend h3 { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3a3d55; margin-bottom: 9px; }
-.leg { display: flex; align-items: center; gap: 7px; font-size: 9px; color: #6b6f8a; margin-bottom: 5px; letter-spacing: 0.03em; }
+html[data-theme='light'] #legend {
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(15,23,42,0.16);
+}
+#legend h3 { font-size: 8px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hm-text-faint); margin-bottom: 9px; }
+.leg { display: flex; align-items: center; gap: 7px; font-size: 9px; color: var(--hm-text-sub); margin-bottom: 5px; letter-spacing: 0.03em; }
 .leg-circle { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
 .leg-line { width: 18px; height: 1.5px; flex-shrink: 0; }
 .leg-dash { width: 18px; height: 0; border-top: 1.5px dashed #ff4444; flex-shrink: 0; }
 .leg-sep { border-top: 1px solid rgba(255,255,255,0.05); margin: 7px 0; }
 
 #zoom-btns { position: fixed; right: 16px; bottom: 16px; z-index: 100; display: flex; flex-direction: column; gap: 4px; }
-.zbtn { width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background: rgba(13,15,27,0.9); color: #6b6f8a; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.zbtn { width: 30px; height: 30px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; background: rgba(13,16,32,0.9); color: var(--hm-text-sub); font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .zbtn:hover { color: #e8e9f0; border-color: rgba(255,255,255,0.3); }
+html[data-theme='light'] .zbtn {
+  background: rgba(255,255,255,0.96);
+  border-color: rgba(15,23,42,0.2);
+}
+html[data-theme='light'] .zbtn:hover {
+  color: var(--hm-text-main);
+  border-color: rgba(15,23,42,0.45);
+}
 
-#hint { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: #2a2d42; pointer-events: none; transition: opacity 1s; z-index: 50; }
+#hint { position: fixed; bottom: 22px; left: 50%; transform: translateX(-50%); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--hm-text-faint); pointer-events: none; transition: opacity 1s; z-index: 50; }
 
 .site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
 .sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
@@ -1474,25 +1524,37 @@ canvas#map { display: block; width: 100%; height: 100%; }
 @media(max-width:520px){.site-nav .sn-label{display:none}.sn{padding:4px 7px}}
       `}</style>
 
-      <div id="toolbar">
+      <div id="toolbar" role="region" aria-label="Hub map controls">
         <h1>
           HYPERSCALE DATA CENTER <span>/ Intelligence Map — Hub &amp; Spoke</span>
         </h1>
-        <button className={`tb-btn ${litOn ? 'lit-on' : ''}`} id="lit-btn" onClick={toggleLit}>
+        <button
+          type="button"
+          className={`tb-btn ${litOn ? 'lit-on' : ''}`}
+          id="lit-btn"
+          aria-pressed={litOn}
+          aria-label="Toggle litigation overlay"
+          onClick={toggleLit}
+        >
           ⬤ Litigation Overlay
         </button>
-        <button className="tb-btn" onClick={resetView}>
+        <button type="button" className="tb-btn" onClick={resetView} aria-label="Reset map view">
           ↺ Reset
         </button>
         <Nav />
       </div>
 
-      <div id="canvas-wrap" ref={canvasWrapRef}>
-        <canvas id="map" ref={canvasRef} />
+      <div id="canvas-wrap" ref={canvasWrapRef} role="img" aria-label="Interactive hub and spoke map">
+        <canvas
+          id="map"
+          ref={canvasRef}
+          tabIndex={0}
+          aria-label="Interactive hub and spoke map. Use mouse or touch to pan and zoom, then select sectors for details."
+        />
       </div>
 
-      <div id="panel" className={panel.open ? 'open' : ''}>
-        <button id="panel-close" onClick={closePanel}>
+      <div id="panel" className={panel.open ? 'open' : ''} role="dialog" aria-modal="false" aria-hidden={!panel.open}>
+        <button type="button" id="panel-close" onClick={closePanel} aria-label="Close details panel">
           ✕
         </button>
         <div id="panel-head">
@@ -1605,10 +1667,10 @@ canvas#map { display: block; width: 100%; height: 100%; }
       </div>
 
       <div id="zoom-btns">
-        <button className="zbtn" onClick={() => zoom(1.15)}>
+        <button type="button" className="zbtn" onClick={() => zoom(1.15)} aria-label="Zoom in">
           +
         </button>
-        <button className="zbtn" onClick={() => zoom(0.87)}>
+        <button type="button" className="zbtn" onClick={() => zoom(0.87)} aria-label="Zoom out">
           −
         </button>
       </div>

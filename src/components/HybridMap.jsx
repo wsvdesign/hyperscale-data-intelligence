@@ -4,25 +4,35 @@ import Nav from './Nav';
 const HYBRID_MAP_STYLES = `
 *{box-sizing:border-box;margin:0;padding:0}
 .hybrid-map-page{background:#07080f;color:#e8e9f0;font-family:Inter,-apple-system,sans-serif;overflow:hidden;width:100vw;height:100vh}
+:root{--hy-main:#e8e9f0;--hy-sub:#b3bdd8;--hy-muted:#98a3c2;--hy-faint:#8792b3}
+html[data-theme='light'] .hybrid-map-page{background:#f3f6fb;color:#0f172a;--hy-main:#0f172a;--hy-sub:#334155;--hy-muted:#475569;--hy-faint:#64748b}
 .hybrid-map-page #toolbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:300;background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 18px;gap:10px}
 .hybrid-map-page #toolbar h1{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap}
-.hybrid-map-page #toolbar h1 span{color:#1e2035}
+.hybrid-map-page #toolbar h1 span{color:var(--hy-faint)}
+html[data-theme='light'] .hybrid-map-page #toolbar{background:rgba(255,255,255,.98);border-bottom:1px solid rgba(15,23,42,.14)}
 .hybrid-map-page .mg{display:flex;border:1px solid rgba(255,255,255,.1);border-radius:5px;overflow:hidden;flex-shrink:0}
-.hybrid-map-page .mb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;background:transparent;color:#3a3e58;cursor:pointer;border:none;border-right:1px solid rgba(255,255,255,.07);transition:all .2s;white-space:nowrap}
+.hybrid-map-page .mb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;background:transparent;color:var(--hy-sub);cursor:pointer;border:none;border-right:1px solid rgba(255,255,255,.07);transition:all .2s;white-space:nowrap}
 .hybrid-map-page .mb:last-child{border-right:none}
 .hybrid-map-page .mb.on{background:rgba(255,255,255,.09);color:#e8e9f0}
 .hybrid-map-page .mb:hover:not(.on){color:#8a8eb0}
-.hybrid-map-page .tb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:#3a3e58;cursor:pointer;transition:all .2s;white-space:nowrap}
+.hybrid-map-page .tb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 12px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:var(--hy-sub);cursor:pointer;transition:all .2s;white-space:nowrap}
 .hybrid-map-page .tb:hover{border-color:rgba(255,255,255,.3);color:#e8e9f0}
 .hybrid-map-page .tb.lit{border-color:#ff4444;color:#ff4444;background:rgba(255,68,68,.1)}
+html[data-theme='light'] .hybrid-map-page .mg{border-color:rgba(15,23,42,.18)}
+html[data-theme='light'] .hybrid-map-page .mb{background:#ffffff;color:var(--hy-sub);border-right-color:rgba(15,23,42,.14)}
+html[data-theme='light'] .hybrid-map-page .mb.on{background:#e2e8f0;color:var(--hy-main)}
+html[data-theme='light'] .hybrid-map-page .mb:hover:not(.on){color:var(--hy-main)}
+html[data-theme='light'] .hybrid-map-page .tb{background:#ffffff;border-color:rgba(15,23,42,.22);color:var(--hy-sub)}
+html[data-theme='light'] .hybrid-map-page .tb:hover{border-color:rgba(15,23,42,.4);color:var(--hy-main)}
 .hybrid-map-page #mstrip{position:fixed;top:52px;left:0;right:0;height:3px;z-index:299;transition:background .3s}
 .hybrid-map-page .view{position:fixed;top:55px;left:0;right:0;bottom:0;display:none}
 .hybrid-map-page .view.on{display:block}
 .hybrid-map-page #vhub,.hybrid-map-page #vcross{background:#07080f;cursor:grab}
 .hybrid-map-page #vhub canvas,.hybrid-map-page #vcross canvas{display:block;width:100%;height:100%}
 .hybrid-map-page #vlayers{background:#07080f;overflow-y:auto;overflow-x:hidden}
+html[data-theme='light'] .hybrid-map-page #vhub,html[data-theme='light'] .hybrid-map-page #vcross,html[data-theme='light'] .hybrid-map-page #vlayers{background:#f3f6fb}
 .hybrid-map-page .lpage{max-width:760px;margin:0 auto;padding:44px 36px 100px}
-.hybrid-map-page .lpage-title{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#1e2035;margin-bottom:28px;display:block}
+.hybrid-map-page .lpage-title{font-size:9px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--hy-faint);margin-bottom:28px;display:block}
 .hybrid-map-page .lrow{display:flex;gap:0;margin-bottom:0}
 .hybrid-map-page .lspine{width:44px;flex-shrink:0;display:flex;flex-direction:column;align-items:center}
 .hybrid-map-page .lletter{width:34px;height:34px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;z-index:1;position:relative;flex-shrink:0}
@@ -47,21 +57,22 @@ const HYBRID_MAP_STYLES = `
 .hybrid-map-page .lnode{font-size:10px;color:#3a3e58;border:1px solid rgba(255,255,255,.06);padding:4px 9px;border-radius:3px}
 .hybrid-map-page .lwhy{margin-top:10px;font-size:11px;color:#4a4e68;line-height:1.6;font-style:italic;display:none}
 .hybrid-map-page .lwhy.op{display:block}
-.hybrid-map-page #panel{position:fixed;top:52px;right:-430px;bottom:0;width:420px;background:#090a18;border-left:1px solid rgba(255,255,255,.06);transition:right .3s ease;z-index:250;display:flex;flex-direction:column;overflow:hidden}
+.hybrid-map-page #panel{position:fixed;top:52px;right:-430px;bottom:0;width:420px;background:#0d1020;border-left:1px solid rgba(255,255,255,.06);transition:right .3s ease;z-index:250;display:flex;flex-direction:column;overflow:hidden}
 .hybrid-map-page #panel.op{right:0}
 .hybrid-map-page #ph{padding:18px 22px 14px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;position:relative}
 .hybrid-map-page #pt{font-size:8px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:6px}
 .hybrid-map-page #pn{font-size:15px;font-weight:700;line-height:1.35}
-.hybrid-map-page #ps{font-size:12px;color:#5a5e78;margin-top:5px;line-height:1.55}
-.hybrid-map-page #pc{position:absolute;top:14px;right:18px;width:26px;height:26px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:#4a4e68;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
+.hybrid-map-page #ps{font-size:12px;color:var(--hy-sub);margin-top:5px;line-height:1.55}
+.hybrid-map-page #pc{position:absolute;top:14px;right:18px;width:26px;height:26px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:transparent;color:var(--hy-sub);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center}
 .hybrid-map-page #pc:hover{color:#e8e9f0;border-color:rgba(255,255,255,.3)}
+html[data-theme='light'] .hybrid-map-page #panel{background:#ffffff;border-left:1px solid rgba(15,23,42,.14)}
 .hybrid-map-page #pb{flex:1;overflow-y:auto;padding:18px 22px}
 .hybrid-map-page .ss{margin-bottom:18px}
-.hybrid-map-page .sl{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1e2035;display:block;margin-bottom:7px}
-.hybrid-map-page .sp{font-size:12px;color:#5a5e78;line-height:1.65}
+.hybrid-map-page .sl{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--hy-faint);display:block;margin-bottom:7px}
+.hybrid-map-page .sp{font-size:12px;color:var(--hy-sub);line-height:1.65}
 .hybrid-map-page .ir{display:flex;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:11px}
-.hybrid-map-page .ik{color:#1e2035;min-width:80px;flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:1px}
-.hybrid-map-page .iv{color:#5a5e78;line-height:1.55}
+.hybrid-map-page .ik{color:var(--hy-faint);min-width:80px;flex-shrink:0;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding-top:1px}
+.hybrid-map-page .iv{color:var(--hy-sub);line-height:1.55}
 .hybrid-map-page .tgs{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
 .hybrid-map-page .tg{font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 7px;border-radius:3px}
 .hybrid-map-page .tg-c{background:rgba(255,68,68,.12);color:#ff7070;border:1px solid rgba(255,68,68,.25)}
@@ -69,8 +80,8 @@ const HYBRID_MAP_STYLES = `
 .hybrid-map-page .tg-r{background:rgba(200,150,50,.12);color:#d4a040;border:1px solid rgba(200,150,50,.25)}
 .hybrid-map-page .tg-t{background:rgba(100,140,210,.12);color:#80a8e8;border:1px solid rgba(100,140,210,.25)}
 .hybrid-map-page .tg-risk{background:rgba(150,80,200,.1);color:#b070d8;border:1px solid rgba(150,80,200,.2)}
-.hybrid-map-page .dc{font-size:10px;color:#3a3e58;padding:5px 8px;border:1px solid rgba(255,255,255,.04);border-radius:3px;margin-bottom:3px;display:flex;gap:6px}
-.hybrid-map-page .dc::before{content:'▸';flex-shrink:0;color:#1e2035}
+.hybrid-map-page .dc{font-size:10px;color:var(--hy-muted);padding:5px 8px;border:1px solid rgba(255,255,255,.08);border-radius:3px;margin-bottom:3px;display:flex;gap:6px}
+.hybrid-map-page .dc::before{content:'▸';flex-shrink:0;color:var(--hy-faint)}
 .hybrid-map-page .li{font-size:11px;color:rgba(255,80,80,.75);padding:5px 0;border-bottom:1px solid rgba(255,68,68,.07);display:flex;gap:6px;line-height:1.5}
 .hybrid-map-page .li:last-child{border-bottom:none}
 .hybrid-map-page .ld{color:#ff4444;flex-shrink:0}
@@ -80,18 +91,22 @@ const HYBRID_MAP_STYLES = `
 .hybrid-map-page .lci{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)}
 .hybrid-map-page .lci:last-child{border-bottom:none}
 .hybrid-map-page .lcl{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;display:block}
-.hybrid-map-page .lch{font-size:11px;color:#5a5e78;line-height:1.55}
-.hybrid-map-page #legend{position:fixed;left:16px;bottom:16px;z-index:200;background:rgba(9,10,24,.95);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:12px 14px}
-.hybrid-map-page #legend h3{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#1e2035;margin-bottom:9px}
-.hybrid-map-page .leg{display:flex;align-items:center;gap:7px;font-size:9px;color:#4a4e68;margin-bottom:5px}
+.hybrid-map-page .lch{font-size:11px;color:var(--hy-sub);line-height:1.55}
+.hybrid-map-page #legend{position:fixed;left:16px;bottom:16px;z-index:200;background:rgba(13,16,32,.95);border:1px solid rgba(255,255,255,.06);border-radius:6px;padding:12px 14px}
+.hybrid-map-page #legend h3{font-size:8px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--hy-faint);margin-bottom:9px}
+.hybrid-map-page .leg{display:flex;align-items:center;gap:7px;font-size:9px;color:var(--hy-sub);margin-bottom:5px}
+html[data-theme='light'] .hybrid-map-page #legend{background:rgba(255,255,255,.96);border:1px solid rgba(15,23,42,.16)}
 .hybrid-map-page .lc{width:11px;height:11px;border-radius:50%;flex-shrink:0}
 .hybrid-map-page .ll{width:16px;height:1.5px;flex-shrink:0}
 .hybrid-map-page .ld2{width:16px;height:0;border-top:1.5px dashed #ff4444;flex-shrink:0}
 .hybrid-map-page .lsep{border-top:1px solid rgba(255,255,255,.04);margin:6px 0}
 .hybrid-map-page #zb{position:fixed;right:16px;bottom:16px;z-index:200;display:flex;flex-direction:column;gap:4px}
-.hybrid-map-page .zbt{width:30px;height:30px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:rgba(9,10,24,.9);color:#4a4e68;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.hybrid-map-page .zbt{width:30px;height:30px;border:1px solid rgba(255,255,255,.1);border-radius:4px;background:rgba(13,16,32,.9);color:var(--hy-sub);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .hybrid-map-page .zbt:hover{color:#e8e9f0;border-color:rgba(255,255,255,.25)}
+html[data-theme='light'] .hybrid-map-page .zbt{background:#ffffff;border-color:rgba(15,23,42,.22);color:var(--hy-sub)}
+html[data-theme='light'] .hybrid-map-page .zbt:hover{border-color:rgba(15,23,42,.45);color:var(--hy-main)}
 .hybrid-map-page #hint{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:#1a1d30;pointer-events:none;transition:opacity 1s;z-index:100;white-space:nowrap}
+html[data-theme='light'] .hybrid-map-page #hint{color:var(--hy-faint)}
 .hybrid-map-page .site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
 .hybrid-map-page .sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
 .hybrid-map-page .sn:hover{border-color:rgba(255,255,255,.25);color:#dde0f0}
@@ -459,6 +474,7 @@ function ha(hex, alpha) {
 }
 
 export default function HybridMap() {
+  const BASE_SCALE = 1.3;
   const [mode, setMode] = useState('hub');
   const [litOn, setLitOn] = useState(false);
   const [panel, setPanel] = useState({ open: false, title: '', subtitle: '', body: '' });
@@ -466,8 +482,8 @@ export default function HybridMap() {
 
   const hubRef = useRef(null);
   const crossRef = useRef(null);
-  const hubState = useRef({ scale: 1, panX: 0, panY: 0, activeSector: null, hovered: null, dragging: false, dragSX: 0, dragSY: 0, dragPX: 0, dragPY: 0, frame: null });
-  const crossState = useRef({ scale: 1, panX: 0, panY: 0, activeSector: null, hovered: null, dragging: false, dragSX: 0, dragSY: 0, dragPX: 0, dragPY: 0, frame: null });
+  const hubState = useRef({ scale: BASE_SCALE, panX: 0, panY: 0, activeSector: null, hovered: null, dragging: false, dragSX: 0, dragSY: 0, dragPX: 0, dragPY: 0, frame: null });
+  const crossState = useRef({ scale: BASE_SCALE, panX: 0, panY: 0, activeSector: null, hovered: null, dragging: false, dragSX: 0, dragSY: 0, dragPX: 0, dragPY: 0, frame: null });
   const panelRef = useRef(null);
   const panelBodyRef = useRef(null);
   const panelTitleRef = useRef(null);
@@ -568,6 +584,7 @@ export default function HybridMap() {
 
     const dtag = (text, wx, wy, cls) => {
       const [x, y] = ts(wx, wy);
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const rs = (SUB + 4) * state.scale * dpr();
       const tx = x + rs * 0.6;
       const ty = y - rs * 0.65;
@@ -585,7 +602,7 @@ export default function HybridMap() {
       ctx.rect(tx - w / 2, ty - h / 2, w, h);
       ctx.fill();
       ctx.font = `700 ${7 * state.scale * dpr()}px Inter,sans-serif`;
-      ctx.fillStyle = fg;
+      ctx.fillStyle = isLight ? '#0f172a' : fg;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(text, tx, ty);
@@ -633,6 +650,7 @@ export default function HybridMap() {
     };
 
     const draw = () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const gs = 60 * state.scale * dpr();
       const ox = (canvas.width / 2 + state.panX * state.scale * dpr()) % gs;
@@ -679,7 +697,7 @@ export default function HybridMap() {
           const r = isH ? SUB * 1.2 : SUB;
           dc(bx, by, r, ha(state.activeSector.color, isH ? 0.25 : 0.1), ha(state.activeSector.color, isH ? 0.9 : 0.45), 1);
           de(sub.icon, bx, by, -2, 11);
-          sub.label.split('\n').forEach((line, li) => dt(line, bx, by, r + 10 + li * 11, 7.5, 'rgba(255,255,255,.48)', 'center', false));
+          sub.label.split('\n').forEach((line, li) => dt(line, bx, by, r + 10 + li * 11, 7.5, isLight ? '#0f172a' : 'rgba(255,255,255,.48)', 'center', false));
           dtag(sub.tag, bx, by, sub.tc);
         });
       }
@@ -700,7 +718,7 @@ export default function HybridMap() {
         }
         dc(sx, sy, r, ha(sec.color, isA ? 0.22 : 0.1), ha(sec.color, isA ? 1 : 0.48), isA ? 2 : 1.5);
         de(sec.icon, sx, sy, -8, 15);
-        sec.label.split('\n').forEach((line, li) => dt(line, sx, sy, 9 + li * 10, 8, isA ? '#ffffff' : 'rgba(255,255,255,.72)', 'center', isA));
+        sec.label.split('\n').forEach((line, li) => dt(line, sx, sy, 9 + li * 10, 8, isLight ? '#0f172a' : isA ? '#ffffff' : 'rgba(255,255,255,.72)', 'center', isA));
         const lay = LAYERS.find((layer) => layer.id === sec.pl);
         if (lay) {
           const [spx, spy] = ts(sx, sy);
@@ -727,9 +745,9 @@ export default function HybridMap() {
       ctx.lineWidth = 1.5 * dpr();
       ctx.stroke();
       dc(0, 0, hR, 'rgba(255,255,255,.06)', 'rgba(255,255,255,.42)', 2);
-      dt('HYPERSCALE', 0, 0, -9, 7, 'rgba(255,255,255,.9)', 'center', true);
-      dt('DATA CENTER', 0, 0, 1, 7, 'rgba(255,255,255,.9)', 'center', true);
-      dt('HUB', 0, 0, 12, 5.5, 'rgba(255,255,255,.3)', 'center', false);
+      dt('HYPERSCALE', 0, 0, -9, 7, isLight ? '#0f172a' : 'rgba(255,255,255,.9)', 'center', true);
+      dt('DATA CENTER', 0, 0, 1, 7, isLight ? '#0f172a' : 'rgba(255,255,255,.9)', 'center', true);
+      dt('HUB', 0, 0, 12, 5.5, isLight ? '#0f172a' : 'rgba(255,255,255,.3)', 'center', false);
       state.frame = window.requestAnimationFrame(draw);
     };
 
@@ -920,6 +938,7 @@ export default function HybridMap() {
 
     const dtag = (text, wx, wy, cls) => {
       const [x, y] = ts(wx, wy);
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       const rs = (SUB + 4) * state.scale * dpr();
       const tx = x + rs * 0.6;
       const ty = y - rs * 0.65;
@@ -937,7 +956,7 @@ export default function HybridMap() {
       ctx.rect(tx - w / 2, ty - h / 2, w, h);
       ctx.fill();
       ctx.font = `700 ${7 * state.scale * dpr()}px Inter,sans-serif`;
-      ctx.fillStyle = fg;
+      ctx.fillStyle = isLight ? '#0f172a' : fg;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(text, tx, ty);
@@ -992,6 +1011,7 @@ export default function HybridMap() {
     };
 
     const draw = () => {
+      const isLight = document.documentElement.getAttribute('data-theme') === 'light';
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const gs = 60 * state.scale * dpr();
       const ox = (canvas.width / 2 + state.panX * state.scale * dpr()) % gs;
@@ -1038,7 +1058,7 @@ export default function HybridMap() {
           const r = isH ? SUB * 1.2 : SUB;
           dc(bx, by, r, ha(state.activeSector.color, isH ? 0.25 : 0.1), ha(state.activeSector.color, isH ? 0.9 : 0.45), 1);
           de(sub.icon, bx, by, -2, 11);
-          sub.label.split('\n').forEach((line, li) => dt(line, bx, by, r + 10 + li * 11, 7.5, 'rgba(255,255,255,.48)', 'center', false));
+          sub.label.split('\n').forEach((line, li) => dt(line, bx, by, r + 10 + li * 11, 7.5, isLight ? '#0f172a' : 'rgba(255,255,255,.48)', 'center', false));
           dtag(sub.tag, bx, by, sub.tc);
         });
       }
@@ -1059,7 +1079,7 @@ export default function HybridMap() {
         }
         dc(sx, sy, r, ha(sec.color, isA ? 0.22 : 0.1), ha(sec.color, isA ? 1 : 0.48), isA ? 2 : 1.5);
         de(sec.icon, sx, sy, -8, 15);
-        sec.label.split('\n').forEach((line, li) => dt(line, sx, sy, 9 + li * 10, 8, isA ? '#ffffff' : 'rgba(255,255,255,.72)', 'center', isA));
+        sec.label.split('\n').forEach((line, li) => dt(line, sx, sy, 9 + li * 10, 8, isLight ? '#0f172a' : isA ? '#ffffff' : 'rgba(255,255,255,.72)', 'center', isA));
         const lay = LAYERS.find((layer) => layer.id === sec.pl);
         if (lay) {
           const [spx, spy] = ts(sx, sy);
@@ -1086,9 +1106,9 @@ export default function HybridMap() {
       ctx.lineWidth = 1.5 * dpr();
       ctx.stroke();
       dc(0, 0, hR, 'rgba(255,255,255,.06)', 'rgba(255,255,255,.42)', 2);
-      dt('HYPERSCALE', 0, 0, -9, 7, 'rgba(255,255,255,.9)', 'center', true);
-      dt('DATA CENTER', 0, 0, 1, 7, 'rgba(255,255,255,.9)', 'center', true);
-      dt('CROSS', 0, 0, 12, 5.5, 'rgba(255,195,60,.5)', 'center', false);
+      dt('HYPERSCALE', 0, 0, -9, 7, isLight ? '#0f172a' : 'rgba(255,255,255,.9)', 'center', true);
+      dt('DATA CENTER', 0, 0, 1, 7, isLight ? '#0f172a' : 'rgba(255,255,255,.9)', 'center', true);
+      dt('CROSS', 0, 0, 12, 5.5, isLight ? '#0f172a' : 'rgba(255,195,60,.5)', 'center', false);
       state.frame = window.requestAnimationFrame(draw);
     };
 
@@ -1248,12 +1268,12 @@ export default function HybridMap() {
   };
 
   const resetView = () => {
-    hubState.current.scale = 1;
+    hubState.current.scale = BASE_SCALE;
     hubState.current.panX = 0;
     hubState.current.panY = 0;
     hubState.current.activeSector = null;
     hubState.current.hovered = null;
-    crossState.current.scale = 1;
+    crossState.current.scale = BASE_SCALE;
     crossState.current.panX = 0;
     crossState.current.panY = 0;
     crossState.current.activeSector = null;
@@ -1279,33 +1299,33 @@ export default function HybridMap() {
   return (
     <div className="hybrid-map-page">
       <style dangerouslySetInnerHTML={{ __html: HYBRID_MAP_STYLES }} />
-      <div id="toolbar">
+      <div id="toolbar" role="region" aria-label="Hybrid map controls">
         <h1>HYPERSCALE DATA CENTER <span>/ Hybrid Intelligence Map</span></h1>
         <div className="mg">
-          <button className={`mb ${mode === 'hub' ? 'on' : ''}`} id="b1" onClick={() => switchMode('hub')}>① Hub &amp; Spoke</button>
-          <button className={`mb ${mode === 'layers' ? 'on' : ''}`} id="b2" onClick={() => switchMode('layers')}>② Control Layers A–H</button>
-          <button className={`mb ${mode === 'cross' ? 'on' : ''}`} id="b3" onClick={() => switchMode('cross')}>③ Cross-Section</button>
+          <button type="button" aria-pressed={mode === 'hub'} className={`mb ${mode === 'hub' ? 'on' : ''}`} id="b1" onClick={() => switchMode('hub')}>① Hub &amp; Spoke</button>
+          <button type="button" aria-pressed={mode === 'layers'} className={`mb ${mode === 'layers' ? 'on' : ''}`} id="b2" onClick={() => switchMode('layers')}>② Control Layers A–H</button>
+          <button type="button" aria-pressed={mode === 'cross'} className={`mb ${mode === 'cross' ? 'on' : ''}`} id="b3" onClick={() => switchMode('cross')}>③ Cross-Section</button>
         </div>
-        <button ref={litBtnRef} className={`tb ${litOn ? 'lit' : ''}`} id="litbtn" onClick={toggleLit}>⬤ Litigation</button>
-        <button className="tb" onClick={resetView}>↺ Reset</button>
+        <button type="button" ref={litBtnRef} aria-pressed={litOn} className={`tb ${litOn ? 'lit' : ''}`} id="litbtn" onClick={toggleLit}>⬤ Litigation</button>
+        <button type="button" className="tb" onClick={resetView} aria-label="Reset map view">↺ Reset</button>
         <Nav />
       </div>
       <div id="mstrip" style={{ background: STRIP[mode] || 'transparent' }} />
-      <div id="vhub" className={`view ${mode === 'hub' ? 'on' : ''}`}><canvas id="c1" ref={hubRef} /></div>
+      <div id="vhub" className={`view ${mode === 'hub' ? 'on' : ''}`}><canvas id="c1" ref={hubRef} tabIndex={0} aria-label="Hybrid map hub and spoke view" /></div>
       <div id="vlayers" className={`view ${mode === 'layers' ? 'on' : ''}`}>
         <div className="lpage">
           <span className="lpage-title">Control Layers A–H — how power flows through the system, top to bottom. Click any layer to expand.</span>
           <div id="lc" />
         </div>
       </div>
-      <div id="vcross" className={`view ${mode === 'cross' ? 'on' : ''}`}><canvas id="c2" ref={crossRef} /></div>
-      <div id="panel" ref={panelRef} className={panel.open ? 'op' : ''}>
-        <button id="pc" onClick={closePanel}>✕</button>
+      <div id="vcross" className={`view ${mode === 'cross' ? 'on' : ''}`}><canvas id="c2" ref={crossRef} tabIndex={0} aria-label="Hybrid map cross-section view" /></div>
+      <div id="panel" ref={panelRef} className={panel.open ? 'op' : ''} role="dialog" aria-modal="false" aria-hidden={!panel.open}>
+        <button type="button" id="pc" onClick={closePanel} aria-label="Close details panel">✕</button>
         <div id="ph"><span id="pt">HYBRID INTELLIGENCE MAP</span><div id="pn" ref={panelTitleRef}>{panel.title}</div><div id="ps" ref={panelSubRef}>{panel.subtitle}</div></div>
         <div id="pb" ref={panelBodyRef} dangerouslySetInnerHTML={{ __html: panel.body }} />
       </div>
       <div id="legend"><h3 id="lgh">Legend</h3><div id="lgb" /></div>
-      <div id="zb"><button className="zbt" onClick={() => { if (mode === 'hub') hubState.current.scale = Math.max(0.2, Math.min(3, hubState.current.scale * 1.15)); if (mode === 'cross') crossState.current.scale = Math.max(0.2, Math.min(3, crossState.current.scale * 1.15)); }}>+</button><button className="zbt" onClick={() => { if (mode === 'hub') hubState.current.scale = Math.max(0.2, Math.min(3, hubState.current.scale * 0.87)); if (mode === 'cross') crossState.current.scale = Math.max(0.2, Math.min(3, crossState.current.scale * 0.87)); }}>−</button></div>
+      <div id="zb"><button type="button" className="zbt" aria-label="Zoom in" onClick={() => { if (mode === 'hub') hubState.current.scale = Math.max(0.2, Math.min(3, hubState.current.scale * 1.15)); if (mode === 'cross') crossState.current.scale = Math.max(0.2, Math.min(3, crossState.current.scale * 1.15)); }}>+</button><button type="button" className="zbt" aria-label="Zoom out" onClick={() => { if (mode === 'hub') hubState.current.scale = Math.max(0.2, Math.min(3, hubState.current.scale * 0.87)); if (mode === 'cross') crossState.current.scale = Math.max(0.2, Math.min(3, crossState.current.scale * 0.87)); }}>−</button></div>
       <div id="hint">Click any node · Switch views in toolbar · Drag to pan</div>
     </div>
   );
