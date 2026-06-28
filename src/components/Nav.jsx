@@ -16,7 +16,7 @@ const links = [
 
 export default function Nav() {
   return (
-    <nav className="site-nav">
+    <nav className="site-nav" aria-label="Primary navigation">
       {links.map((link) => (
         <NavLink
           key={link.to}

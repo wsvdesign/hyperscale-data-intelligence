@@ -179,11 +179,12 @@ const SCHEMA = [
 
 // ── STYLES (inline — matches site dark theme exactly) ─────────────────────────
 
-const S = {
+const makeStyles = (isLight) => ({
   page: {
     position:'fixed', inset:0,
     display:'flex', flexDirection:'column',
-    background:'#06070e', color:'#dde0f0',
+    background: isLight ? '#f3f6fb' : '#07080f',
+    color: isLight ? '#0f172a' : '#e8e9f0',
     fontFamily:"'Inter',-apple-system,sans-serif",
     overflow:'hidden',
   },
@@ -193,23 +194,23 @@ const S = {
   // LEFT PANEL
   left: {
     width:'280px', flexShrink:0,
-    background:'#0a0c18',
-    borderRight:'1px solid rgba(255,255,255,0.07)',
+    background: isLight ? '#ffffff' : '#0d1020',
+    borderRight: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
     display:'flex', flexDirection:'column',
     overflow:'hidden',
   },
   leftHead: {
     padding:'14px 16px 10px',
-    borderBottom:'1px solid rgba(255,255,255,0.07)',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
     flexShrink:0,
   },
   leftTitle: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'11px', fontWeight:700,
     letterSpacing:'0.12em', textTransform:'uppercase',
-    color:'#8a8eb0', marginBottom:'2px', display:'block',
+    color: isLight ? '#64748b' : '#8792b3', marginBottom:'2px', display:'block',
   },
-  leftSub: { fontSize:'11px', color:'#9a9eb8' },
+  leftSub: { fontSize:'11px', color: isLight ? '#334155' : '#b3bdd8' },
   leftScroll: { flex:1, overflowY:'auto', padding:'12px 14px' },
   // schema table
   schemaTable: { marginBottom:'18px' },
@@ -222,37 +223,37 @@ const S = {
   schemaDot: { width:'7px', height:'7px', borderRadius:'50%', flexShrink:0 },
   schemaRow: {
     display:'flex', gap:'6px', alignItems:'baseline',
-    padding:'3px 0', borderBottom:'1px solid rgba(255,255,255,0.04)',
+    padding:'3px 0', borderBottom: isLight ? '1px solid rgba(15,23,42,0.08)' : '1px solid rgba(255,255,255,0.04)',
     fontSize:'12px',
   },
-  schemaCol: { color:'#dde0f0', minWidth:'80px', flexShrink:0, fontSize:'13px' },
+  schemaCol: { color: isLight ? '#0f172a' : '#e8e9f0', minWidth:'80px', flexShrink:0, fontSize:'13px' },
   schemaType: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'12px', color:'#8a8eb0',
+    fontSize:'12px', color: isLight ? '#64748b' : '#8792b3',
   },
-  schemaNoteText: { fontSize:'12px', color:'#8a8eb0' },
+  schemaNoteText: { fontSize:'12px', color: isLight ? '#64748b' : '#8792b3' },
   // starter queries
   starterHead: {
     padding:'10px 14px 6px',
-    borderTop:'1px solid rgba(255,255,255,0.07)',
+    borderTop: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
     flexShrink:0,
   },
   starterTitle: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'8px', fontWeight:700,
     letterSpacing:'0.1em', textTransform:'uppercase',
-    color:'#2e3050',
+    color: isLight ? '#64748b' : '#8792b3',
   },
   starterScroll: { overflowY:'auto', maxHeight:'200px', padding:'6px 14px 12px' },
   starterBtn: {
     display:'block', width:'100%', textAlign:'left',
-    background:'transparent', border:'1px solid rgba(255,255,255,0.06)',
+    background: isLight ? '#ffffff' : 'transparent', border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.06)',
     borderRadius:'3px', padding:'6px 9px', marginBottom:'4px',
     cursor:'pointer', transition:'all 0.15s',
     fontFamily:"'Space Mono',monospace",
     fontSize:'11px', fontWeight:700,
     letterSpacing:'0.04em', textTransform:'uppercase',
-    color:'#5a5e78',
+    color: isLight ? '#334155' : '#5a5e78',
   },
   // RIGHT PANEL
   right: {
@@ -260,22 +261,22 @@ const S = {
   },
   editorWrap: {
     flexShrink:0, padding:'16px 18px 12px',
-    borderBottom:'1px solid rgba(255,255,255,0.07)',
-    background:'#0d1020',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
+    background: isLight ? '#ffffff' : '#0d1020',
   },
   editorLabel: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'8px', fontWeight:700,
     letterSpacing:'0.1em', textTransform:'uppercase',
-    color:'#2e3050', marginBottom:'8px', display:'block',
+    color: isLight ? '#64748b' : '#8792b3', marginBottom:'8px', display:'block',
   },
   textarea: {
     width:'100%', height:'120px',
-    background:'#06070e',
-    border:'1px solid rgba(255,255,255,0.1)',
+    background: isLight ? '#ffffff' : '#07080f',
+    border: isLight ? '1px solid rgba(15,23,42,0.22)' : '1px solid rgba(255,255,255,0.1)',
     borderRadius:'4px', padding:'10px 12px',
     fontFamily:"'Space Mono',monospace",
-    fontSize:'12px', color:'#dde0f0',
+    fontSize:'12px', color: isLight ? '#0f172a' : '#e8e9f0',
     resize:'vertical', outline:'none',
     lineHeight:1.6,
   },
@@ -287,7 +288,7 @@ const S = {
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
     padding:'7px 16px',
-    background:'#6c8ebf', color:'#06070e',
+    background:'#6c8ebf', color: isLight ? '#ffffff' : '#07080f',
     border:'none', borderRadius:'3px',
     cursor:'pointer', transition:'background 0.15s',
   },
@@ -296,8 +297,8 @@ const S = {
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
     padding:'7px 14px',
-    background:'transparent', color:'#3a3e58',
-    border:'1px solid rgba(255,255,255,0.08)',
+    background: isLight ? '#ffffff' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
+    border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.08)',
     borderRadius:'3px', cursor:'pointer',
   },
   errorMsg: {
@@ -327,8 +328,8 @@ const S = {
     fontSize:'8px', fontWeight:700,
     letterSpacing:'0.06em', textTransform:'uppercase',
     padding:'3px 9px',
-    background:'transparent', color:'#3a3e58',
-    border:'1px solid rgba(255,255,255,0.07)',
+    background: isLight ? '#ffffff' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
+    border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.07)',
     borderRadius:'3px', cursor:'pointer',
     transition:'all 0.15s',
   },
@@ -340,44 +341,53 @@ const S = {
     fontFamily:"'Space Mono',monospace",
     fontSize:'8.5px', fontWeight:700,
     letterSpacing:'0.06em', textTransform:'uppercase',
-    color:'#3a3e58', textAlign:'left',
+    color: isLight ? '#64748b' : '#3a3e58', textAlign:'left',
     padding:'7px 10px',
-    borderBottom:'1px solid rgba(255,255,255,0.07)',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
     whiteSpace:'nowrap',
   },
   td: {
     padding:'7px 10px',
-    borderBottom:'1px solid rgba(255,255,255,0.04)',
-    color:'#dde0f0',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.08)' : '1px solid rgba(255,255,255,0.04)',
+    color: isLight ? '#0f172a' : '#e8e9f0',
   },
   tdNum: {
     padding:'7px 10px',
-    borderBottom:'1px solid rgba(255,255,255,0.04)',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.08)' : '1px solid rgba(255,255,255,0.04)',
     color:'#6c8ebf', fontFamily:"'Space Mono',monospace",
     fontSize:'11px', textAlign:'right',
   },
   emptyState: {
     padding:'48px 0', textAlign:'center',
-    color:'#2e3050',
+    color: isLight ? '#64748b' : '#8792b3',
   },
   emptyIcon: { fontSize:'28px', marginBottom:'12px', display:'block' },
   emptyText: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'10px', fontWeight:700,
     letterSpacing:'0.08em', textTransform:'uppercase',
-    color:'#6a6e90',
+    color: isLight ? '#334155' : '#6a6e90',
     marginBottom:'6px',
   },
-  emptySub: { fontSize:'12px', color:'#5a5e78' },
-}
+  emptySub: { fontSize:'12px', color: isLight ? '#475569' : '#5a5e78' },
+})
 
 const DATAQUERY_NAV_CSS = `
+.data-query-page #toolbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:300;background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 18px;gap:10px}
+.data-query-page #toolbar h1{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap;color:#e8e9f0}
+.data-query-page #toolbar h1 span{color:#8792b3;font-weight:400}
+html[data-theme='light'] .data-query-page #toolbar{background:rgba(255,255,255,.98);border-bottom:1px solid rgba(15,23,42,.14)}
+html[data-theme='light'] .data-query-page #toolbar h1{color:#0f172a}
+html[data-theme='light'] .data-query-page #toolbar h1 span{color:#64748b}
 .data-query-page .site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
 .data-query-page .sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
 .data-query-page .sn:hover{border-color:rgba(255,255,255,.25);color:#dde0f0}
 .data-query-page .sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
 .data-query-page .sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
 .data-query-page .sn.sn-active{background:rgba(255,255,255,.07);color:#dde0f0;border-color:rgba(255,255,255,.18)}
+html[data-theme='light'] .data-query-page .sn{background:#ffffff;border-color:rgba(15,23,42,.16);color:#334155}
+html[data-theme='light'] .data-query-page .sn:hover{border-color:rgba(15,23,42,.4);color:#0f172a}
+html[data-theme='light'] .data-query-page .sn.sn-active{background:#e2e8f0;color:#0f172a;border-color:rgba(15,23,42,.24)}
 @media(max-width:780px){.data-query-page .sn{font-size:7px;padding:3px 7px}}
 @media(max-width:520px){.data-query-page .site-nav .sn-label{display:none}.data-query-page .sn{padding:4px 7px}}
 `;
@@ -385,6 +395,8 @@ const DATAQUERY_NAV_CSS = `
 // ── COMPONENT ─────────────────────────────────────────────────────────────────
 
 export default function DataQuery() {
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light'
+  const S = makeStyles(isLight)
   const [db,       setDb]       = useState(null)
   const [dbReady,  setDbReady]  = useState(false)
   const [dbError,  setDbError]  = useState(null)
@@ -525,11 +537,11 @@ export default function DataQuery() {
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="data-query-page" style={S.page}>
+    <div className="data-query-page" style={S.page} role="main" aria-label="Data query workspace">
       <style>{DATAQUERY_NAV_CSS}</style>
 
       {/* TOOLBAR */}
-      <div id="toolbar">
+      <div id="toolbar" role="region" aria-label="Data query controls">
         <h1>
           HYPERSCALE DATA CENTER{' '}
           <span>/ Data Query</span>
@@ -576,8 +588,8 @@ export default function DataQuery() {
               <button
                 key={i}
                 style={S.starterBtn}
-                onMouseEnter={e => { e.currentTarget.style.color = '#dde0f0'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)' }}
-                onMouseLeave={e => { e.currentTarget.style.color = '#5a5e78'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)' }}
+                onMouseEnter={e => { e.currentTarget.style.color = isLight ? '#0f172a' : '#dde0f0'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.32)' : 'rgba(255,255,255,0.18)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = isLight ? '#334155' : '#5a5e78'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.16)' : 'rgba(255,255,255,0.06)' }}
                 onClick={() => {
                   setSql(q.sql)
                   setResults(null)
@@ -605,19 +617,22 @@ export default function DataQuery() {
               onChange={e => setSql(e.target.value)}
               onKeyDown={handleKeyDown}
               spellCheck={false}
+              aria-label="SQL editor"
               placeholder="SELECT * FROM states ORDER BY ratio DESC;"
             />
             <div style={S.btnRow}>
               <button
+                type="button"
                 style={S.runBtn}
                 disabled={!dbReady}
-                onMouseEnter={e => { e.currentTarget.style.background = '#8aabda' }}
+                onMouseEnter={e => { e.currentTarget.style.background = isLight ? '#5f83b8' : '#8aabda' }}
                 onMouseLeave={e => { e.currentTarget.style.background = '#6c8ebf' }}
                 onClick={runQuery}
               >
                 {dbReady ? '▶ Run Query' : 'Loading db…'}
               </button>
               <button
+                type="button"
                 style={S.clearBtn}
                 onClick={() => { setSql(''); setResults(null); setError(null); textareaRef.current?.focus() }}
               >
@@ -654,9 +669,10 @@ export default function DataQuery() {
                     {results.rows.length} row{results.rows.length !== 1 ? 's' : ''} returned
                   </span>
                   <button
+                    type="button"
                     style={S.copyBtn}
-                    onMouseEnter={e => { e.currentTarget.style.color = '#dde0f0'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.18)' }}
-                    onMouseLeave={e => { e.currentTarget.style.color = '#3a3e58'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)' }}
+                    onMouseEnter={e => { e.currentTarget.style.color = isLight ? '#0f172a' : '#dde0f0'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.32)' : 'rgba(255,255,255,0.18)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = isLight ? '#334155' : '#3a3e58'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.16)' : 'rgba(255,255,255,0.07)' }}
                     onClick={copyCSV}
                   >
                     {copied ? '✓ Copied' : 'Copy CSV'}
@@ -675,14 +691,14 @@ export default function DataQuery() {
                     {results.rows.map((row, ri) => (
                       <tr
                         key={ri}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.025)' }}
+                        onMouseEnter={e => { e.currentTarget.style.background = isLight ? 'rgba(15,23,42,0.04)' : 'rgba(255,255,255,0.025)' }}
                         onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                       >
                         {row.map((val, ci) => {
                           const numeric = isNumeric(ci, results.rows)
                           return (
                             <td key={ci} style={numeric ? S.tdNum : S.td}>
-                              {val === null ? <span style={{ color:'#252838' }}>NULL</span> : String(val)}
+                              {val === null ? <span style={{ color: isLight ? '#94a3b8' : '#252838' }}>NULL</span> : String(val)}
                             </td>
                           )
                         })}

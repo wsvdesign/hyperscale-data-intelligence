@@ -848,16 +848,16 @@ const PANEL_STYLE = `
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #06070e;
-  --bg2: #0a0c18;
+  --bg: #07080f;
+  --bg2: #0d1020;
   --rail-w: 148px;
   --col-w: 240px;
   --row-h: 110px;
   --gap: 1px;
   --border: rgba(255,255,255,0.06);
-  --text: #dde0f0;
-  --text2: #6a6e90;
-  --text3: #2e3050;
+  --text: #e8e9f0;
+  --text2: #b3bdd8;
+  --text3: #8792b3;
   --mono: 'Space Mono', monospace;
   --sans: 'Inter', -apple-system, sans-serif;
 
@@ -868,6 +868,15 @@ const PANEL_STYLE = `
   --c-fin:   #b84f8c;
   --c-lit:   #e04040;
   --c-gate:  #e8c060;
+}
+
+html[data-theme='light'] .timeline-page {
+  --bg: #f3f6fb;
+  --bg2: #ffffff;
+  --border: rgba(15,23,42,0.14);
+  --text: #0f172a;
+  --text2: #334155;
+  --text3: #64748b;
 }
 
 .timeline-page, .timeline-page body { width: 100%; height: 100%; }
@@ -889,10 +898,11 @@ const PANEL_STYLE = `
 }
 
 .toolbar {
-  position: fixed; top: 0; left: 0; right: 0; height: 50px; z-index: 300;
-  background: rgba(6,7,14,0.98); border-bottom: 1px solid var(--border);
+  position: fixed; top: 0; left: 0; right: 0; height: 52px; z-index: 300;
+  background: rgba(7,8,15,0.98); border-bottom: 1px solid var(--border);
   display: flex; align-items: center; padding: 0 18px; gap: 10px;
 }
+html[data-theme='light'] .toolbar { background: rgba(255,255,255,0.98); }
 .toolbar h1 { font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; flex: 1; color: var(--text); }
 .toolbar h1 span { color: var(--text3); font-weight: 400; }
 .tb-btn {
@@ -901,6 +911,8 @@ const PANEL_STYLE = `
   background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s;
 }
 .tb-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+html[data-theme='light'] .tb-btn { background: #ffffff; border-color: rgba(15,23,42,0.22); }
+html[data-theme='light'] .tb-btn:hover { border-color: rgba(15,23,42,0.4); }
 .tb-btn.lit-on { border-color: var(--c-lit); color: var(--c-lit); background: rgba(224,64,64,0.08); }
 .track-btns { display: flex; gap: 5px; }
 .track-btn {
@@ -909,6 +921,7 @@ const PANEL_STYLE = `
   transition: all 0.15s; opacity: 0.5; background: transparent;
 }
 .track-btn.on { opacity: 1; }
+html[data-theme='light'] .track-btn { background: #ffffff; border-color: rgba(15,23,42,0.16) !important; }
 .track-btn.track-main { color: var(--c-main); border-color: rgba(200,208,240,0.18); }
 .track-btn.track-land { color: var(--c-land); border-color: rgba(196,168,79,0.18); }
 .track-btn.track-util { color: var(--c-util); border-color: rgba(140,108,184,0.18); }
@@ -916,15 +929,16 @@ const PANEL_STYLE = `
 .track-btn.track-fin { color: var(--c-fin); border-color: rgba(184,79,140,0.18); }
 .track-btn.track-lit { color: var(--c-lit); border-color: rgba(224,64,64,0.18); }
 
-.main-layout { position: fixed; top: 50px; left: 0; right: 0; bottom: 0; display: flex; }
+.main-layout { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; display: flex; }
 
 .rail {
   width: var(--rail-w); flex-shrink: 0;
-  background: rgba(6,7,14,0.97);
+  background: rgba(13,16,32,0.97);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column;
   z-index: 100;
 }
+html[data-theme='light'] .rail { background: rgba(255,255,255,0.97); }
 .rail-header { height: 54px; flex-shrink: 0; border-bottom: 1px solid var(--border); display: flex; align-items: center; padding: 0 14px; }
 .rail-header-text { font-family: var(--mono); font-size: 7.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); }
 .rail-track {
@@ -942,9 +956,11 @@ const PANEL_STYLE = `
 .scroll-wrap::-webkit-scrollbar { height: 4px; }
 .scroll-wrap::-webkit-scrollbar-track { background: transparent; }
 .scroll-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
+html[data-theme='light'] .scroll-wrap::-webkit-scrollbar-thumb { background: rgba(15,23,42,0.18); }
 
 .timeline { display: flex; flex-direction: column; min-width: max-content; height: 100%; }
-.phase-row { height: 54px; flex-shrink: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; background: rgba(6,7,14,0.97); }
+.phase-row { height: 54px; flex-shrink: 0; display: flex; align-items: stretch; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; background: rgba(13,16,32,0.97); }
+html[data-theme='light'] .phase-row { background: rgba(255,255,255,0.97); }
 .phase-cell { display: flex; align-items: center; padding: 0 16px; border-right: 1px solid var(--border); position: relative; }
 .phase-num { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.1em; color: var(--text3); display: block; margin-bottom: 3px; }
 .phase-name { font-family: var(--mono); font-size: 9px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
@@ -957,9 +973,11 @@ const PANEL_STYLE = `
 
 .cell { min-width: var(--col-w); border-right: 1px solid var(--border); padding: 10px 12px; display: flex; flex-direction: column; justify-content: center; position: relative; cursor: pointer; transition: background 0.15s; }
 .cell:hover { background: rgba(255,255,255,0.025); }
+html[data-theme='light'] .cell:hover { background: rgba(15,23,42,0.04); }
 .cell.empty { cursor: default; }
 .cell.empty:hover { background: transparent; }
 .cell.active-cell { background: rgba(255,255,255,0.04) !important; }
+html[data-theme='light'] .cell.active-cell { background: rgba(15,23,42,0.07) !important; }
 .cell.gate { align-items: center; justify-content: center; text-align: center; background: rgba(232,192,96,0.04); border-left: 2px solid rgba(232,192,96,0.25); cursor: pointer; }
 .cell.gate:hover { background: rgba(232,192,96,0.08); }
 .gate-diamond { width: 36px; height: 36px; border: 2px solid rgba(232,192,96,0.6); transform: rotate(45deg); margin: 0 auto 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -974,7 +992,8 @@ const PANEL_STYLE = `
 .node-label-tags { display: flex; gap: 3px; flex-wrap: wrap; justify-content: flex-end; margin-left: auto; }
 .node-actors { font-size: 10px; color: var(--text2); line-height: 1.5; margin-bottom: 5px; }
 .node-docs { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 4px; }
-.node-doc { font-family: var(--mono); font-size: 7.5px; color: var(--text3); border: 1px solid rgba(255,255,255,0.05); padding: 2px 5px; border-radius: 2px; }
+.node-doc { font-family: var(--mono); font-size: 7.5px; color: var(--text3); border: 1px solid rgba(255,255,255,0.08); padding: 2px 5px; border-radius: 2px; }
+html[data-theme='light'] .node-doc { border-color: rgba(15,23,42,0.16); }
 .ntag { font-family: var(--mono); font-size: 7px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 5px; border-radius: 2px; }
 .ntag-c { background: rgba(255,68,68,0.15); color: #ff7070; }
 .ntag-p { background: rgba(76,178,76,0.15); color: #6ed06e; }
@@ -990,10 +1009,11 @@ const PANEL_STYLE = `
 .connector-lit { background: rgba(224,64,64,0.5); }
 
 .panel {
-  position: fixed; top: 50px; right: -440px; bottom: 0; width: 420px;
-  background: #090a17; border-left: 1px solid var(--border);
+  position: fixed; top: 52px; right: -440px; bottom: 0; width: 420px;
+  background: #0d1020; border-left: 1px solid var(--border);
   transition: right 0.3s ease; z-index: 250; display: flex; flex-direction: column; overflow: hidden;
 }
+html[data-theme='light'] .panel { background: #ffffff; }
 .panel.open { right: 0; }
 .panel-head { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; position: relative; }
 .panel-type { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 6px; }
@@ -1001,6 +1021,7 @@ const PANEL_STYLE = `
 .panel-sub { font-size: 12px; color: var(--text2); margin-top: 5px; line-height: 1.55; }
 .panel-close { position: absolute; top: 14px; right: 18px; width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 3px; background: transparent; color: var(--text2); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); }
 .panel-close:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
+html[data-theme='light'] .panel-close:hover { border-color: rgba(15,23,42,0.4); }
 .panel-body { flex: 1; overflow-y: auto; padding: 18px 22px; }
 .panel-body::-webkit-scrollbar { width: 3px; }
 .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 2px; }
@@ -1018,7 +1039,8 @@ const PANEL_STYLE = `
 .tag-r { background: rgba(200,150,50,0.12); color: #d4a040; border: 1px solid rgba(200,150,50,0.25); }
 .tag-t { background: rgba(100,140,210,0.12); color: #80a8e8; border: 1px solid rgba(100,140,210,0.25); }
 .tag-risk { background: rgba(150,80,200,0.1); color: #b070d8; border: 1px solid rgba(150,80,200,0.2); }
-.doc { font-family: var(--mono); font-size: 9.5px; color: var(--text3); padding: 5px 8px; border: 1px solid rgba(255,255,255,0.04); border-radius: 2px; margin-bottom: 3px; display: flex; gap: 6px; }
+.doc { font-family: var(--mono); font-size: 9.5px; color: var(--text3); padding: 5px 8px; border: 1px solid rgba(255,255,255,0.08); border-radius: 2px; margin-bottom: 3px; display: flex; gap: 6px; }
+html[data-theme='light'] .doc { border-color: rgba(15,23,42,0.16); }
 .doc::before { content: '▸'; flex-shrink: 0; color: var(--text3); }
 .lit-item { font-size: 11px; color: rgba(224,90,90,0.8); padding: 5px 0; border-bottom: 1px solid rgba(224,64,64,0.07); display: flex; gap: 6px; line-height: 1.5; }
 .lit-item:last-child { border-bottom: none; }
@@ -1028,13 +1050,15 @@ const PANEL_STYLE = `
 .qm { color: rgba(255,195,60,0.45); flex-shrink: 0; font-weight: 700; }
 
 .hint { position: fixed; bottom: 16px; right: 20px; font-family: var(--mono); font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text3); pointer-events: none; transition: opacity 1s; z-index: 100; }
-.legend { position: fixed; left: 164px; bottom: 16px; z-index: 100; display: flex; gap: 14px; align-items: center; }
+.legend { position: fixed; left: 164px; bottom: 16px; z-index: 100; display: flex; gap: 14px; align-items: center; background: rgba(13,16,32,0.95); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+html[data-theme='light'] .legend { background: rgba(255,255,255,0.96); }
 .leg { display: flex; align-items: center; gap: 5px; font-family: var(--mono); font-size: 8px; color: var(--text2); letter-spacing: 0.04em; }
 .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .leg-diamond { width: 9px; height: 9px; border: 1.5px solid var(--c-gate); transform: rotate(45deg); flex-shrink: 0; }
 .leg-dash { width: 16px; height: 0; border-top: 1.5px dashed var(--c-lit); flex-shrink: 0; }
-.progress { position: fixed; top: 50px; left: var(--rail-w); right: 0; height: 2px; z-index: 200; background: rgba(255,255,255,0.04); }
+.progress { position: fixed; top: 52px; left: var(--rail-w); right: 0; height: 2px; z-index: 200; background: rgba(255,255,255,0.04); }
 .progress-bar { height: 100%; background: rgba(255,255,255,0.12); width: 0%; transition: width 0.1s; }
+html[data-theme='light'] .progress-bar { background: rgba(15,23,42,0.2); }
 
 @media(max-width:780px){.tb-btn{font-size:8px;padding:4px 10px}.track-btn{font-size:7px;padding:3px 7px}.toolbar h1{font-size:8.5px}}
 @media(max-width:520px){.toolbar h1 .toolbar-sub{display:none}.toolbar .site-nav .sn-label{display:none}.toolbar .sn{padding:4px 7px}}
@@ -1259,6 +1283,13 @@ export default function Timeline() {
     setPanel({ type: 'gate', phase });
   };
 
+  const handleKeyActivate = (event, callback) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      callback();
+    }
+  };
+
   return (
     <div className="timeline-page">
       <style>{PANEL_STYLE}</style>
@@ -1277,8 +1308,8 @@ export default function Timeline() {
               </button>
             ))}
           </div>
-          <button type="button" className={`tb-btn ${litOn ? 'lit-on' : ''}`.trim()} onClick={toggleLit}>⬤ Litigation</button>
-          <button type="button" className="tb-btn" onClick={scrollToStart}>↤ Start</button>
+          <button type="button" aria-pressed={litOn} className={`tb-btn ${litOn ? 'lit-on' : ''}`.trim()} onClick={toggleLit}>⬤ Litigation</button>
+          <button type="button" className="tb-btn" onClick={scrollToStart} aria-label="Scroll timeline to start">↤ Start</button>
           <Nav />
         </div>
 
@@ -1287,27 +1318,27 @@ export default function Timeline() {
         <div className={`main-layout ${litOn ? 'lit-on' : ''}`.trim()} id="main" style={{ zIndex: 1 }}>
           <div className="rail">
             <div className="rail-header"><span className="rail-header-text">Track</span></div>
-            <div className="rail-track" id="rail-main" onClick={() => focusTrack('main')}>
+            <div className="rail-track" id="rail-main" role="button" tabIndex={0} onClick={() => focusTrack('main')} onKeyDown={(event) => handleKeyActivate(event, () => focusTrack('main'))}>
               <div className="rail-dot" style={{ background: 'var(--c-main)' }} />
               <div className="rail-label" style={{ color: 'var(--c-main)' }}>Main<br />Flow</div>
             </div>
-            <div className="rail-track" id="rail-land" onClick={() => focusTrack('land')}>
+            <div className="rail-track" id="rail-land" role="button" tabIndex={0} onClick={() => focusTrack('land')} onKeyDown={(event) => handleKeyActivate(event, () => focusTrack('land'))}>
               <div className="rail-dot" style={{ background: 'var(--c-land)' }} />
               <div className="rail-label" style={{ color: 'var(--c-land)' }}>Land<br />Track</div>
             </div>
-            <div className="rail-track" id="rail-util" onClick={() => focusTrack('util')}>
+            <div className="rail-track" id="rail-util" role="button" tabIndex={0} onClick={() => focusTrack('util')} onKeyDown={(event) => handleKeyActivate(event, () => focusTrack('util'))}>
               <div className="rail-dot" style={{ background: 'var(--c-util)' }} />
               <div className="rail-label" style={{ color: 'var(--c-util)' }}>Utility<br />Track</div>
             </div>
-            <div className="rail-track" id="rail-reg" onClick={() => focusTrack('reg')}>
+            <div className="rail-track" id="rail-reg" role="button" tabIndex={0} onClick={() => focusTrack('reg')} onKeyDown={(event) => handleKeyActivate(event, () => focusTrack('reg'))}>
               <div className="rail-dot" style={{ background: 'var(--c-reg)' }} />
               <div className="rail-label" style={{ color: 'var(--c-reg)' }}>Regulatory<br />Track</div>
             </div>
-            <div className="rail-track" id="rail-fin" onClick={() => focusTrack('fin')}>
+            <div className="rail-track" id="rail-fin" role="button" tabIndex={0} onClick={() => focusTrack('fin')} onKeyDown={(event) => handleKeyActivate(event, () => focusTrack('fin'))}>
               <div className="rail-dot" style={{ background: 'var(--c-fin)' }} />
               <div className="rail-label" style={{ color: 'var(--c-fin)' }}>Financial<br />Track</div>
             </div>
-            <div className="rail-track" id="rail-lit" onClick={() => focusTrack('lit')}>
+            <div className="rail-track" id="rail-lit" role="button" tabIndex={0} onClick={() => focusTrack('lit')} onKeyDown={(event) => handleKeyActivate(event, () => focusTrack('lit'))}>
               <div className="rail-dot" style={{ background: 'var(--c-lit)' }} />
               <div className="rail-label" style={{ color: 'var(--c-lit)' }}>Litigation<br />Exposure</div>
             </div>
@@ -1345,7 +1376,10 @@ export default function Timeline() {
                             key={`${phase.name}-${track.id}`}
                             className={`cell gate ${!isMainTrack ? 'empty' : ''}`.trim()}
                             style={{ minWidth: `${phaseWidth}px` }}
+                            role={isMainTrack ? 'button' : undefined}
+                            tabIndex={isMainTrack ? 0 : undefined}
                             onClick={isMainTrack ? () => openGatePanel(phase) : undefined}
+                            onKeyDown={isMainTrack ? (event) => handleKeyActivate(event, () => openGatePanel(phase)) : undefined}
                           >
                             {isMainTrack ? (
                               <>
@@ -1367,7 +1401,10 @@ export default function Timeline() {
                           key={`${phase.name}-${track.id}`}
                           className={`cell ${isEmpty ? 'empty' : ''}`.trim()}
                           style={{ minWidth: `${phaseWidth}px`, borderTop: '2px solid', borderTopColor: TRACK_COLORS[track.id] }}
+                          role={isEmpty ? undefined : 'button'}
+                          tabIndex={isEmpty ? undefined : 0}
                           onClick={isEmpty ? undefined : () => openCellPanel(phase, track.id, phaseData)}
+                          onKeyDown={isEmpty ? undefined : (event) => handleKeyActivate(event, () => openCellPanel(phase, track.id, phaseData))}
                         >
                           <div className="lit-stripe" />
                           {!isEmpty && phaseData.litigation?.length > 0 && <div className="lit-badge">⚠ LIT</div>}
@@ -1394,8 +1431,8 @@ export default function Timeline() {
           </div>
         </div>
 
-        <div className={`panel ${panel ? 'open' : ''}`.trim()} id="panel">
-          <button type="button" className="panel-close" id="pc" onClick={closePanel}>✕</button>
+        <div className={`panel ${panel ? 'open' : ''}`.trim()} id="panel" role="dialog" aria-modal="false" aria-hidden={!panel}>
+          <button type="button" className="panel-close" id="pc" onClick={closePanel} aria-label="Close timeline details panel">✕</button>
           <div className="panel-head" id="ph">
             <TimelinePanel panel={panel} />
           </div>
