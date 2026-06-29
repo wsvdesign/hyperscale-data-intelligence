@@ -1,0 +1,479 @@
+<!--
+=============================================================
+  HYPERSCALE DATA CENTER INTELLIGENCE SYSTEM
+  Research Dashboard
+
+  Researched, designed, and built by:
+  NATALIE WALKER
+  Creative Technologist & AI Product Strategist
+  Founder, WASIVI (sole proprietorship)
+  Pursuit Fellow L2 — March 2026 through January 2027
+
+  Tagline: The medium changed. The thinking never did.
+
+  © 2026 Natalie Walker. All rights reserved.
+
+  This file and all associated visualizations, data structures,
+  intelligence maps, and research frameworks were created by
+  Natalie Walker. Unauthorized reproduction, distribution, or
+  removal of attribution is prohibited.
+
+  Repository: hyperscale-data-intelligence
+  Site: hyperdataintelligence.netlify.app
+=============================================================
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="author" content="Natalie Walker">
+<meta name="copyright" content="© 2026 Natalie Walker · WASIVI · All rights reserved">
+<meta name="description" content="Hyperscale Data Center Intelligence System — researched, designed, and built by Natalie Walker, Creative Technologist and AI Product Strategist, WASIVI, Pursuit Fellow L2 2026">
+<meta name="creator" content="Natalie Walker / WASIVI">
+<meta property="og:author" content="Natalie Walker">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyperscale Data Center Services — Industry Landscape Data Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --color-bg:      #07080f;
+  --color-bg-sec:  #0d0f1a;
+  --color-bg-card: #10121e;
+  --color-text:    #dde0f0;
+  --color-text-sec:#8a8eb0;
+  --color-text-ter:#4a4e68;
+  --color-border:  rgba(255,255,255,0.07);
+  --color-border-sec: rgba(255,255,255,0.12);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  /* dimension colors */
+  --c-growth:    #3FBF6A;
+  --c-hiring:    #6c8ebf;
+  --c-data:      #8c6cb8;
+  --c-pain:      #E07B00;
+  --c-opp:       #bf6c6c;
+}
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--color-bg); color: var(--color-text); font-size: 16px; line-height: 1.6; }
+.container { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+.header { margin-bottom: 2rem; border-bottom: 0.5px solid var(--color-border); padding-bottom: 1.5rem; }
+.header h1 { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+.header p { font-size: 14px; color: var(--color-text-sec); }
+.metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px,1fr)); gap: 10px; margin-bottom: 1.5rem; }
+.metric { background: var(--color-bg-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem; }
+.metric-label { font-size: 12px; color: var(--color-text-sec); margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; }
+.metric-sub { font-size: 12px; color: var(--color-text-ter); margin-top: 2px; }
+.tab-bar { display: flex; gap: 6px; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.tab { padding: 6px 14px; font-size: 13px; border: 0.5px solid var(--color-border-sec); border-radius: var(--radius-md); cursor: pointer; background: transparent; color: var(--color-text-sec); transition: all 0.15s; font-family: inherit; }
+.tab.active { background: #6c8ebf; color: #07080f; border-color: #6c8ebf; font-weight:600; }
+.tab:hover:not(.active) { background: var(--color-bg-sec); }
+.section { display: none; }
+.section.active { display: block; }
+.section-label { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-ter); margin-bottom: 0.75rem; }
+.card { background: var(--color-bg-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.25rem; margin-bottom: 1rem; }
+.dim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+@media (max-width: 560px) { .dim-grid { grid-template-columns: 1fr; } }
+.dim-card { background: var(--color-bg-card); border: 0.5px solid var(--color-border); border-radius: var(--radius-lg); padding: 1rem; }
+.dim-card h3 { font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.dim-card p { font-size: 12px; color: var(--color-text-sec); line-height: 1.6; }
+.tension-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+@media (max-width: 560px) { .tension-grid { grid-template-columns: 1fr; } }
+.tension-card { border-radius: var(--radius-md); padding: 1rem; }
+.tension-card.pro { background: rgba(15,110,86,0.15); border: 1px solid rgba(15,110,86,0.3); }
+.tension-card.con { background: rgba(133,79,11,0.15); border: 1px solid rgba(133,79,11,0.3); }
+.tension-card h4 { font-size: 12px; font-weight: 500; margin-bottom: 8px; }
+.tension-card.pro h4 { color: #3FBF6A; }
+.tension-card.con h4 { color: #E07B00; }
+.tension-card ul { padding-left: 14px; }
+.tension-card li { font-size: 12px; margin-bottom: 4px; line-height: 1.5; }
+.tension-card.pro li { color: #7adba8; }
+.tension-card.con li { color: #d4a040; }
+.state-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.state-table th { text-align: left; font-weight: 500; font-size: 12px; color: var(--color-text-sec); padding: 6px 8px; border-bottom: 0.5px solid var(--color-border); }
+.state-table td { padding: 8px 8px; border-bottom: 0.5px solid var(--color-border); }
+.state-table tr:last-child td { border-bottom: none; }
+.state-table tr:hover td { background: rgba(108,142,191,0.08); }
+.bar-bg { background: var(--color-bg-sec); border-radius: 3px; height: 6px; width: 100%; min-width: 80px; }
+.bar-fill { height: 6px; border-radius: 3px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 500; }
+.badge-red { background: rgba(163,45,45,0.2); color: #f08080; border: 1px solid rgba(163,45,45,0.3); }
+.badge-blue { background: rgba(108,142,191,0.2); color: #8ab0e0; border: 1px solid rgba(108,142,191,0.3); }
+.badge-teal { background: rgba(63,191,106,0.15); color: #3FBF6A; border: 1px solid rgba(63,191,106,0.3); }
+.badge-amber { background: rgba(224,123,0,0.15); color: #E07B00; border: 1px solid rgba(224,123,0,0.3); }
+.filter-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+.filter-row label { font-size: 12px; color: var(--color-text-sec); }
+.filter-row select { font-size: 12px; padding: 4px 8px; border-radius: var(--radius-md); background: var(--color-bg); color: var(--color-text); border: 0.5px solid var(--color-border-sec); font-family: inherit; }
+.sort-btn { font-size: 12px; padding: 3px 8px; border: 0.5px solid var(--color-border-sec); border-radius: var(--radius-md); cursor: pointer; background: transparent; color: var(--color-text-sec); font-family: inherit; }
+.sort-btn.active { background: #6c8ebf; color: #07080f; }
+.incentive-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 0.5px solid var(--color-border); }
+.incentive-row:last-child { border-bottom: none; }
+.incentive-icon { font-size: 18px; color: var(--color-text-sec); flex-shrink: 0; margin-top: 1px; }
+.incentive-text h4 { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+.incentive-text p { font-size: 12px; color: var(--color-text-sec); line-height: 1.5; }
+.role-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid var(--color-border); }
+.role-row:last-child { border-bottom: none; }
+.role-name { font-size: 13px; }
+.role-pay { font-size: 13px; font-weight: 500; color: #3FBF6A; white-space: nowrap; margin-left: 12px; }
+.role-note { font-size: 12px; color: var(--color-text-ter); }
+.source-row { font-size: 12px; color: var(--color-text-ter); padding: 6px 0; display: flex; gap: 8px; align-items: baseline; border-bottom: 0.5px solid var(--color-border); }
+.source-row:last-child { border-bottom: none; }
+.source-row a { color: #185FA5; font-size: 12px; }
+.chart-wrap { position: relative; width: 100%; height: 220px; }
+.salary-wrap { position: relative; width: 100%; height: 320px; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<div class="header">
+  <h1>Hyperscale Data Center Services</h1>
+  <p>Industry Landscape + Complete Data Map &nbsp;·&nbsp; Updated with employment, salary, state incentives &amp; community impact</p>
+  <p style="margin-top:8px;font-size:12px;color:var(--color-text-ter)">
+    Research &amp; analysis by <strong style="color:var(--color-text-sec)">Natalie Walker</strong> &nbsp;·&nbsp; WASIVI &nbsp;·&nbsp; Pursuit Cycle 2, 2026
+  </p>
+</div>
+
+<div class="metric-grid">
+  <div class="metric"><div class="metric-label">Revenue growth</div><div class="metric-value">28.9%</div><div class="metric-sub">Highest in shortlist</div></div>
+  <div class="metric"><div class="metric-label">States with incentives</div><div class="metric-value">38</div><div class="metric-sub">of 50 states — NCSL</div></div>
+  <div class="metric"><div class="metric-label">Top market (VA)</div><div class="metric-value">685</div><div class="metric-sub">facilities operating + planned</div></div>
+  <div class="metric"><div class="metric-label">Technician base pay</div><div class="metric-value">$61K</div><div class="metric-sub">avg; $68K total</div></div>
+</div>
+
+<div class="tab-bar">
+  <button class="tab active" data-tab="overview">Overview</button>
+  <button class="tab" data-tab="states">State map</button>
+  <button class="tab" data-tab="matrix">Dataset matrix</button>
+  <button class="tab" data-tab="employment">Employment</button>
+  <button class="tab" data-tab="incentives">Incentives</button>
+  <button class="tab" data-tab="community">Community</button>
+  <button class="tab" data-tab="sources">Sources</button>
+</div>
+
+<!-- OVERVIEW -->
+<div id="tab-overview" class="section active">
+  <p class="section-label">Five research dimensions</p>
+  <div class="dim-grid">
+    <div class="dim-card" style="border-left:3px solid var(--c-growth);background:rgba(63,191,106,0.06)"><h3 style="color:var(--c-growth)"><i class="ti ti-trending-up" aria-hidden="true" style="margin-right:6px"></i>Growth</h3><p>28.9% revenue growth — highest on initial shortlist. AI demand for GPU compute and storage is the primary driver, with Goldman Sachs projecting a 165% increase in power demand by 2030.</p></div>
+    <div class="dim-card" style="border-left:3px solid var(--c-hiring);background:rgba(108,142,191,0.06)"><h3 style="color:var(--c-hiring)"><i class="ti ti-users" aria-hidden="true" style="margin-right:6px"></i>Hiring demand</h3><p>Broad but limited permanent count. Construction, electrical, HVAC, grid, cybersecurity, network, and facility operations roles benefit most. Permanent headcount per facility is small.</p></div>
+    <div class="dim-card" style="border-left:3px solid var(--c-data);background:rgba(140,108,184,0.06)"><h3 style="color:var(--c-data)"><i class="ti ti-database" aria-hidden="true" style="margin-right:6px"></i>Data accessibility</h3><p>Public data exists for energy, emissions, water stress, location, incentives, and labor. Company-level water use, exact workloads, and private energy contracts may be hard to access.</p></div>
+    <div class="dim-card" style="border-left:3px solid var(--c-pain);background:rgba(224,123,0,0.06)"><h3 style="color:var(--c-pain)"><i class="ti ti-alert-triangle" aria-hidden="true" style="margin-right:6px"></i>Pain points</h3><p>Electricity demand, water stress, cooling, grid reliability, land use, noise, diesel backup generators, community opposition, tax incentives, and whether public benefits match public costs.</p></div>
+  </div>
+  <div class="dim-card" style="margin-top:1rem;border-left:3px solid var(--c-opp);background:rgba(191,108,108,0.06)">
+    <h3 style="color:var(--c-opp)"><i class="ti ti-bulb" aria-hidden="true" style="margin-right:6px"></i>Opportunity</h3>
+    <p>An AI Data Center Impact Dashboard to help users compare locations, power demand, water risk, cooling approach, incentives, jobs, tax benefit, and community burden. Core question: <em>What does AI infrastructure cost in electricity, water, land, cooling, incentives, and community impact?</em></p>
+  </div>
+  <div class="tension-grid">
+    <div class="tension-card pro"><h4><i class="ti ti-circle-check" aria-hidden="true" style="margin-right:4px"></i>Public benefits claimed</h4><ul><li>Large capital investment (billions per campus)</li><li>Construction employment + local spending</li><li>Tax base expansion in counties</li><li>Grid + fiber infrastructure upgrades</li><li>Technology economy positioning</li><li>Rural development in low-density areas</li></ul></div>
+    <div class="tension-card con"><h4><i class="ti ti-alert-circle" aria-hidden="true" style="margin-right:4px"></i>Public risks + tradeoffs</h4><ul><li>Power demand strains local utility grids</li><li>Water stress in drought-prone states</li><li>Diesel generator emissions + noise</li><li>Large tax breaks for limited permanent jobs</li><li>Indirect displacement + land pressure</li><li>Infrastructure costs shifted to ratepayers</li></ul></div>
+  </div>
+</div>
+
+<!-- STATES -->
+<div id="tab-states" class="section">
+  <p class="section-label">Top 15 states by total facilities</p>
+  <div class="filter-row">
+    <label>Filter by party:</label>
+    <select id="party-filter" onchange="filterStates()">
+      <option value="all">All states</option>
+      <option value="Republican">Republican-leaning</option>
+      <option value="Democrat">Democrat-leaning</option>
+    </select>
+    <label style="margin-left:8px">Sort:</label>
+    <button class="sort-btn active" id="sort-total" onclick="sortStates('total')">Total</button>
+    <button class="sort-btn" id="sort-planned" onclick="sortStates('planned')">Planned</button>
+    <button class="sort-btn" id="sort-operating" onclick="sortStates('operating')">Operating</button>
+  </div>
+  <div class="card" style="padding:0.75rem 1rem; overflow-x:auto;">
+    <table class="state-table">
+      <thead><tr><th>State</th><th>Total</th><th>Operating</th><th>Planned</th><th>Party</th><th style="min-width:100px">Scale</th><th>Note</th></tr></thead>
+      <tbody id="state-tbody"></tbody>
+    </table>
+  </div>
+  <div class="card"><div class="chart-wrap"><canvas id="stateChart" role="img" aria-label="Bar chart of top 15 states by total data centers — Virginia leads with 685"></canvas></div></div>
+  <p style="font-size:12px;color:var(--color-text-ter);margin-top:0.5rem">Source: Pew Research Center; 2024 presidential result as partisan marker. Industry is bipartisan — 9 Republican + 6 Democrat-leaning states in top 15.</p>
+</div>
+
+<!-- MATRIX -->
+<div id="tab-matrix" class="section">
+  <p class="section-label">Complete dataset matrix</p>
+  <div class="filter-row">
+    <label>Category:</label>
+    <select id="matrix-filter" onchange="filterMatrix()">
+      <option value="all">All categories</option>
+      <option value="environment">Environment</option>
+      <option value="economics">Economics</option>
+      <option value="community">Community</option>
+      <option value="infrastructure">Infrastructure</option>
+    </select>
+  </div>
+  <div id="matrix-cards"></div>
+</div>
+
+<!-- EMPLOYMENT -->
+<div id="tab-employment" class="section">
+  <p class="section-label">Employment + salary landscape</p>
+  <div class="card">
+    <p style="font-size:13px;line-height:1.7;color:var(--color-text-sec);margin-bottom:1rem">Hyperscale data centers are <strong style="color:var(--color-text);font-weight:500">capital-heavy, power-heavy, and land-heavy — but not labor-heavy</strong> after construction. Permanent staffing is typically modest compared with land, electricity, water, and tax incentives involved.</p>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem">
+      <div style="flex:1;min-width:140px;background:#E1F5EE;border-radius:var(--radius-md);padding:0.75rem"><div style="font-size: 12px;font-weight:500;color:#0F6E56;margin-bottom:4px">Construction phase</div><div style="font-size:12px;color:#085041;line-height:1.6">Hundreds–thousands of temporary jobs: electricians, HVAC, concrete crews, welders, fiber installers, power-line workers, security, project managers.</div></div>
+      <div style="flex:1;min-width:140px;background:#E6F1FB;border-radius:var(--radius-md);padding:0.75rem"><div style="font-size: 12px;font-weight:500;color:#185FA5;margin-bottom:4px">Operations phase</div><div style="font-size:12px;color:#0C447C;line-height:1.6">Smaller permanent headcount — highly automated. DC technicians, critical facilities, network support, security, ops managers, vendor contractors.</div></div>
+    </div>
+    <div style="background:#FAEEDA;border-radius:var(--radius-md);padding:0.75rem;margin-bottom:1.25rem"><div style="font-size: 12px;font-weight:500;color:#854F0B;margin-bottom:3px"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Policy tension</div><div style="font-size:12px;color:#633806;line-height:1.6">Dashboard must separate construction vs. permanent jobs and calculate <strong>incentives per permanent job</strong> — not just total announced investment.</div></div>
+    <p class="section-label">Salary by role</p>
+    <div id="role-list"></div>
+  </div>
+  <div class="card"><div class="salary-wrap"><canvas id="salaryChart" role="img" aria-label="Horizontal bar chart of salaries across data center roles"></canvas></div></div>
+</div>
+
+<!-- INCENTIVES -->
+<div id="tab-incentives" class="section">
+  <p class="section-label">State incentives + legal landscape</p>
+  <div class="card" style="margin-bottom:1rem"><p style="font-size:13px;color:var(--color-text-sec);line-height:1.7">38 states offer dedicated data center tax incentives (NCSL). Key public-finance question: <em>Is the state giving away too much tax revenue for too few permanent jobs?</em></p></div>
+  <div class="card" id="incentive-list"></div>
+</div>
+
+<!-- COMMUNITY -->
+<div id="tab-community" class="section">
+  <p class="section-label">Community burden + displacement risk</p>
+  <div class="card">
+    <p style="font-size:13px;color:var(--color-text-sec);line-height:1.7;margin-bottom:1rem">Data centers can create indirect displacement and environmental justice concerns through land pressure, rezoning, utility-rate increases, water competition, noise, diesel emissions, traffic, and public infrastructure costs.</p>
+    <div class="tension-grid">
+      <div class="dim-card"><h3 style="font-size:12px;color:#A32D2D;margin-bottom:6px"><i class="ti ti-map-pin" aria-hidden="true" style="margin-right:4px"></i>Direct displacement risk</h3><p>Land acquisition, rezoning, utility easements, transmission corridors, and road or water infrastructure may affect residents and landowners.</p></div>
+      <div class="dim-card"><h3 style="font-size:12px;color:#A32D2D;margin-bottom:6px"><i class="ti ti-home-off" aria-hidden="true" style="margin-right:4px"></i>Indirect displacement risk</h3><p>Rising land values, higher utility costs, and industrialization of rural or low-cost areas can pressure lower-income communities.</p></div>
+    </div>
+    <div style="margin-top:1rem">
+      <p class="section-label">Environmental justice data to track</p>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:0.5rem">
+        <span class="badge badge-amber">Median income</span><span class="badge badge-amber">Poverty rate</span><span class="badge badge-amber">Race / ethnicity</span><span class="badge badge-amber">Housing cost change</span><span class="badge badge-teal">Water stress</span><span class="badge badge-teal">Noise complaints</span><span class="badge badge-blue">Generator permits</span><span class="badge badge-blue">Public hearing testimony</span>
+      </div>
+    </div>
+    <div style="margin-top:1rem;background:var(--color-bg-sec);border-radius:var(--radius-md);padding:1rem">
+      <p style="font-size:12px;font-weight:500;margin-bottom:6px">Public-benefit test — compare per project:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:12px;color:var(--color-text-sec)">
+        <div>• Tax incentives waived</div><div>• Permanent jobs created</div><div>• Construction jobs created</div><div>• Electricity demand (MW)</div><div>• Water demand (gal/day)</div><div>• Tax revenue retained</div><div>• Community protections</div><div>• Infrastructure funded</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SOURCES -->
+<div id="tab-sources" class="section">
+  <p class="section-label">Source links</p>
+  <div class="card" id="sources-list"></div>
+</div>
+
+</div>
+
+<!-- OWNERSHIP FOOTER — DO NOT REMOVE -->
+<footer style="
+  max-width:900px;margin:0 auto;padding:24px 1.5rem 40px;
+  border-top:0.5px solid var(--color-border);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;margin-top:32px;
+">
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--color-text-ter);letter-spacing:0.08em;text-transform:uppercase;line-height:1.6">
+    © 2026 <strong style="color:var(--color-text-sec)">Natalie Walker</strong> &nbsp;·&nbsp; WASIVI<br>
+    <span style="font-style:italic;text-transform:none;letter-spacing:0">The medium changed. The thinking never did.</span>
+  </div>
+  <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--color-text-ter);letter-spacing:0.06em;text-transform:uppercase;text-align:right">
+    Pursuit Fellow L2 &nbsp;·&nbsp; 2026<br>
+    Hyperscale Data Intelligence
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+// ============================================================
+// OWNERSHIP — DO NOT REMOVE
+// Researched, designed, and built by Natalie Walker
+// Creative Technologist & AI Product Strategist
+// WASIVI · Pursuit Fellow L2 · 2026
+// © 2026 Natalie Walker. All rights reserved.
+// The medium changed. The thinking never did.
+// hyperdataintelligence.netlify.app
+// ============================================================
+const __OWNER__ = {
+  name:    "Natalie Walker",
+  company: "WASIVI",
+  role:    "Creative Technologist & AI Product Strategist",
+  program: "Pursuit Fellow L2, 2026",
+  tagline: "The medium changed. The thinking never did.",
+  site:    "hyperdataintelligence.netlify.app",
+  year:    2026
+};
+
+const stateData = [
+  { state:'Virginia', total:685, operating:398, planned:287, party:'Democrat', note:'Largest market; Northern Virginia/Data Center Alley.' },
+  { state:'Texas', total:466, operating:296, planned:170, party:'Republican', note:'Major growth state with large energy market and land.' },
+  { state:'California', total:331, operating:277, planned:54, party:'Democrat', note:'Strong tech market; higher costs and environmental review.' },
+  { state:'Illinois', total:262, operating:139, planned:123, party:'Democrat', note:'Chicago-area market; incentives under review.' },
+  { state:'Georgia', total:235, operating:94, planned:141, party:'Republican', note:'Fast-growing planned market around Atlanta.' },
+  { state:'Ohio', total:223, operating:166, planned:57, party:'Republican', note:'Growing Midwest market with grid/fiber advantages.' },
+  { state:'Arizona', total:184, operating:98, planned:86, party:'Republican', note:'Growth market; water stress is a major issue.' },
+  { state:'New York', total:154, operating:148, planned:6, party:'Democrat', note:'Existing metro/network-connected market.' },
+  { state:'Oregon', total:142, operating:115, planned:27, party:'Democrat', note:'Hillsboro is a major market.' },
+  { state:'Washington', total:135, operating:124, planned:11, party:'Democrat', note:'Hydropower and tech presence matter.' },
+  { state:'Pennsylvania', total:129, operating:78, planned:51, party:'Republican', note:'Growth market; transmission and siting concerns.' },
+  { state:'Florida', total:128, operating:120, planned:8, party:'Republican', note:'Market tied to energy-load definitions and incentives.' },
+  { state:'North Carolina', total:113, operating:72, planned:41, party:'Republican', note:'Growing Southeast market.' },
+  { state:'Iowa', total:105, operating:64, planned:41, party:'Republican', note:'Rural land and energy access matter.' },
+  { state:'Indiana', total:92, operating:38, planned:54, party:'Republican', note:'Midwest growth potential.' }
+];
+
+const matrixData = [
+  { cat:'infrastructure', category:'Location', icon:'ti-map-pin', specific:'State, county, city, rural/urban; operating vs planned', why:'Shows geographic concentration and expansion', source:'Pew Research; Data Center Map; company reports' },
+  { cat:'environment', category:'Energy demand', icon:'ti-bolt', specific:'MW load, electricity use, utility interconnection requests, grid upgrades', why:'Shows pressure on utilities and cost shifts to ratepayers', source:'EIA; DOE/Lawrence Berkeley Lab; utilities' },
+  { cat:'environment', category:'Power source', icon:'ti-plug', specific:'Gas, coal, nuclear, solar, wind, hydro, batteries, hydrogen, fuel cells', why:'Determines emissions, reliability, and whether the DC is truly clean', source:'EIA; EPA eGRID; utility IRPs' },
+  { cat:'environment', category:'Water risk', icon:'ti-droplet', specific:'Drought, groundwater stress, cooling water use, wastewater reuse', why:'Shows ecosystem and household water impact', source:'NOAA; WRI Aqueduct; EPA; local water agencies' },
+  { cat:'environment', category:'Cooling method', icon:'ti-temperature-snow', specific:'Air, evaporative, direct-to-chip liquid, immersion, closed-loop systems', why:'Cooling determines water use, power efficiency, and environmental impact', source:'Company reports; Uptime Institute' },
+  { cat:'environment', category:'Backup power', icon:'ti-battery-charging', specific:'Diesel generators, batteries, natural gas, hydrogen fuel cells', why:'Backup systems affect emissions, noise, local air quality, and resilience', source:'EPA permits; company filings; DOE' },
+  { cat:'environment', category:'Hydrogen pathway', icon:'ti-atom', specific:'H₂ production source, water for electrolysis, fuel cell capacity', why:'Hydrogen can reduce diesel emissions but may create new water demand', source:'DOE; hydrogen hub records; company pilots' },
+  { cat:'economics', category:'Employment', icon:'ti-users', specific:'Construction jobs, permanent jobs, contractors, wages, local hiring commitments', why:'Shows whether public receives labor benefits for incentives and resource use', source:'BLS; Brookings; local incentive agreements' },
+  { cat:'economics', category:'Salary / job quality', icon:'ti-coin', specific:'Technician pay, network support pay, power-line pay, benefits, training pathways', why:'Shows whether jobs are high-quality and accessible to local workers', source:'BLS; Coursera; workforce boards' },
+  { cat:'economics', category:'Tax incentives', icon:'ti-receipt-tax', specific:'Sales tax exemptions, electricity tax exemptions, property tax abatements', why:'Shows how states attract data centers and what revenue is waived', source:'NCSL; state economic development agencies' },
+  { cat:'community', category:'Community burden', icon:'ti-home', specific:'Noise, traffic, land use, generator emissions, housing pressure, water impacts', why:'Tracks whether communities carry burdens without proportional benefit', source:'Local hearings; 311 complaints; EJ datasets' },
+  { cat:'community', category:'Public benefit', icon:'ti-building-community', specific:'Tax revenue, community benefit agreements, workforce training, infrastructure improvements', why:'Tests whether the deal is fair to the state and local community', source:'Local development agreements; state incentive reports' },
+  { cat:'infrastructure', category:'Political landscape', icon:'ti-flag', specific:'2024 presidential state result; legislature control; local government position', why:'Shows whether development concentrates by political affiliation', source:'FEC; Ballotpedia/NCSL' },
+  { cat:'infrastructure', category:'Legal restrictions', icon:'ti-gavel', specific:'Moratoriums, zoning limits, special use permits, energy guardrails, environmental studies', why:'Shows where development is slowed or conditioned', source:'NCSL; local ordinances; public hearing records' },
+  { cat:'infrastructure', category:'Eminent domain / utility easements', icon:'ti-route', specific:'Transmission-line routes, substation sites, right-of-way maps', why:'Shows whether data center demand triggers public utility land impacts', source:'Public utility commission filings; utility maps' }
+];
+
+const incentives = [
+  { icon:'ti-receipt-tax', name:'Sales and use tax exemption', how:'Reduces taxes on servers, construction materials, cooling equipment, software, and electrical gear', benefit:'Attracts capital investment and construction activity', risk:'Can waive large tax revenue for a project with limited permanent employment' },
+  { icon:'ti-bolt', name:'Electricity tax exemption / low energy tax', how:'Reduces operating cost for a power-intensive facility', benefit:'May attract hyperscale companies that need enormous electricity', risk:'Can shift grid costs or reduce public revenue if not guarded' },
+  { icon:'ti-building-bank', name:'Property tax abatement', how:'Reduces property taxes for a set period', benefit:'Encourages large campuses to locate in the state or county', risk:'Can weaken the local tax benefit used to justify the project' },
+  { icon:'ti-coins', name:'Minimum investment threshold', how:'Requires the company to invest a certain amount to qualify', benefit:'Ensures the incentive goes to large projects', risk:'Investment alone does not prove community benefit' },
+  { icon:'ti-users', name:'Minimum job threshold', how:'Requires a specific number of jobs to qualify', benefit:'Creates accountability for employment promises', risk:'Thresholds may be low compared with subsidy size' },
+  { icon:'ti-hammer', name:'Prevailing / local wage conditions', how:'Requires jobs to pay local average wage or better in some states', benefit:'Improves job quality', risk:'Does not solve low permanent headcount' },
+  { icon:'ti-leaf', name:'Green building / carbon conditions', how:'Requires efficiency, carbon neutrality, or sustainability standards in some states', benefit:'Connects incentives to climate goals', risk:'May be hard to verify without transparent data' },
+  { icon:'ti-clock-bolt', name:'Fast-track permitting', how:'Speeds approvals or designates projects as economic development priorities', benefit:'Reduces uncertainty for companies', risk:'Can limit public review if not balanced with community input' },
+  { icon:'ti-handshake', name:'Community benefit agreement', how:'Can require local hiring, training, infrastructure, or community investments', benefit:'Creates direct public return', risk:'Only useful if enforceable and transparent' }
+];
+
+const roles = [
+  { name:'Data center technician', pay:'$61K base / $68K avg', note:'Core operations role', value:61 },
+  { name:'Computer network support specialist', pay:'$73,340 median', note:'BLS May 2024', value:73 },
+  { name:'Electrical power-line installer / repairer', pay:'$92,560 median', note:'BLS May 2024', value:92 },
+  { name:'Critical facilities / HVAC / electrical technician', pay:'Market-dependent', note:'Higher-paid specialized', value:85 },
+  { name:'Construction trades', pay:'Varies by union/market', note:'Largest job impact', value:70 },
+  { name:'Operations / facilities manager', pay:'Often six-figure', note:'Employer postings', value:100 }
+];
+
+const sources = [
+  { title:'IEA — Energy demand from AI', url:'https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai' },
+  { title:'DOE — Electricity demand from data centers', url:'https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers' },
+  { title:'Lawrence Berkeley Lab — 2024 Data Center Energy Usage Report', url:'https://eta-publications.lbl.gov/publications/2024-united-states-data-center-energy' },
+  { title:'Goldman Sachs — 165% increase in data center power demand by 2030', url:'https://www.goldmansachs.com/insights/articles/ai-to-drive-165-increase-in-data-center-power-demand-by-2030' },
+  { title:'Pew Research Center — Most new data centers in rural areas', url:'https://www.pewresearch.org/short-reads/2026/04/13/most-new-data-centers-in-the-us-are-coming-to-rural-areas/' },
+  { title:'FEC — 2024 Presidential General Election Results', url:'https://www.fec.gov/resources/cms-content/documents/2024presgeresults.pdf' },
+  { title:'NCSL — Subsidizing Servers: How States Compete for Data Centers', url:'https://www.ncsl.org/fiscal/subsidizing-servers-how-states-are-competing-to-attract-data-centers' },
+  { title:'NCSL — Policy Snapshot: Data Center Incentives', url:'https://www.ncsl.org/fiscal/policy-snapshot-data-center-incentives' },
+  { title:'NCSL — Does Your State Offer Data Center Tax Incentives?', url:'https://www.ncsl.org/resources/details/does-your-state-offer-data-center-tax-incentives' },
+  { title:'Brookings — New evidence on data center employment effects', url:'https://www.brookings.edu/articles/new-evidence-on-data-center-employment-effects/' },
+  { title:'BLS — Computer Network Support Specialists', url:'https://www.bls.gov/ooh/computer-and-information-technology/computer-support-specialists.htm' },
+  { title:'BLS — Electrical Power-Line Installers and Repairers', url:'https://www.bls.gov/ooh/installation-maintenance-and-repair/line-installers-and-repairers.htm' },
+  { title:'Coursera — Data Center Technician Salary', url:'https://www.coursera.org/articles/data-center-technician-salary' },
+  { title:'EIA Open Data', url:'https://www.eia.gov/opendata/' },
+  { title:'EPA eGRID', url:'https://www.epa.gov/egrid' },
+  { title:'WRI Aqueduct', url:'https://www.wri.org/aqueduct' },
+  { title:'NOAA Climate Data Online', url:'https://www.ncei.noaa.gov/cdo-web/' },
+  { title:'DOE — Fuel Cells', url:'https://www.energy.gov/eere/fuelcells/fuel-cells' },
+  { title:'Microsoft — Hydrogen fuel cells for data center backup power', url:'https://news.microsoft.com/source/features/sustainability/hydrogen-fuel-cells-could-provide-emission-free-backup-power-at-datacenters-microsoft-says/' }
+];
+
+let currentSort = 'total';
+let currentPartyFilter = 'all';
+let stateChartInst = null;
+let salaryChartInst = null;
+
+window.showTab = function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'states' && !stateChartInst) setTimeout(buildStateChart, 50);
+  if (id === 'employment' && !salaryChartInst) setTimeout(buildSalaryChart, 50);
+}
+
+document.querySelectorAll('.tab[data-tab]').forEach((btn) => {
+  btn.addEventListener('click', () => window.showTab(btn.dataset.tab, btn));
+});
+
+function renderStates() {
+  let data = [...stateData];
+  if (currentPartyFilter !== 'all') data = data.filter(d => d.party === currentPartyFilter);
+  data.sort((a,b) => b[currentSort] - a[currentSort]);
+  const max = Math.max(...data.map(d => d[currentSort]));
+  document.getElementById('state-tbody').innerHTML = data.map(d => {
+    const pct = Math.round((d[currentSort]/max)*100);
+    const bc = d.party==='Republican' ? 'badge-red' : 'badge-blue';
+    const fill = d.party==='Republican' ? '#E24B4A' : '#378ADD';
+    return `<tr><td style="font-weight:500">${d.state}</td><td>${d.total}</td><td>${d.operating}</td><td>${d.planned}</td><td><span class="badge ${bc}">${d.party.slice(0,3)}</span></td><td><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${fill}"></div></div></td><td style="font-size: 12px;color:var(--color-text-ter)">${d.note}</td></tr>`;
+  }).join('');
+}
+
+function filterStates() { currentPartyFilter = document.getElementById('party-filter').value; renderStates(); }
+function sortStates(col) {
+  currentSort = col;
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sort-' + col).classList.add('active');
+  renderStates();
+}
+
+function buildStateChart() {
+  const ctx = document.getElementById('stateChart');
+  if (!ctx) return;
+  stateChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: stateData.map(d => d.state),
+      datasets: [
+        { label:'Operating', data:stateData.map(d=>d.operating), backgroundColor:stateData.map(d=>d.party==='Republican'?'#E24B4A':'#378ADD'), stack:'a' },
+        { label:'Planned', data:stateData.map(d=>d.planned), backgroundColor:stateData.map(d=>d.party==='Republican'?'#F09595':'#85B7EB'), stack:'a' }
+      ]
+    },
+    options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{font:{size:10},maxRotation:45},stacked:true},y:{stacked:true}} }
+  });
+}
+
+function renderMatrix() {
+  const filter = document.getElementById('matrix-filter').value;
+  const data = filter==='all' ? matrixData : matrixData.filter(d=>d.cat===filter);
+  document.getElementById('matrix-cards').innerHTML = data.map(d => `<div class="card" style="margin-bottom:0.75rem"><div style="display:flex;gap:10px;align-items:flex-start"><i class="ti ${d.icon}" aria-hidden="true" style="font-size:20px;color:var(--color-text-sec);flex-shrink:0;margin-top:1px"></i><div style="flex:1"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap"><strong style="font-size:13px;font-weight:500">${d.category}</strong><span class="badge badge-teal">${d.cat}</span></div><p style="font-size:12px;color:var(--color-text-sec);margin:4px 0;line-height:1.5">${d.specific}</p><p style="font-size:12px;margin:4px 0;line-height:1.5"><strong style="font-weight:500">Why it matters:</strong> ${d.why}</p><p style="font-size: 12px;color:var(--color-text-ter);margin-top:4px">Source: ${d.source}</p></div></div></div>`).join('');
+}
+function filterMatrix() { renderMatrix(); }
+
+function renderRoles() {
+  document.getElementById('role-list').innerHTML = roles.map(r=>`<div class="role-row"><div><div class="role-name">${r.name}</div><div class="role-note">${r.note}</div></div><div class="role-pay">${r.pay}</div></div>`).join('');
+}
+
+function buildSalaryChart() {
+  const ctx = document.getElementById('salaryChart');
+  if (!ctx) return;
+  salaryChartInst = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:roles.map(r=>r.name.length>30?r.name.slice(0,30)+'…':r.name), datasets:[{label:'Est. annual salary ($K)',data:roles.map(r=>r.value),backgroundColor:'#1D9E75',borderRadius:4}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{ticks:{callback:v=>'$'+v+'K',font:{size:11}}},y:{ticks:{font:{size:11}}}}}
+  });
+}
+
+function renderIncentives() {
+  document.getElementById('incentive-list').innerHTML = incentives.map(i=>`<div class="incentive-row"><i class="ti ${i.icon} incentive-icon" aria-hidden="true"></i><div class="incentive-text"><h4>${i.name}</h4><p>${i.how}</p><p style="margin-top:4px"><span style="color:#0F6E56;font-weight:500">Benefit:</span> ${i.benefit}</p><p style="margin-top:2px"><span style="color:#854F0B;font-weight:500">Risk:</span> ${i.risk}</p></div></div>`).join('');
+}
+
+function renderSources() {
+  document.getElementById('sources-list').innerHTML = sources.map(s=>`<div class="source-row"><i class="ti ti-external-link" aria-hidden="true" style="color:#185FA5;font-size:14px;flex-shrink:0"></i><div><strong style="font-size:12px">${s.title}</strong><br><a href="${s.url}" target="_blank" rel="noopener">${s.url}</a></div></div>`).join('');
+}
+
+renderStates();
+renderMatrix();
+renderRoles();
+renderIncentives();
+renderSources();
+</script>
+</body>
+</html>
