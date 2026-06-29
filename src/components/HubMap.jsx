@@ -1387,6 +1387,7 @@ export default function HubMap() {
 html[data-theme='light'] .hub-map-root {
   background: #f3f6fb;
   color: #0f172a;
+  --bg: #f3f6fb;
   --hm-text-main: #0f172a;
   --hm-text-sub: #334155;
   --hm-text-muted: #475569;
@@ -1414,7 +1415,7 @@ html[data-theme='light'] #toolbar {
 html[data-theme='light'] .tb-btn {
   border-color: rgba(15,23,42,0.22);
   color: var(--hm-text-sub);
-  background: #ffffff;
+  background: var(--bg);
 }
 html[data-theme='light'] .tb-btn:hover {
   border-color: rgba(15,23,42,0.4);
@@ -1440,7 +1441,7 @@ canvas#map { display: block; width: 100%; height: 100%; }
   overflow: hidden;
 }
 html[data-theme='light'] #panel {
-  background: #ffffff;
+  background: var(--bg);
   border-left: 1px solid rgba(15,23,42,0.14);
 }
 #panel.open { right: 0; }

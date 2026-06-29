@@ -181,6 +181,11 @@ const SCHEMA = [
 
 const makeStyles = (isLight) => ({
   page: {
+    '--bg': isLight ? '#f3f6fb' : '#07080f',
+    '--text': isLight ? '#0f172a' : '#e8e9f0',
+    '--text2': isLight ? '#334155' : '#b3bdd8',
+    '--text3': isLight ? '#64748b' : '#8792b3',
+    '--border': isLight ? 'rgba(15,23,42,0.14)' : 'rgba(255,255,255,0.07)',
     position:'fixed', inset:0,
     display:'flex', flexDirection:'column',
     background: isLight ? '#f3f6fb' : '#07080f',
@@ -194,7 +199,7 @@ const makeStyles = (isLight) => ({
   // LEFT PANEL
   left: {
     width:'280px', flexShrink:0,
-    background: isLight ? '#ffffff' : '#0d1020',
+    background: isLight ? 'var(--bg)' : '#0d1020',
     borderRight: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
     display:'flex', flexDirection:'column',
     overflow:'hidden',
@@ -247,7 +252,7 @@ const makeStyles = (isLight) => ({
   starterScroll: { overflowY:'auto', maxHeight:'200px', padding:'6px 14px 12px' },
   starterBtn: {
     display:'block', width:'100%', textAlign:'left',
-    background: isLight ? '#ffffff' : 'transparent', border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.06)',
+    background: isLight ? 'var(--bg)' : 'transparent', border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.06)',
     borderRadius:'3px', padding:'6px 9px', marginBottom:'4px',
     cursor:'pointer', transition:'all 0.15s',
     fontFamily:"'Space Mono',monospace",
@@ -262,7 +267,7 @@ const makeStyles = (isLight) => ({
   editorWrap: {
     flexShrink:0, padding:'16px 18px 12px',
     borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
-    background: isLight ? '#ffffff' : '#0d1020',
+    background: isLight ? 'var(--bg)' : '#0d1020',
   },
   editorLabel: {
     fontFamily:"'Space Mono',monospace",
@@ -272,7 +277,7 @@ const makeStyles = (isLight) => ({
   },
   textarea: {
     width:'100%', height:'120px',
-    background: isLight ? '#ffffff' : '#07080f',
+    background: isLight ? 'var(--bg)' : '#07080f',
     border: isLight ? '1px solid rgba(15,23,42,0.22)' : '1px solid rgba(255,255,255,0.1)',
     borderRadius:'4px', padding:'10px 12px',
     fontFamily:"'Space Mono',monospace",
@@ -288,7 +293,7 @@ const makeStyles = (isLight) => ({
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
     padding:'7px 16px',
-    background:'#6c8ebf', color: isLight ? '#ffffff' : '#07080f',
+    background:'#6c8ebf', color: isLight ? 'var(--text)' : '#07080f',
     border:'none', borderRadius:'3px',
     cursor:'pointer', transition:'background 0.15s',
   },
@@ -297,7 +302,7 @@ const makeStyles = (isLight) => ({
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
     padding:'7px 14px',
-    background: isLight ? '#ffffff' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
+    background: isLight ? 'var(--bg)' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
     border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.08)',
     borderRadius:'3px', cursor:'pointer',
   },
@@ -328,7 +333,7 @@ const makeStyles = (isLight) => ({
     fontSize:'8px', fontWeight:700,
     letterSpacing:'0.06em', textTransform:'uppercase',
     padding:'3px 9px',
-    background: isLight ? '#ffffff' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
+    background: isLight ? 'var(--bg)' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
     border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.07)',
     borderRadius:'3px', cursor:'pointer',
     transition:'all 0.15s',
@@ -385,7 +390,7 @@ html[data-theme='light'] .data-query-page #toolbar h1 span{color:#64748b}
 .data-query-page .sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
 .data-query-page .sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
 .data-query-page .sn.sn-active{background:rgba(255,255,255,.07);color:#dde0f0;border-color:rgba(255,255,255,.18)}
-html[data-theme='light'] .data-query-page .sn{background:#ffffff;border-color:rgba(15,23,42,.16);color:#334155}
+html[data-theme='light'] .data-query-page .sn{background:var(--bg);border-color:rgba(15,23,42,.16);color:#334155}
 html[data-theme='light'] .data-query-page .sn:hover{border-color:rgba(15,23,42,.4);color:#0f172a}
 html[data-theme='light'] .data-query-page .sn.sn-active{background:#e2e8f0;color:#0f172a;border-color:rgba(15,23,42,.24)}
 @media(max-width:780px){.data-query-page .sn{font-size:7px;padding:3px 7px}}

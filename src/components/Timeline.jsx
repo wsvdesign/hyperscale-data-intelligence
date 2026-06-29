@@ -872,7 +872,7 @@ const PANEL_STYLE = `
 
 html[data-theme='light'] .timeline-page {
   --bg: #f3f6fb;
-  --bg2: #ffffff;
+  --bg2: #E8E6E0;
   --border: rgba(15,23,42,0.14);
   --text: #0f172a;
   --text2: #334155;
@@ -911,7 +911,7 @@ html[data-theme='light'] .toolbar { background: rgba(255,255,255,0.98); }
   background: transparent; color: var(--text2); cursor: pointer; transition: all 0.2s;
 }
 .tb-btn:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
-html[data-theme='light'] .tb-btn { background: #ffffff; border-color: rgba(15,23,42,0.22); }
+html[data-theme='light'] .tb-btn { background: var(--bg); border-color: rgba(15,23,42,0.22); }
 html[data-theme='light'] .tb-btn:hover { border-color: rgba(15,23,42,0.4); }
 .tb-btn.lit-on { border-color: var(--c-lit); color: var(--c-lit); background: rgba(224,64,64,0.08); }
 .track-btns { display: flex; gap: 5px; }
@@ -921,7 +921,7 @@ html[data-theme='light'] .tb-btn:hover { border-color: rgba(15,23,42,0.4); }
   transition: all 0.15s; opacity: 0.5; background: transparent;
 }
 .track-btn.on { opacity: 1; }
-html[data-theme='light'] .track-btn { background: #ffffff; border-color: rgba(15,23,42,0.16) !important; }
+html[data-theme='light'] .track-btn { background: var(--bg); border-color: rgba(15,23,42,0.16) !important; }
 .track-btn.track-main { color: var(--c-main); border-color: rgba(200,208,240,0.18); }
 .track-btn.track-land { color: var(--c-land); border-color: rgba(196,168,79,0.18); }
 .track-btn.track-util { color: var(--c-util); border-color: rgba(140,108,184,0.18); }
@@ -1013,7 +1013,7 @@ html[data-theme='light'] .node-doc { border-color: rgba(15,23,42,0.16); }
   background: #0d1020; border-left: 1px solid var(--border);
   transition: right 0.3s ease; z-index: 250; display: flex; flex-direction: column; overflow: hidden;
 }
-html[data-theme='light'] .panel { background: #ffffff; }
+html[data-theme='light'] .panel { background: var(--bg); }
 .panel.open { right: 0; }
 .panel-head { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); flex-shrink: 0; position: relative; }
 .panel-type { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 6px; }
