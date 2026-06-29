@@ -6,6 +6,7 @@ import Timeline from './components/Timeline';
 import GrowthPressure from './components/GrowthPressure';
 import DataQuery from './components/DataQuery';
 import Home from './components/Home';
+import ResearchDashboard from './components/ResearchDashboard';
 
 export default function App() {
   const [theme, setTheme] = useState(() => {
@@ -44,6 +45,7 @@ export default function App() {
           <Route path="/timeline" element={<Timeline />} />
           <Route path="/growth-pressure" element={<GrowthPressure />} />
           <Route path="/data-query" element={<DataQuery />} />
+          <Route path="/research" element={<ResearchDashboard />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
