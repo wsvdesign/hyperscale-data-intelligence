@@ -14,7 +14,7 @@ export default function Home() {
 }
 html[data-theme='light']{
   --bg:#f3f6fb;--bg2:#ffffff;--bg3:#ffffff;
-  --text:#0f172a;--text2:#334155;--text3:#475569;
+  --text:#2D2B55;--text2:#5A587A;--text3:#8A88AA;
   --border:rgba(15,23,42,0.16);
 }
 html,body{width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
@@ -60,10 +60,10 @@ html[data-theme='light'] .card:hover{border-color:rgba(15,23,42,0.28);background
 .card.c2 .card-title{color:#7cb87c}
 .card.c3 .card-title{color:#c4a84f}
 .card.c4 .card-title{color:#e8c060}
-html[data-theme='light'] .card.c1 .card-title{color:#1e3a8a}
-html[data-theme='light'] .card.c2 .card-title{color:#166534}
-html[data-theme='light'] .card.c3 .card-title{color:#92400e}
-html[data-theme='light'] .card.c4 .card-title{color:#9a3412}
+html[data-theme='light'] .card.c1 .card-title{color:#4a6ea8}
+html[data-theme='light'] .card.c2 .card-title{color:#4a8a5a}
+html[data-theme='light'] .card.c3 .card-title{color:#8B6E1A}
+html[data-theme='light'] .card.c4 .card-title{color:#8B6E1A}
 .card-desc{font-size:12px;color:var(--text2);line-height:1.65}
 .card-arrow{position:absolute;bottom:20px;right:20px;font-family:var(--mono);font-size:11px;color:var(--text3);transition:color 0.2s}
 .card:hover .card-arrow{color:var(--text2)}

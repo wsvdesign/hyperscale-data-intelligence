@@ -10,6 +10,53 @@ body {
 
 html[data-theme='light'] {
   --bg: #EDF1F5;
+  --text: #2D2B55;
+  --text2: #5A587A;
+  --text3: #8A88AA;
+}
+
+:root.light {
+  --bg: #EDF1F5;
+  --c-gold: #7A5C00;
+  --c-amber: #7A5C00;
+  --c-pressure: #7A5C00;
+  --c-gate: #7A5C00;
+  --text: #2D2B55;
+  --text2: #5A587A;
+  --text3: #8A88AA;
+}
+
+html[data-theme='light'] {
+  --c-gold: #7A5C00 !important;
+  --c-amber: #7A5C00 !important;
+  --c-pressure: #7A5C00 !important;
+  --c-gate: #7A5C00 !important;
+}
+
+html[data-theme='light'] .timeline-page {
+  --c-gate: #7A5C00 !important;
+}
+
+html[data-theme='light'] .card.c4::before {
+  background: #7A5C00 !important;
+}
+
+html[data-theme='light'] .card.c4 .card-title {
+  color: #7A5C00 !important;
+}
+
+html[data-theme='light'] .hybrid-map-page .ik[style*="#e8c060"] {
+  color: #7A5C00 !important;
+}
+
+html[data-theme='light'] .tt-state[style*="#e8c060"],
+html[data-theme='light'] .tt-ratio[style*="#e8c060"] {
+  color: #7A5C00 !important;
+}
+
+html[data-theme='light'] .state-label.highlight,
+html[data-theme='light'] .bar-value.highlight {
+  color: #7A5C00 !important;
 }
 
 html[data-theme='light'] body {
