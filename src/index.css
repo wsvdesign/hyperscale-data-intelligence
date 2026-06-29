@@ -8,6 +8,15 @@ body {
   color: #dde0f0;
 }
 
+html[data-theme='light'] {
+  --bg: #EDF1F5;
+}
+
+html[data-theme='light'] body {
+  background: linear-gradient(180deg, #EDF1F5 0%, #F5F5F5 100%);
+  min-height: 100vh;
+}
+
 #root {
   min-height: 100vh;
 }
