@@ -12,7 +12,7 @@ export default async (req) => {
     return new Response(JSON.stringify({ error: "path query param required" }), { status: 400 });
   }
 
-  const upstream = await fetch(`https://api.eia.gov/v2/${path}&api_key=${apiKey}`);
+  const upstream = await fetch(`https://api.eia.gov/v2/${path}${path.includes("?") ? "&" : "?"}api_key=${apiKey}`);
   const data = await upstream.json();
   return new Response(JSON.stringify(data), {
     status: upstream.status,
