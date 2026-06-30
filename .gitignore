@@ -6,3 +6,4 @@ dist/
 .DS_Store
 *.log
 dist.zip
+.DS_Store
