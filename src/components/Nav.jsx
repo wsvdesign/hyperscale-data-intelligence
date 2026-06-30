@@ -12,7 +12,7 @@ const links = [
   { to: '/timeline', icon: '③', label: 'Timeline' },
   { to: '/growth-pressure', icon: '④', label: 'Growth Pressure' },
   { to: '/data-query', icon: '⑤', label: 'Data Query' },
-  { to: '/research', label: 'Research', icon: '⑥', cls: '' },
+  { to: '/research', icon: '⑥', label: 'Research' },
 ];
 
 export default function Nav() {

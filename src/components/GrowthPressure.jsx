@@ -121,16 +121,17 @@ export default function GrowthPressure() {
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#07080f;--bg2:#0d1020;--bg3:#0d1020;
+  --bg:#07080f;--bg3:#0d1020;
   --text:#e8e9f0;--text2:#b3bdd8;--text3:#8792b3;
   --border:rgba(255,255,255,0.07);
   --accent-ga:#e8c060;--accent-high:#6c8ebf;
   --mono:'Space Mono',monospace;--sans:'Inter',-apple-system,sans-serif;
 }
 html[data-theme='light']{
-  --bg:#f3f6fb;--bg2:#ffffff;--bg3:#ffffff;
+  --bg:#f3f6fb;--bg3:#DEDAD2;
   --text:#0f172a;--text2:#334155;--text3:#64748b;
   --border:rgba(15,23,42,0.14);
+  --accent-ga:#7A5C00;
 }
 html,body{width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
 
@@ -242,7 +243,7 @@ html[data-theme='light'] .leg-dash{border-top-color:rgba(15,23,42,0.35)}
 .sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
 .sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
 .sn.sn-active{background:rgba(255,255,255,.07);color:#dde0f0;border-color:rgba(255,255,255,.18)}
-html[data-theme='light'] .sn{background:#ffffff;border-color:rgba(15,23,42,.16);color:#334155}
+html[data-theme='light'] .sn{background:var(--bg);border-color:rgba(15,23,42,.16);color:#334155}
 html[data-theme='light'] .sn:hover{border-color:rgba(15,23,42,.4);color:#0f172a}
 html[data-theme='light'] .sn.sn-active{background:#e2e8f0;color:#0f172a;border-color:rgba(15,23,42,.24)}
 @media(max-width:780px){.sn{font-size:7px;padding:3px 7px}}
@@ -280,7 +281,7 @@ html[data-theme='light'] .sn.sn-active{background:#e2e8f0;color:#0f172a;border-c
           ...tooltipStyles,
         }}
       >
-        <div className="tt-state" style={{ color: tooltip?.state?.ratio >= 1 ? '#e8c060' : isLight ? '#0f172a' : '#e8e9f0' }}>
+        <div className="tt-state" style={{ color: tooltip?.state?.ratio >= 1 ? 'var(--accent-ga)' : isLight ? '#0f172a' : '#e8e9f0' }}>
           {tooltip?.state?.state}
         </div>
         <div className="tt-row">
@@ -299,7 +300,7 @@ html[data-theme='light'] .sn.sn-active{background:#e2e8f0;color:#0f172a;border-c
           <span>Planned share</span>
           <span className="tt-val">{tooltip ? tooltip.state.plannedShare.toFixed(1) + '% of total' : ''}</span>
         </div>
-        <div className="tt-ratio" style={{ color: tooltip?.state?.ratio >= 1 ? '#e8c060' : '#6c8ebf' }}>
+        <div className="tt-ratio" style={{ color: tooltip?.state?.ratio >= 1 ? 'var(--accent-ga)' : '#6c8ebf' }}>
           {tooltip ? `Ratio: ${tooltip.state.ratio.toFixed(2)}` : ''}
         </div>
       </div>

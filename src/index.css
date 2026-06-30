@@ -8,6 +8,36 @@ body {
   color: #dde0f0;
 }
 
+html[data-theme='light'] {
+  --bg: #EDF1F5;
+  --text: #2D2B55;
+  --text2: #5A587A;
+  --text3: #8A88AA;
+  --c-gold: #7A5C00;
+  --c-amber: #7A5C00;
+  --c-pressure: #7A5C00;
+  --c-gate: #7A5C00;
+}
+
+html[data-theme='light'] .timeline-page {
+  --c-gate: #7A5C00 !important;
+}
+
+html[data-theme='light'] .hybrid-map-page .ik[style*="#e8c060"],
+html[data-theme='light'] .hybrid-map-page .ik[style*="rgb(232, 192, 96)"] {
+  color: #7A5C00 !important;
+}
+
+html[data-theme='light'] .state-label.highlight,
+html[data-theme='light'] .bar-value.highlight {
+  color: #7A5C00 !important;
+}
+
+html[data-theme='light'] body {
+  background: linear-gradient(180deg, #EDF1F5 0%, #F5F5F5 100%);
+  min-height: 100vh;
+}
+
 #root {
   min-height: 100vh;
 }
