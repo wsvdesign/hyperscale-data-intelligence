@@ -123,6 +123,28 @@ body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; back
 .source-row a { color: #185FA5; font-size: 12px; }
 .chart-wrap { position: relative; width: 100%; height: 220px; }
 .salary-wrap { position: relative; width: 100%; height: 320px; }
+html[data-theme='light'] {
+  --color-bg:      #f3f6fb;
+  --color-bg-sec:  #E8E6E0;
+  --color-bg-card: #ffffff;
+  --color-text:    #0f172a;
+  --color-text-sec:#334155;
+  --color-text-ter:#64748b;
+  --color-border:  rgba(15,23,42,0.10);
+  --color-border-sec: rgba(15,23,42,0.16);
+}
+html[data-theme='light'] .tension-card.pro { background: rgba(15,110,86,0.08); border-color: rgba(15,110,86,0.25); }
+html[data-theme='light'] .tension-card.con { background: rgba(133,79,11,0.08); border-color: rgba(133,79,11,0.25); }
+html[data-theme='light'] .tension-card.pro h4 { color: #166534; }
+html[data-theme='light'] .tension-card.con h4 { color: #7A5C00; }
+html[data-theme='light'] .tension-card.pro li { color: #166534; }
+html[data-theme='light'] .tension-card.con li { color: #7A5C00; }
+html[data-theme='light'] .badge-red   { background: rgba(163,45,45,0.1);   color: #9b1c1c; border-color: rgba(163,45,45,0.25); }
+html[data-theme='light'] .badge-blue  { background: rgba(108,142,191,0.12); color: #1e3a8a; border-color: rgba(108,142,191,0.3); }
+html[data-theme='light'] .badge-teal  { background: rgba(63,191,106,0.1);  color: #166534; border-color: rgba(63,191,106,0.25); }
+html[data-theme='light'] .badge-amber { background: rgba(224,123,0,0.1);   color: #7A5C00; border-color: rgba(224,123,0,0.25); }
+html[data-theme='light'] .role-pay    { color: #166534; }
+html[data-theme='light'] .tab:hover:not(.active) { background: var(--color-bg-sec); }
 </style>
 </head>
 <body>
@@ -474,6 +496,13 @@ renderMatrix();
 renderRoles();
 renderIncentives();
 renderSources();
+</script>
+<script>
+window.addEventListener('message', (e) => {
+  if (e.data?.type === 'theme') {
+    document.documentElement.setAttribute('data-theme', e.data.theme);
+  }
+});
 </script>
 </body>
 </html>
