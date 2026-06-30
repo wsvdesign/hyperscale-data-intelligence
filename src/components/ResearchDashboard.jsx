@@ -8,13 +8,14 @@ export default function ResearchDashboard() {
 
     const sendTheme = () => {
       const theme = document.documentElement.getAttribute('data-theme') || 'dark'
-      iframe?.contentWindow?.postMessage({ type: 'theme', theme }, '*')
+      iframe?.contentWindow?.postMessage({ type: 'theme', theme }, window.location.origin)
     }
 
     iframe?.addEventListener('load', sendTheme)
 
     const observer = new MutationObserver(sendTheme)
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    sendTheme()
 
     return () => {
       iframe?.removeEventListener('load', sendTheme)

@@ -499,7 +499,10 @@ renderSources();
 </script>
 <script>
 window.addEventListener('message', (e) => {
+  if (e.origin !== window.location.origin) return;
   if (e.data?.type === 'theme') {
+    const VALID = ['light', 'dark'];
+    if (!VALID.includes(e.data.theme)) return;
     document.documentElement.setAttribute('data-theme', e.data.theme);
   }
 });
