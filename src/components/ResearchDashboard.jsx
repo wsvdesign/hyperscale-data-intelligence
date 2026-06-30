@@ -1,27 +1,17 @@
 import React, { useEffect, useRef } from 'react'
 
-export default function ResearchDashboard() {
+export default function ResearchDashboard({ theme }) {
   const iframeRef = useRef(null)
 
   useEffect(() => {
     const iframe = iframeRef.current
-
-    const sendTheme = () => {
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark'
+    const send = () =>
       iframe?.contentWindow?.postMessage({ type: 'theme', theme }, window.location.origin)
-    }
 
-    iframe?.addEventListener('load', sendTheme)
-
-    const observer = new MutationObserver(sendTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    sendTheme()
-
-    return () => {
-      iframe?.removeEventListener('load', sendTheme)
-      observer.disconnect()
-    }
-  }, [])
+    iframe?.addEventListener('load', send)
+    send()
+    return () => iframe?.removeEventListener('load', send)
+  }, [theme])
 
   return (
     <div style={{ position: 'fixed', inset: 0 }}>
