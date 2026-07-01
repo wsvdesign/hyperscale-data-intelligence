@@ -225,6 +225,23 @@ FROM states
 GROUP BY pressure_tier
 ORDER BY avg_ratio DESC;`
   },
+  {
+    label: 'H4 - Incentive-to-jobs ratio',
+    sql: `-- Hypothesis 4 (Andres): Are states getting enough permanent jobs per incentive dollar?
+SELECT state, planned, operating, ROUND(ratio, 2) AS ratio, planned * 50 AS est_permanent_jobs, party FROM states ORDER BY planned DESC;`
+  },
+  {
+    label: 'H5 - Water stress correlation',
+    sql: `-- Hypothesis 5 (Andres): Does water stress influence data center location?
+-- Finding: r = 0.098, water stress is noise in location decisions
+SELECT state, ROUND(ratio, 2) AS growth_ratio, planned, party, CASE WHEN state IN ('Arizona','California','Texas','Colorado') THEN 'HIGH WATER STRESS' WHEN state IN ('Washington','Oregon','Iowa','Pennsylvania') THEN 'LOW WATER STRESS' ELSE 'MODERATE WATER STRESS' END AS water_stress_tier FROM states ORDER BY ratio DESC;`
+  },
+  {
+    label: 'H6 - Virginia plateau',
+    sql: `-- Hypothesis 6 (Andres): Is Virginia plateauing vs Georgia and Indiana?
+-- Finding: ratio lower but absolute pipeline still largest at 287 planned
+SELECT state, operating, planned, operating + planned AS total_facilities, ROUND(ratio, 2) AS ratio, CASE WHEN state = 'Virginia' THEN 'DOMINANT - slowing ratio' WHEN ratio >= 1.0 THEN 'SURGING - fastest relative growth' WHEN ratio >= 0.6 THEN 'GROWING' ELSE 'ESTABLISHED' END AS market_status FROM states WHERE state IN ('Virginia','Georgia','Indiana','Texas','California') ORDER BY planned DESC;`
+  }
 ]
 
 // ── SCHEMA DISPLAY ────────────────────────────────────────────────────────────
@@ -272,19 +289,47 @@ const STATE_DATA = {
 
 const SYSTEM_PROMPT = `You are the research assistant for the Hyperscale Data Center Intelligence System, a public-interest platform mapping hyperscale data center development in the United States.
 
-SCOPE: You only answer questions about Georgia and Indiana. These are the two states with the highest growth pressure in the dataset — Georgia has a planned-to-operating ratio of 1.50, Indiana 1.42. If asked about any other state, say clearly that this tool is focused on Georgia and Indiana specifically, and offer to answer about either of those instead.
+SCOPE: Answer questions about all 15 states in this dataset. Provide full in-depth inquiry for Georgia and Indiana only. For other states, provide statistical context. Never refuse a question.
 
-FRAMEWORK: Ground every answer in this structure where relevant — the ten actors and eight decision layers that govern how a hyperscale data center project moves from concept to operation:
+RESPONSE FORMAT - YOU MUST FOLLOW THIS EXACTLY. Use bold subject headers and bullet points. Structure every answer as a formal research report with these exact sections:
 
-Layers (A–H): A Strategic Intent, B Political & Economic Recruitment, C Land Control, D Utility Dependency, E Regulatory Authorization, F Financial & Contractual Structure, G Public Consequences, H Legal Challenge & Accountability.
+## Overview
+2-3 sentences directly answering the question with the most important finding stated first.
 
-Actors: Developer/Hyperscaler (A), State Government (B), Local Government (E), Landowners/Community (C), Electric Utility/Grid (D), Water & Sewer (D), Environmental Regulators (E), Financial Institutions (F), Contractors/Infrastructure (D), Courts & Admin Review (H).
+## Key Actors and Decision Layers
+- List which of the ten actors are most relevant and explain each one role in one sentence
+- Developer/Hyperscaler controls site selection and NDA negotiations at Layer A
+- State Government manages incentive packages at Layer B
+- Local Government controls zoning permits and public hearings at Layer E
+- Electric Utility controls grid interconnection capacity at Layer D
+- Courts and PSC handle all legal challenges at Layer H
 
-TOOLS: Use web search for anything current or specific — construction wages, named developers, permit status, town hall schedules, recent news. Always cite what you find. Do not guess or estimate numbers you have not found a real source for.
+## Current Status and Timeline
+- Cover publicly known permit status utility interconnection filings and legislative activity
+- Cite the source for every specific fact
+- If a fact is unknown say so and explain exactly where to search for it
 
-TONE: Plain language for a general audience — community advocates and local officials, not just researchers. Be direct and concrete. When you don't know something or can't find it, say so rather than filling the gap.
+## Community and Policy Impact
+- Property tax implications for the county and school district
+- Displacement and land acquisition risk using shell LLC patterns
+- Ratepayer cost shifts from grid infrastructure upgrades
+- Water stress and consumption projections
+- Employment reality: average incentive cost is $166K per permanent job against $61K median salary
 
-OUTPUT: After your answer, include a short "Helpful resources" section listing real links you found — government dockets, news coverage, meeting calendars, anything genuinely relevant. Only include links you actually retrieved, never invented ones. Format resources as a JSON block at the end of your response like this:
+## What To Do Next
+- Specific agency to contact with the agency name and what to request
+- Which database to search: Good Jobs First, FERC queue, SEC EDGAR, state PSC docket
+- Which document to FOIA and from which county or state office
+- Whether a public comment period is currently open and how to submit
+
+## Helpful Resources
+List every real link retrieved through web search with source name and URL.
+
+SOURCES TO ALWAYS SEARCH: Georgia General Assembly at legis.ga.gov, Indiana General Assembly at iga.in.gov, state Public Service Commission dockets, FERC interconnection queue at ferc.gov, PJM and MISO capacity requests, state circuit court filings, Good Jobs First at goodjobsfirst.org, SEC EDGAR for hyperscaler 10-K filings, county assessor and recorder databases, Secretary of State LLC registration search, city and county council meeting minutes, planning commission hearing records, zoning board decisions, state lobbying registration databases, Data Center Dynamics at datacenterdynamics.com.
+
+TONE: Authoritative specific and actionable. Every bullet point must contain a real specific usable piece of information.
+
+END every response with:
 RESOURCES_JSON:[{"title":"...","url":"..."},{"title":"...","url":"..."}]`
 
 // ── STYLES ────────────────────────────────────────────────────────────────────
@@ -748,6 +793,16 @@ export default function DataQuery() {
     }
   }
 
+
+  function renderMarkdown(text) {
+    return text.split('\\n').map((line) => {
+      if (line.startsWith('## ')) return '<h3 style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin:14px 0 6px">' + line.slice(3) + '</h3>'
+      if (line.startsWith('- ')) return '<div style="display:flex;gap:8px;margin-bottom:4px"><span style="color:#C8A020;flex-shrink:0">&mdash;</span><span>' + line.slice(2) + '</span></div>'
+      if (line.trim() === '') return '<div style="height:6px"></div>'
+      return '<p style="margin-bottom:6px">' + line + '</p>'
+    }).join('')
+  }
+
   // ── RENDER ─────────────────────────────────────────────────────────────────
   const stateData = STATE_DATA[selectedState]
 
@@ -799,7 +854,9 @@ export default function DataQuery() {
               style={S.hypSelect}
               onChange={e => {
                 const q = HYPOTHESIS_QUERIES.find(h => h.label === e.target.value)
-                if (q) { setSql(q.sql); setResults(null); setError(null); setActiveTab('sql') }
+                if (q) { setSql(q.sql); setResults(null); setError(null); setActiveTab('sql')
+                  setTimeout(() => runQuery(), 50)
+                }
               }}
               defaultValue=""
             >
@@ -822,6 +879,7 @@ export default function DataQuery() {
                   setError(null)
                   setActiveTab('sql')
                   textareaRef.current?.focus()
+                  setTimeout(() => runQuery(), 50)
                 }}
               >
                 {q.label}
@@ -930,8 +988,11 @@ export default function DataQuery() {
                   value={selectedState}
                   onChange={e => { setSelectedState(e.target.value); setAnswer(null); setResources([]) }}
                 >
-                  <option>Georgia</option>
-                  <option>Indiana</option>
+                  {['Arizona','California','Florida','Georgia','Illinois','Indiana','Iowa','New York','North Carolina','Ohio','Oregon','Pennsylvania','Texas','Virginia','Washington'].map(s => (
+                    <option key={s} value={s}>
+                      {['Georgia','Indiana'].includes(s) ? String.fromCharCode(9733)+' '+s : s}
+                    </option>
+                  ))}
                 </select>
                 <span style={S.badge}>Full inquiry available</span>
               </div>
@@ -990,7 +1051,7 @@ export default function DataQuery() {
                   {asking ? (
                     <div style={{ ...S.answerText, color:'var(--text4)' }}>Searching and reasoning…</div>
                   ) : (
-                    <div style={S.answerText}>{answer}</div>
+                    <div style={S.answerText} dangerouslySetInnerHTML={{__html: renderMarkdown(answer)}} />
                   )}
                   {resources.length > 0 && (
                     <div style={S.resourcesDivider}>
