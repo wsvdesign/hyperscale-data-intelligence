@@ -45,7 +45,7 @@ export default function App() {
           <Route path="/timeline" element={<Timeline />} />
           <Route path="/growth-pressure" element={<GrowthPressure />} />
           <Route path="/data-query" element={<DataQuery />} />
-          <Route path="/research" element={<ResearchDashboard />} />
+          <Route path="/research" element={<ResearchDashboard theme={theme} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
