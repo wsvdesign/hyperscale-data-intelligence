@@ -755,8 +755,10 @@ export default function DataQuery() {
     setResources([])
     setAskError(null)
 
-    const stateInfo = STATE_DATA[selectedState]
-    const contextMsg = `State: ${selectedState}. Operating: ${stateInfo.operating}. Planned: ${stateInfo.planned}. Planned-to-operating ratio: ${stateInfo.ratio} (highest pressure in dataset). Question: ${question}`
+    const stateRecord = STATES.find(s => s.state === selectedState)
+    const contextMsg = stateRecord
+      ? `State: ${selectedState}. Operating: ${stateRecord.operating}. Planned: ${stateRecord.planned}. Ratio: ${stateRecord.ratio.toFixed(2)}. Party: ${stateRecord.party}. Question: ${question}`
+      : `Scope: All U.S. states in dataset. Question: ${question}`
 
     try {
       const response = await fetch('/.netlify/functions/anthropic', {
@@ -985,12 +987,13 @@ export default function DataQuery() {
 
               {/* State selector */}
               <div style={S.stateRow}>
-                <span style={S.stateLbl}>State</span>
+                <span style={S.stateLbl}>{selectedState === 'All States' ? 'Scope' : 'State'}</span>
                 <select
                   style={S.stateSelect}
                   value={selectedState}
                   onChange={e => { setSelectedState(e.target.value); setAnswer(null); setResources([]) }}
                 >
+                  <option value="All States">All States</option>
                   {['Arizona','California','Florida','Georgia','Illinois','Indiana','Iowa','New York','North Carolina','Ohio','Oregon','Pennsylvania','Texas','Virginia','Washington'].map(s => (
                     <option key={s} value={s}>
                       {['Georgia','Indiana'].includes(s) ? String.fromCharCode(9733)+' '+s : s}
@@ -1031,7 +1034,7 @@ export default function DataQuery() {
                     value={question}
                     onChange={e => setQuestion(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') askClaude() }}
-                    placeholder="How long does a planned facility take from concept to completion?"
+                    {...{placeholder: selectedState === 'All States' ? 'Ask about U.S. hyperscale data center development across all states...' : 'How long does a planned facility take from concept to completion?'}}
                   />
                   <button type="button" style={S.askBtn} onClick={askClaude} disabled={asking}>
                     {asking ? 'Asking…' : 'Ask'}
