@@ -654,6 +654,7 @@ export default function DataQuery() {
   const [answer,        setAnswer]        = useState(null)
   const [resources,     setResources]     = useState([])
   const [asking,        setAsking]        = useState(false)
+  const [askStage,      setAskStage]      = useState('Searching the web...')
   const [askError,      setAskError]      = useState(null)
 
   // ── INIT sql.js ────────────────────────────────────────────────────────────
@@ -733,7 +734,54 @@ export default function DataQuery() {
 
   // ── PRINT ──────────────────────────────────────────────────────────────────
   function handlePrint() {
-    window.print()
+    const script = document.createElement('script')
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
+    script.onload = () => {
+      const { jsPDF } = window.jspdf
+      const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+      const W = doc.internal.pageSize.getWidth()
+      let y = 20
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(14)
+      doc.setTextColor(30, 30, 30)
+      doc.text(`${selectedState} — Hyperscale Data Center Inquiry`, 15, y)
+      y += 8
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(9)
+      doc.setTextColor(80, 80, 80)
+      doc.text(`Question: ${question}`, 15, y, { maxWidth: W - 30 })
+      y += 12
+      const lines = (answer || '').split('\n')
+      lines.forEach(line => {
+        if (y > 270) { doc.addPage(); y = 20 }
+        if (line.startsWith('## ')) {
+          doc.setFont('helvetica', 'bold')
+          doc.setFontSize(10)
+          doc.setTextColor(30, 30, 30)
+          doc.text(line.slice(3).toUpperCase(), 15, y)
+          y += 6
+        } else if (line.startsWith('- ')) {
+          doc.setFont('helvetica', 'normal')
+          doc.setFontSize(9)
+          doc.setTextColor(60, 60, 60)
+          const wrapped = doc.splitTextToSize('— ' + line.slice(2), W - 30)
+          doc.text(wrapped, 15, y)
+          y += wrapped.length * 5
+        } else if (line.trim()) {
+          doc.setFont('helvetica', 'normal')
+          doc.setFontSize(9)
+          doc.setTextColor(60, 60, 60)
+          const wrapped = doc.splitTextToSize(line, W - 30)
+          doc.text(wrapped, 15, y)
+          y += wrapped.length * 5
+        } else {
+          y += 3
+        }
+      })
+      const date = new Date().toISOString().slice(0, 10)
+      doc.save(`${selectedState}_DataCenter_Report_${date}.pdf`)
+    }
+    document.head.appendChild(script)
   }
 
   // ── NUMERIC COLUMN DETECTION ───────────────────────────────────────────────
@@ -755,6 +803,12 @@ export default function DataQuery() {
     setAnswer(null)
     setResources([])
     setAskError(null)
+    setAskStage('Searching the web...')
+    setTimeout(() => setAskStage('Reading sources...'), 8000)
+    setTimeout(() => setAskStage('Writing your report...'), 16000)
+    setAskStage('Searching the web...')
+    setTimeout(() => setAskStage('Reading sources...'), 8000)
+    setTimeout(() => setAskStage('Writing your report...'), 16000)
 
     const stateRecord = STATES.find(s => s.state === selectedState)
     const contextMsg = stateRecord
@@ -796,6 +850,8 @@ export default function DataQuery() {
       setAskError('Could not get a response. Please try again.')
     } finally {
       setAsking(false)
+      setAskStage('Searching the web...')
+      setAskStage('Searching the web...')
     }
   }
 
@@ -1061,7 +1117,7 @@ export default function DataQuery() {
                     )}
                   </div>
                   {asking ? (
-                    <div style={{ ...S.answerText, color:'var(--text4)' }}>Searching the web and building your report… this takes 20–30 seconds.</div>
+                    <div style={{ ...S.answerText, color:'var(--text4)' }}>{askStage}</div>
                   ) : (
                     <div style={S.answerText} dangerouslySetInnerHTML={{__html: renderMarkdown(answer)}} />
                   )}
