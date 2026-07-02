@@ -1070,10 +1070,10 @@ export default function DataQuery() {
                       <span style={S.lbl}>Helpful resources</span>
                       <span style={S.resourceNote}>Links generated live by web search</span>
                       {resources.map((r, i) => (
-                        <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={S.resourceLink}>
+                        (r.url && (r.url.startsWith('http://') || r.url.startsWith('https://'))) ? <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={S.resourceLink}>
                           <i className="ti ti-external-link" aria-hidden="true" />
                           {r.title}
-                        </a>
+                        </a> : null
                       ))}
                     </div>
                   )}

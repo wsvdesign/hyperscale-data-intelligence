@@ -20,7 +20,8 @@ export default async (req) => {
   }
   const payload = { model: "claude-sonnet-4-6", max_tokens, messages };
   if (system) payload.system = system;
-  if (tools && Array.isArray(tools)) payload.tools = tools;
+  // Server-side allowlist: only web_search permitted
+  payload.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
   const upstream = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
