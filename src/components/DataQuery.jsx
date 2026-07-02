@@ -2,7 +2,9 @@
  * DataQuery.jsx
  * Real SQL queries against an in-memory SQLite database (sql.js)
  * Three tables: states, sectors, layers
- * State Inquiry tab: plain-English questions via Anthropic API + web search
+ *
+ * Dependency: npm install sql.js
+ * Vite config note: sql.js uses WebAssembly — see vite.config.js update below
  */
 
 import { useState, useEffect, useRef } from 'react'
@@ -55,7 +57,7 @@ const LAYERS = [
 
 // ── STARTER QUERIES ───────────────────────────────────────────────────────────
 
-const HYPOTHESIS_QUERIES = [
+const STARTER_QUERIES = [
   {
     label: 'H1 — Virginia concentration',
     sql: `-- Hypothesis 1: Is Virginia's planned share disproportionate?
@@ -101,12 +103,8 @@ SELECT
 FROM states
 ORDER BY ratio DESC;`
   },
-]
-
-const STARTER_QUERIES = [
   {
     label: 'States above 1.0 ratio',
-    color: '#6c8ebf',
     sql: `SELECT state, operating, planned, ratio, party
 FROM states
 WHERE ratio >= 1.0
@@ -114,7 +112,6 @@ ORDER BY ratio DESC;`
   },
   {
     label: 'All states ranked',
-    color: '#7cb87c',
     sql: `SELECT
   ROW_NUMBER() OVER (ORDER BY ratio DESC) AS rank,
   state,
@@ -127,14 +124,12 @@ ORDER BY ratio DESC;`
   },
   {
     label: 'Layer actor count',
-    color: '#7a5aaa',
     sql: `SELECT id, label, actor_count
 FROM layers
 ORDER BY id;`
   },
   {
     label: 'Sectors by layer',
-    color: '#b8a048',
     sql: `SELECT
   s.id,
   s.label,
@@ -144,104 +139,6 @@ FROM sectors s
 JOIN layers l ON s.primary_layer = l.id
 ORDER BY s.primary_layer, s.id;`
   },
-  {
-    label: 'Employment impact by state',
-    color: '#4aaa70',
-    sql: `-- Employment pressure: planned facilities × avg construction jobs estimate
-SELECT
-  state,
-  planned,
-  operating,
-  ROUND(ratio, 2) AS ratio,
-  planned * 500 AS est_construction_jobs,
-  planned * 50  AS est_permanent_jobs,
-  party
-FROM states
-ORDER BY planned DESC;`
-  },
-  {
-    label: 'Water stress / high-growth',
-    color: '#4fa8b8',
-    sql: `-- High-ratio states with Republican lean (lower regulatory friction)
-SELECT
-  state,
-  ROUND(ratio, 2) AS ratio,
-  planned,
-  operating,
-  party
-FROM states
-WHERE ratio >= 0.6
-ORDER BY ratio DESC;`
-  },
-  {
-    label: 'Community displacement risk',
-    color: '#b87c6c',
-    sql: `-- States where planned exceeds operating by largest absolute margin
-SELECT
-  state,
-  planned,
-  operating,
-  planned - operating AS net_new_planned,
-  ROUND(ratio, 2) AS ratio,
-  CASE
-    WHEN planned - operating > 100 THEN 'EXTREME'
-    WHEN planned - operating > 50  THEN 'HIGH'
-    WHEN planned - operating > 20  THEN 'MODERATE'
-    ELSE 'LOW'
-  END AS displacement_risk
-FROM states
-ORDER BY net_new_planned DESC;`
-  },
-  {
-    label: 'Sector power concentration',
-    color: '#aa4a80',
-    sql: `-- Which decision layers have the most actors (bottleneck risk)
-SELECT
-  l.id,
-  l.label,
-  l.actor_count,
-  CASE
-    WHEN l.actor_count >= 3 THEN 'HIGH CONCENTRATION'
-    WHEN l.actor_count = 2  THEN 'MODERATE'
-    ELSE 'SINGLE ACTOR'
-  END AS power_structure
-FROM layers l
-ORDER BY l.actor_count DESC, l.id;`
-  },
-  {
-    label: 'Pressure tier distribution',
-    color: '#aa5050',
-    sql: `-- Count of states in each pressure tier
-SELECT
-  CASE
-    WHEN ratio >= 1.0 THEN 'HIGH PRESSURE'
-    WHEN ratio >= 0.6 THEN 'MODERATE'
-    WHEN ratio >= 0.3 THEN 'LOW'
-    ELSE 'ESTABLISHED'
-  END AS pressure_tier,
-  COUNT(*) AS state_count,
-  ROUND(AVG(ratio), 3) AS avg_ratio
-FROM states
-GROUP BY pressure_tier
-ORDER BY avg_ratio DESC;`
-  },
-  {
-    label: 'H4 - Incentive-to-jobs ratio',
-    sql: `-- Hypothesis 4 (Andres): Are states getting enough permanent jobs per incentive dollar?
-SELECT state, planned, operating, ROUND(ratio, 2) AS ratio, planned * 50 AS est_permanent_jobs, party FROM states ORDER BY planned DESC;`
-  },
-  {
-    label: 'H5 - Water stress correlation',
-    sql: `-- Hypothesis 5 (Andres): Does water stress influence data center location?
--- Finding: r = 0.098, water stress is noise in location decisions
-SELECT state, ROUND(ratio, 2) AS growth_ratio, planned, party, CASE WHEN state IN ('Arizona','California','Texas','Colorado') THEN 'HIGH WATER STRESS' WHEN state IN ('Washington','Oregon','Iowa','Pennsylvania') THEN 'LOW WATER STRESS' ELSE 'MODERATE WATER STRESS' END AS water_stress_tier FROM states ORDER BY ratio DESC;`
-  },
-  {
-    label: 'H6 - Virginia plateau',
-    sql: `-- Hypothesis 6 (Andres): Is Virginia plateauing vs Georgia and Indiana?
--- Finding: ratio lower but absolute pipeline still largest at 287 planned
-SELECT state, operating, planned, operating + planned AS total_facilities, ROUND(ratio, 2) AS ratio, CASE WHEN state = 'Virginia' THEN 'DOMINANT - slowing ratio' WHEN ratio >= 1.0 THEN 'SURGING - fastest relative growth' WHEN ratio >= 0.6 THEN 'GROWING' ELSE 'ESTABLISHED' END AS market_status FROM states WHERE state IN ('Virginia','Georgia','Indiana','Texas','California') ORDER BY planned DESC;`
-  }
 ]
 
 // ── SCHEMA DISPLAY ────────────────────────────────────────────────────────────
@@ -280,59 +177,7 @@ const SCHEMA = [
   },
 ]
 
-// ── STATE INQUIRY DATA ────────────────────────────────────────────────────────
-
-const STATE_DATA = {
-  Georgia: { operating: 94, planned: 141, ratio: '1.50' },
-  Indiana: { operating: 38, planned: 54,  ratio: '1.42' },
-}
-
-const SYSTEM_PROMPT = `You are the research assistant for the Hyperscale Data Center Intelligence System, a public-interest platform mapping hyperscale data center development in the United States.
-
-SCOPE: Answer questions about all 15 states in this dataset. Provide full in-depth inquiry for Georgia and Indiana only. For other states, provide statistical context. Never refuse a question.
-
-RESPONSE FORMAT - YOU MUST FOLLOW THIS EXACTLY. Use bold subject headers and bullet points. Structure every answer as a formal research report with these exact sections:
-
-## Overview
-2-3 sentences directly answering the question with the most important finding stated first.
-
-## Key Actors and Decision Layers
-- List which of the ten actors are most relevant and explain each one role in one sentence
-- Developer/Hyperscaler controls site selection and NDA negotiations at Layer A
-- State Government manages incentive packages at Layer B
-- Local Government controls zoning permits and public hearings at Layer E
-- Electric Utility controls grid interconnection capacity at Layer D
-- Courts and PSC handle all legal challenges at Layer H
-
-## Current Status and Timeline
-- Cover publicly known permit status utility interconnection filings and legislative activity
-- Cite the source for every specific fact
-- If a fact is unknown say so and explain exactly where to search for it
-
-## Community and Policy Impact
-- Property tax implications for the county and school district
-- Displacement and land acquisition risk using shell LLC patterns
-- Ratepayer cost shifts from grid infrastructure upgrades
-- Water stress and consumption projections
-- Employment reality: average incentive cost is $166K per permanent job against $61K median salary
-
-## What To Do Next
-- Specific agency to contact with the agency name and what to request
-- Which database to search: Good Jobs First, FERC queue, SEC EDGAR, state PSC docket
-- Which document to FOIA and from which county or state office
-- Whether a public comment period is currently open and how to submit
-
-## Helpful Resources
-List every real link retrieved through web search with source name and URL.
-
-SOURCES TO ALWAYS SEARCH: Georgia General Assembly at legis.ga.gov, Indiana General Assembly at iga.in.gov, state Public Service Commission dockets, FERC interconnection queue at ferc.gov, PJM and MISO capacity requests, state circuit court filings, Good Jobs First at goodjobsfirst.org, SEC EDGAR for hyperscaler 10-K filings, county assessor and recorder databases, Secretary of State LLC registration search, city and county council meeting minutes, planning commission hearing records, zoning board decisions, state lobbying registration databases, Data Center Dynamics at datacenterdynamics.com.
-
-TONE: Authoritative specific and actionable. Every bullet point must contain a real specific usable piece of information. NEVER use markdown tables with pipe characters. NEVER use --- dividers. Only use ## headers, ### subheaders, and - bullet points.
-
-END every response with:
-RESOURCES_JSON:[{"title":"...","url":"..."},{"title":"...","url":"..."}]`
-
-// ── STYLES ────────────────────────────────────────────────────────────────────
+// ── STYLES (inline — matches site dark theme exactly) ─────────────────────────
 
 const makeStyles = (isLight) => ({
   page: {
@@ -340,15 +185,7 @@ const makeStyles = (isLight) => ({
     '--text': isLight ? '#0f172a' : '#e8e9f0',
     '--text2': isLight ? '#334155' : '#b3bdd8',
     '--text3': isLight ? '#64748b' : '#8792b3',
-    '--text4': isLight ? '#94a3b8' : '#5a5e78',
     '--border': isLight ? 'rgba(15,23,42,0.14)' : 'rgba(255,255,255,0.07)',
-    '--border2': isLight ? 'rgba(15,23,42,0.22)' : 'rgba(255,255,255,0.12)',
-    '--surface': isLight ? '#e8edf5' : '#0d1020',
-    '--surface2': isLight ? '#dce3ef' : '#050608',
-    '--gold': isLight ? '#7A5C00' : '#C8A020',
-    '--green': isLight ? '#1a7a3c' : '#3FBF6A',
-    '--blue': isLight ? '#3a6a9f' : '#6c8ebf',
-    '--warm': '#faf0d7',
     position:'fixed', inset:0,
     display:'flex', flexDirection:'column',
     background: isLight ? '#f3f6fb' : '#07080f',
@@ -356,101 +193,118 @@ const makeStyles = (isLight) => ({
     fontFamily:"'Inter',-apple-system,sans-serif",
     overflow:'hidden',
   },
-  body: { flex:1, display:'flex', overflow:'hidden' },
+  body: {
+    flex:1, display:'flex', overflow:'hidden',
+  },
+  // LEFT PANEL
   left: {
-    width:'260px', flexShrink:0,
-    background:'var(--surface)',
-    borderRight:'1px solid var(--border)',
-    display:'flex', flexDirection:'column', overflow:'hidden',
+    width:'280px', flexShrink:0,
+    background: isLight ? 'var(--bg)' : '#0d1020',
+    borderRight: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
+    display:'flex', flexDirection:'column',
+    overflow:'hidden',
   },
   leftHead: {
-    padding:'12px 14px 8px',
-    borderBottom:'1px solid var(--border)',
+    padding:'14px 16px 10px',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
     flexShrink:0,
   },
-  lbl: {
+  leftTitle: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
-    letterSpacing:'0.10em', textTransform:'uppercase',
-    color:'var(--text3)', display:'block', marginBottom:'2px',
+    fontSize:'11px', fontWeight:700,
+    letterSpacing:'0.12em', textTransform:'uppercase',
+    color: isLight ? '#64748b' : '#8792b3', marginBottom:'2px', display:'block',
   },
-  lsub: { fontSize:'12px', color:'var(--text3)' },
-  leftScroll: { flex:1, overflowY:'auto', padding:'10px 12px' },
-  schemaTable: { marginBottom:'12px' },
+  leftSub: { fontSize:'11px', color: isLight ? '#334155' : '#b3bdd8' },
+  leftScroll: { flex:1, overflowY:'auto', padding:'12px 14px' },
+  // schema table
+  schemaTable: { marginBottom:'18px' },
   schemaTableName: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.06em', textTransform:'uppercase',
-    marginBottom:'5px', display:'flex', alignItems:'center', gap:'6px',
+    marginBottom:'6px', display:'flex', alignItems:'center', gap:'6px',
   },
   schemaDot: { width:'7px', height:'7px', borderRadius:'50%', flexShrink:0 },
   schemaRow: {
-    display:'flex', gap:'8px', alignItems:'baseline',
-    padding:'3px 0',
-    borderBottom:'1px solid rgba(255,255,255,0.04)',
+    display:'flex', gap:'6px', alignItems:'baseline',
+    padding:'3px 0', borderBottom: isLight ? '1px solid rgba(15,23,42,0.08)' : '1px solid rgba(255,255,255,0.04)',
+    fontSize:'12px',
   },
-  schemaCol: { color:'var(--text3)', minWidth:'80px', flexShrink:0, fontSize:'12px' },
+  schemaCol: { color: isLight ? '#0f172a' : '#e8e9f0', minWidth:'80px', flexShrink:0, fontSize:'13px' },
   schemaType: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', color:'var(--text4)',
+    fontSize:'12px', color: isLight ? '#64748b' : '#8792b3',
   },
-  qsec: {
-    flexShrink:0, padding:'8px 14px 4px',
-    borderTop:'1px solid var(--border)',
+  schemaNoteText: { fontSize:'12px', color: isLight ? '#64748b' : '#8792b3' },
+  // starter queries
+  starterHead: {
+    padding:'10px 14px 6px',
+    borderTop: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
+    flexShrink:0,
   },
-  hypSelect: {
-    width:'100%',
-    background:'var(--surface2)',
-    border:'1px solid rgba(200,160,32,0.2)',
-    color:'var(--text4)',
-    borderRadius:'3px',
-    padding:'5px 8px',
+  starterTitle: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
-    letterSpacing:'0.04em',
-    marginTop:'4px', marginBottom:'8px',
-    cursor:'pointer',
-    appearance:'none', WebkitAppearance:'none',
+    fontSize:'8px', fontWeight:700,
+    letterSpacing:'0.1em', textTransform:'uppercase',
+    color: isLight ? '#64748b' : '#8792b3',
   },
-  qscroll: { overflowY:'auto', maxHeight:'230px', padding:'4px 14px 10px' },
-  right: { flex:1, display:'flex', flexDirection:'column', overflow:'hidden' },
+  starterScroll: { overflowY:'auto', maxHeight:'200px', padding:'6px 14px 12px' },
+  starterBtn: {
+    display:'block', width:'100%', textAlign:'left',
+    background: isLight ? 'var(--bg)' : 'transparent', border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.06)',
+    borderRadius:'3px', padding:'6px 9px', marginBottom:'4px',
+    cursor:'pointer', transition:'all 0.15s',
+    fontFamily:"'Space Mono',monospace",
+    fontSize:'11px', fontWeight:700,
+    letterSpacing:'0.04em', textTransform:'uppercase',
+    color: isLight ? '#334155' : '#5a5e78',
+  },
+  // RIGHT PANEL
+  right: {
+    flex:1, display:'flex', flexDirection:'column', overflow:'hidden',
+  },
   editorWrap: {
-    flexShrink:0, padding:'13px 16px 10px',
-    borderBottom:'1px solid var(--border)',
-    background:'var(--surface)',
+    flexShrink:0, padding:'16px 18px 12px',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
+    background: isLight ? 'var(--bg)' : '#0d1020',
+  },
+  editorLabel: {
+    fontFamily:"'Space Mono',monospace",
+    fontSize:'8px', fontWeight:700,
+    letterSpacing:'0.1em', textTransform:'uppercase',
+    color: isLight ? '#64748b' : '#8792b3', marginBottom:'8px', display:'block',
   },
   textarea: {
-    width:'100%', height:'95px',
-    background:'var(--surface2)',
-    border:'1px solid var(--border2)',
-    borderRadius:'4px', padding:'8px 10px',
+    width:'100%', height:'120px',
+    background: isLight ? 'var(--bg)' : '#07080f',
+    border: isLight ? '1px solid rgba(15,23,42,0.22)' : '1px solid rgba(255,255,255,0.1)',
+    borderRadius:'4px', padding:'10px 12px',
     fontFamily:"'Space Mono',monospace",
-    fontSize:'11px', color:'#faf0d7',
-    resize:'vertical', outline:'none', lineHeight:1.6,
+    fontSize:'12px', color: isLight ? '#0f172a' : '#e8e9f0',
+    resize:'vertical', outline:'none',
+    lineHeight:1.6,
   },
-  btnRow: { display:'flex', gap:'8px', alignItems:'center', marginTop:'8px' },
+  btnRow: {
+    display:'flex', gap:'8px', alignItems:'center', marginTop:'10px',
+  },
   runBtn: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
-    padding:'6px 14px',
-    background:'var(--blue)', color:'var(--surface2)',
-    border:'none', borderRadius:'3px', cursor:'pointer',
+    padding:'7px 16px',
+    background:'#6c8ebf', color: isLight ? 'var(--text)' : '#07080f',
+    border:'none', borderRadius:'3px',
+    cursor:'pointer', transition:'background 0.15s',
   },
   clearBtn: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
-    padding:'6px 12px',
-    background:'transparent', color:'var(--text4)',
-    border:'1px solid var(--border)', borderRadius:'3px', cursor:'pointer',
-  },
-  iconBtn: {
-    background:'transparent',
-    border:'1px solid rgba(63,191,106,0.3)',
-    borderRadius:'3px', padding:'4px 7px',
-    cursor:'pointer', color:'var(--green)',
-    display:'flex', alignItems:'center', fontSize:'14px',
+    padding:'7px 14px',
+    background: isLight ? 'var(--bg)' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
+    border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.08)',
+    borderRadius:'3px', cursor:'pointer',
   },
   errorMsg: {
     marginTop:'8px', padding:'8px 10px',
@@ -460,152 +314,74 @@ const makeStyles = (isLight) => ({
     fontFamily:"'Space Mono',monospace",
     fontSize:'10px', color:'#e04040',
   },
-  resultsWrap: { flex:1, overflow:'auto', padding:'13px 16px' },
-  resultsMeta: { display:'flex', gap:'10px', alignItems:'center', marginBottom:'10px' },
+  // RESULTS
+  resultsWrap: {
+    flex:1, overflow:'auto', padding:'16px 18px',
+  },
+  resultsMeta: {
+    display:'flex', gap:'12px', alignItems:'center',
+    marginBottom:'12px',
+  },
   rowCount: {
     fontFamily:"'Space Mono',monospace",
     fontSize:'9px', fontWeight:700,
     letterSpacing:'0.07em', textTransform:'uppercase',
-    color:'var(--green)', flex:1,
+    color:'#4fb87c',
   },
   copyBtn: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
+    fontSize:'8px', fontWeight:700,
     letterSpacing:'0.06em', textTransform:'uppercase',
-    padding:'4px 9px',
-    background:'transparent', color:'var(--text4)',
-    border:'1px solid var(--border)', borderRadius:'3px', cursor:'pointer',
+    padding:'3px 9px',
+    background: isLight ? 'var(--bg)' : 'transparent', color: isLight ? '#334155' : '#3a3e58',
+    border: isLight ? '1px solid rgba(15,23,42,0.16)' : '1px solid rgba(255,255,255,0.07)',
+    borderRadius:'3px', cursor:'pointer',
+    transition:'all 0.15s',
   },
-  table: { width:'100%', borderCollapse:'collapse' },
+  table: {
+    width:'100%', borderCollapse:'collapse',
+    fontSize:'12px',
+  },
   th: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
+    fontSize:'8.5px', fontWeight:700,
     letterSpacing:'0.06em', textTransform:'uppercase',
-    color:'var(--text4)', textAlign:'left',
-    padding:'6px 8px',
-    borderBottom:'1px solid var(--border)',
+    color: isLight ? '#64748b' : '#3a3e58', textAlign:'left',
+    padding:'7px 10px',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.14)' : '1px solid rgba(255,255,255,0.07)',
+    whiteSpace:'nowrap',
   },
   td: {
-    padding:'6px 8px',
-    borderBottom:'1px solid rgba(255,255,255,0.04)',
-    color:'var(--text2)', fontSize:'13px',
+    padding:'7px 10px',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.08)' : '1px solid rgba(255,255,255,0.04)',
+    color: isLight ? '#0f172a' : '#e8e9f0',
   },
   tdNum: {
-    padding:'6px 8px',
-    borderBottom:'1px solid rgba(255,255,255,0.04)',
-    color:'var(--blue)',
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'12px', textAlign:'right',
+    padding:'7px 10px',
+    borderBottom: isLight ? '1px solid rgba(15,23,42,0.08)' : '1px solid rgba(255,255,255,0.04)',
+    color:'#6c8ebf', fontFamily:"'Space Mono',monospace",
+    fontSize:'11px', textAlign:'right',
   },
-  tdHi: {
-    padding:'6px 8px',
-    borderBottom:'1px solid rgba(255,255,255,0.04)',
-    color:'var(--gold)',
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'12px', textAlign:'right',
+  emptyState: {
+    padding:'48px 0', textAlign:'center',
+    color: isLight ? '#64748b' : '#8792b3',
   },
-  emptyState: { padding:'48px 0', textAlign:'center', color:'var(--text3)' },
   emptyIcon: { fontSize:'28px', marginBottom:'12px', display:'block' },
   emptyText: {
     fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
+    fontSize:'10px', fontWeight:700,
     letterSpacing:'0.08em', textTransform:'uppercase',
-    color:'var(--text4)', marginBottom:'6px',
+    color: isLight ? '#334155' : '#6a6e90',
+    marginBottom:'6px',
   },
-  emptySub: { fontSize:'12px', color:'var(--text4)' },
-  // State inquiry
-  statePanel: { flex:1, display:'flex', flexDirection:'column', overflow:'auto', padding:'14px 16px', gap:'12px' },
-  stateRow: { display:'flex', alignItems:'center', gap:'12px' },
-  stateLbl: {
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
-    letterSpacing:'0.10em', textTransform:'uppercase',
-    color:'var(--text3)', flexShrink:0,
-  },
-  stateSelect: {
-    background:'var(--surface2)',
-    border:'1px solid var(--border2)',
-    color:'var(--text2)',
-    borderRadius:'3px', padding:'7px 12px',
-    fontSize:'12px', minWidth:'148px',
-    appearance:'none', WebkitAppearance:'none',
-  },
-  badge: {
-    fontSize:'10px', color:'var(--green)',
-    background:'rgba(63,191,106,0.08)',
-    border:'1px solid rgba(63,191,106,0.18)',
-    borderRadius:'3px', padding:'3px 8px',
-    fontFamily:"'Space Mono',monospace",
-    letterSpacing:'0.04em',
-  },
-  cards: { display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'8px' },
-  card: {
-    background:'var(--surface2)',
-    borderRadius:'3px', padding:'11px',
-    border:'1px solid var(--border)',
-  },
-  cardHi: {
-    background:'var(--surface2)',
-    borderRadius:'3px', padding:'11px',
-    border:'1px solid rgba(200,160,32,0.2)',
-  },
-  cardLbl: {
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
-    letterSpacing:'0.07em', textTransform:'uppercase',
-    color:'var(--text4)', marginBottom:'6px',
-  },
-  cardVal: { fontSize:'18px', fontWeight:500, color:'var(--text2)' },
-  askBox: {
-    background:'var(--surface2)',
-    borderRadius:'3px', padding:'12px',
-    border:'1px solid var(--border)',
-  },
-  askInput: {
-    flex:1,
-    background:'var(--surface)',
-    border:'1px solid var(--border2)',
-    color:'var(--text2)',
-    borderRadius:'3px', padding:'8px 11px',
-    fontSize:'12px', outline:'none',
-  },
-  askBtn: {
-    background:'rgba(108,142,191,0.1)',
-    border:'1px solid rgba(108,142,191,0.25)',
-    color:'var(--blue)',
-    borderRadius:'3px', padding:'8px 14px',
-    cursor:'pointer',
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'9px', fontWeight:700,
-    letterSpacing:'0.06em', textTransform:'uppercase',
-    whiteSpace:'nowrap',
-  },
-  answerBox: {
-    background:'var(--surface2)',
-    borderRadius:'3px', padding:'13px',
-    border:'1px solid var(--border)',
-  },
-  answerText: { fontSize:'12px', lineHeight:1.75, color:'var(--text3)', marginBottom:'10px' },
-  resourcesDivider: { borderTop:'1px solid var(--border)', paddingTop:'9px' },
-  resourceNote: {
-    fontFamily:"'Space Mono',monospace",
-    fontSize:'8px', color:'var(--text4)',
-    letterSpacing:'0.04em', marginBottom:'8px', display:'block',
-  },
-  resourceLink: {
-    fontSize:'12px', color:'var(--blue)',
-    display:'flex', alignItems:'center', gap:'6px',
-    marginBottom:'5px', cursor:'pointer', opacity:0.75,
-    textDecoration:'none',
-  },
+  emptySub: { fontSize:'12px', color: isLight ? '#475569' : '#5a5e78' },
 })
 
 const DATAQUERY_NAV_CSS = `
-@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css');
 .data-query-page #toolbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:300;background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 18px;gap:10px}
-.data-query-page #toolbar h1{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap;color:#e8e9f0;font-family:'Space Mono',monospace}
+.data-query-page #toolbar h1{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap;color:#e8e9f0}
 .data-query-page #toolbar h1 span{color:#8792b3;font-weight:400}
-html[data-theme='light'] .data-query-page #toolbar{background:rgba(243,246,251,.98);border-bottom:1px solid rgba(15,23,42,.14)}
+html[data-theme='light'] .data-query-page #toolbar{background:rgba(255,255,255,.98);border-bottom:1px solid rgba(15,23,42,.14)}
 html[data-theme='light'] .data-query-page #toolbar h1{color:#0f172a}
 html[data-theme='light'] .data-query-page #toolbar h1 span{color:#64748b}
 .data-query-page .site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
@@ -617,79 +393,102 @@ html[data-theme='light'] .data-query-page #toolbar h1 span{color:#64748b}
 html[data-theme='light'] .data-query-page .sn{background:var(--bg);border-color:rgba(15,23,42,.16);color:#334155}
 html[data-theme='light'] .data-query-page .sn:hover{border-color:rgba(15,23,42,.4);color:#0f172a}
 html[data-theme='light'] .data-query-page .sn.sn-active{background:#e2e8f0;color:#0f172a;border-color:rgba(15,23,42,.24)}
-.dq-tab-bar{display:flex;border-bottom:1px solid rgba(255,255,255,0.07);padding:0 18px;background:#07080f;flex-shrink:0}
-html[data-theme='light'] .dq-tab-bar{background:#f3f6fb;border-bottom:1px solid rgba(15,23,42,0.14)}
-.dq-tab{padding:9px 16px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5a5e78;cursor:pointer;border-bottom:2px solid transparent;transition:color .15s;background:none;border-left:none;border-right:none;border-top:none}
-.dq-tab.active{color:#C8A020;border-bottom:2px solid #C8A020}
-html[data-theme='light'] .dq-tab{color:#94a3b8}
-html[data-theme='light'] .dq-tab.active{color:#7A5C00;border-bottom-color:#7A5C00}
-.qbtn-item{display:block;width:100%;text-align:left;background:transparent;border-radius:3px;padding:5px 8px;margin-bottom:3px;cursor:pointer;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;transition:opacity .15s;border-left:2px solid;border-top:none;border-right:none;border-bottom:none;opacity:1}
-.qbtn-item:hover{opacity:.4}
 @media(max-width:780px){.data-query-page .sn{font-size:7px;padding:3px 7px}}
 @media(max-width:520px){.data-query-page .site-nav .sn-label{display:none}.data-query-page .sn{padding:4px 7px}}
-`
+`;
 
 // ── COMPONENT ─────────────────────────────────────────────────────────────────
 
 export default function DataQuery() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
   const S = makeStyles(isLight)
-
-  // SQL state
   const [db,       setDb]       = useState(null)
   const [dbReady,  setDbReady]  = useState(false)
   const [dbError,  setDbError]  = useState(null)
-  const [sql,      setSql]      = useState(HYPOTHESIS_QUERIES[0].sql)
-  const [results,  setResults]  = useState(null)
+  const [sql,      setSql]      = useState(STARTER_QUERIES[0].sql)
+  const [results,  setResults]  = useState(null)  // { columns, rows }
   const [error,    setError]    = useState(null)
   const [copied,   setCopied]   = useState(false)
   const textareaRef = useRef(null)
 
-  // Tab state
-  const [activeTab, setActiveTab] = useState('sql')
-
-  // State inquiry state
-  const [selectedState, setSelectedState] = useState('Georgia')
-  const [question,      setQuestion]      = useState('')
-  const [answer,        setAnswer]        = useState(null)
-  const [resources,     setResources]     = useState([])
-  const [asking,        setAsking]        = useState(false)
-  const [askError,      setAskError]      = useState(null)
-
   // ── INIT sql.js ────────────────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false
+
     async function initDb() {
       try {
         let SQL
+
         try {
           const initSqlAsm = (await import('sql.js/dist/sql-asm.js')).default
           SQL = await initSqlAsm()
-        } catch {
-          SQL = await initSqlJs({ locateFile: file => `/${file}` })
+        } catch (asmError) {
+          SQL = await initSqlJs({
+            locateFile: file => `/${file}`,
+          })
         }
+
         if (cancelled) return
+
         const database = new SQL.Database()
+
+        // Create tables
         database.run(`
-          CREATE TABLE states (state TEXT PRIMARY KEY, operating INTEGER, planned INTEGER, ratio REAL, party TEXT);
-          CREATE TABLE sectors (id TEXT PRIMARY KEY, label TEXT, color TEXT, primary_layer TEXT);
-          CREATE TABLE layers (id TEXT PRIMARY KEY, label TEXT, color TEXT, actor_count INTEGER);
+          CREATE TABLE states (
+            state     TEXT PRIMARY KEY,
+            operating INTEGER,
+            planned   INTEGER,
+            ratio     REAL,
+            party     TEXT
+          );
+          CREATE TABLE sectors (
+            id            TEXT PRIMARY KEY,
+            label         TEXT,
+            color         TEXT,
+            primary_layer TEXT
+          );
+          CREATE TABLE layers (
+            id          TEXT PRIMARY KEY,
+            label       TEXT,
+            color       TEXT,
+            actor_count INTEGER
+          );
         `)
-        const stateStmt = database.prepare('INSERT INTO states VALUES (?, ?, ?, ?, ?)')
-        STATES.forEach(r => stateStmt.run([r.state, r.operating, r.planned, r.ratio, r.party]))
+
+        // Insert states
+        const stateStmt = database.prepare(
+          'INSERT INTO states VALUES (?, ?, ?, ?, ?)'
+        )
+        STATES.forEach(r => {
+          stateStmt.run([r.state, r.operating, r.planned, r.ratio, r.party])
+        })
         stateStmt.free()
-        const secStmt = database.prepare('INSERT INTO sectors VALUES (?, ?, ?, ?)')
-        SECTORS.forEach(r => secStmt.run([r.id, r.label, r.color, r.primary_layer]))
+
+        // Insert sectors
+        const secStmt = database.prepare(
+          'INSERT INTO sectors VALUES (?, ?, ?, ?)'
+        )
+        SECTORS.forEach(r => {
+          secStmt.run([r.id, r.label, r.color, r.primary_layer])
+        })
         secStmt.free()
-        const layStmt = database.prepare('INSERT INTO layers VALUES (?, ?, ?, ?)')
-        LAYERS.forEach(r => layStmt.run([r.id, r.label, r.color, r.actor_count]))
+
+        // Insert layers
+        const layStmt = database.prepare(
+          'INSERT INTO layers VALUES (?, ?, ?, ?)'
+        )
+        LAYERS.forEach(r => {
+          layStmt.run([r.id, r.label, r.color, r.actor_count])
+        })
         layStmt.free()
+
         setDb(database)
         setDbReady(true)
       } catch (err) {
         if (!cancelled) setDbError(err.message)
       }
     }
+
     initDb()
     return () => { cancelled = true }
   }, [])
@@ -699,6 +498,7 @@ export default function DataQuery() {
     if (!db) return
     setError(null)
     setResults(null)
+
     try {
       const res = db.exec(sql.trim())
       if (!res || res.length === 0) {
@@ -712,6 +512,7 @@ export default function DataQuery() {
     }
   }
 
+  // Run on Cmd+Enter / Ctrl+Enter
   function handleKeyDown(e) {
     if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
       e.preventDefault()
@@ -723,17 +524,12 @@ export default function DataQuery() {
   function copyCSV() {
     if (!results || !results.columns.length) return
     const header = results.columns.join(',')
-    const rows = results.rows.map(r =>
+    const rows   = results.rows.map(r =>
       r.map(v => (typeof v === 'string' && v.includes(',') ? `"${v}"` : v)).join(',')
     )
     navigator.clipboard.writeText([header, ...rows].join('\n'))
     setCopied(true)
     setTimeout(() => setCopied(false), 1800)
-  }
-
-  // ── PRINT ──────────────────────────────────────────────────────────────────
-  function handlePrint() {
-    window.print()
   }
 
   // ── NUMERIC COLUMN DETECTION ───────────────────────────────────────────────
@@ -744,101 +540,32 @@ export default function DataQuery() {
     })
   }
 
-  function isHighPressure(col, val) {
-    return col === 'ratio' && typeof val === 'number' && val >= 1.0
-  }
-
-  // ── ASK CLAUDE ─────────────────────────────────────────────────────────────
-  async function askClaude() {
-    if (!question.trim()) return
-    setAsking(true)
-    setAnswer(null)
-    setResources([])
-    setAskError(null)
-
-    const stateRecord = STATES.find(s => s.state === selectedState)
-    const contextMsg = stateRecord
-      ? `State: ${selectedState}. Operating: ${stateRecord.operating}. Planned: ${stateRecord.planned}. Ratio: ${stateRecord.ratio.toFixed(2)}. Party: ${stateRecord.party}. Question: ${question}`
-      : `Scope: All U.S. states in dataset. Question: ${question}`
-
-    try {
-      const response = await fetch('/.netlify/functions/anthropic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: contextMsg }],
-          max_tokens: 2000,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        }),
-      })
-      const data = await response.json()
-      const textBlocks = (data.content || [])
-        .filter(b => b.type === 'text' && typeof b.text === 'string')
-        .map(b => b.text.trim())
-        .filter(Boolean)
-      if (!textBlocks.length) throw new Error('No response from API')
-
-      let rawText = textBlocks.join('\n\n')
-      let parsedResources = []
-
-      const jsonMatch = rawText.match(/RESOURCES_JSON:\[.*?\]/s)
-      if (jsonMatch) {
-        try {
-          parsedResources = JSON.parse(jsonMatch[0].replace('RESOURCES_JSON:', ''))
-        } catch {}
-        rawText = rawText.replace(/RESOURCES_JSON:\[.*?\]/s, '').trim()
-      }
-
-      setAnswer(rawText)
-      setResources(parsedResources)
-    } catch (err) {
-      setAskError('Could not get a response. Please try again.')
-    } finally {
-      setAsking(false)
-    }
-  }
-
-
-  function renderMarkdown(text) {
-    return text.split('\n').map((line) => {
-      if (line.startsWith('# ') && !line.startsWith('## ')) return '<h2 style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:var(--text);margin:0 0 10px">' + line.slice(2) + '</h2>'
-      if (line.startsWith('## ')) return '<h3 style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.07)">' + line.slice(3) + '</h3>'
-      if (line.startsWith('### ')) return '<h4 style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin:10px 0 4px">' + line.slice(4) + '</h4>'
-      if (line.startsWith('- ') || line.startsWith('* ')) return '<div style="display:flex;gap:8px;margin-bottom:5px;line-height:1.5"><span style="color:#C8A020;flex-shrink:0;margin-top:1px">-</span><span style="color:var(--text2);">' + line.slice(2) + '</span></div>'
-      if (line.startsWith('|') || line.trim() === '---') return ''
-      if (line.trim() === '') return '<div style="height:8px"></div>'
-      return '<p style="margin-bottom:6px;color:var(--text2);line-height:1.6">' + line + '</p>'
-    }).join('')
-  }
-
   // ── RENDER ─────────────────────────────────────────────────────────────────
-  const stateData = STATES.find(s => s.state === selectedState)
-
   return (
     <div className="data-query-page" style={S.page} role="main" aria-label="Data query workspace">
       <style>{DATAQUERY_NAV_CSS}</style>
 
       {/* TOOLBAR */}
       <div id="toolbar" role="region" aria-label="Data query controls">
-        <h1>HYPERSCALE DATA CENTER <span>/ Data Query</span></h1>
+        <h1>
+          HYPERSCALE DATA CENTER{' '}
+          <span>/ Data Query</span>
+        </h1>
         <Nav />
-      </div>
-
-      {/* TAB BAR */}
-      <div className="dq-tab-bar" style={{ marginTop:'52px' }}>
-        <button className={`dq-tab${activeTab === 'sql' ? ' active' : ''}`} onClick={() => setActiveTab('sql')}>SQL</button>
-        <button className={`dq-tab${activeTab === 'state' ? ' active' : ''}`} onClick={() => setActiveTab('state')}>State Inquiry</button>
       </div>
 
       <div style={S.body}>
 
-        {/* LEFT — schema + queries (always visible) */}
+        {/* LEFT — schema + starter queries */}
         <div style={S.left}>
+
           <div style={S.leftHead}>
-            <span style={S.lbl}>Schema</span>
-            <span style={S.lsub}>{dbReady ? '3 tables loaded' : dbError ? 'Error loading db' : 'Loading…'}</span>
+            <span style={S.leftTitle}>Schema</span>
+            <span style={S.leftSub}>
+              {dbReady ? '3 tables loaded' : dbError ? 'Error loading db' : 'Loading…'}
+            </span>
           </div>
+
           <div style={S.leftScroll}>
             {SCHEMA.map(t => (
               <div key={t.table} style={S.schemaTable}>
@@ -850,240 +577,145 @@ export default function DataQuery() {
                   <div key={c.name} style={S.schemaRow}>
                     <span style={S.schemaCol}>{c.name}</span>
                     <span style={S.schemaType}>{c.type}</span>
+                    <span style={S.schemaNoteText}>{c.note}</span>
                   </div>
                 ))}
               </div>
             ))}
           </div>
 
-          {/* HYPOTHESES + QUERIES */}
-          <div style={S.qsec}>
-            <span style={S.lbl}>Hypotheses</span>
-            <select
-              style={S.hypSelect}
-              onChange={e => {
-                const q = HYPOTHESIS_QUERIES.find(h => h.label === e.target.value)
-                if (q) { setSql(q.sql); setResults(null); setError(null); setActiveTab('sql')
-                  setTimeout(() => runQuery(), 50)
-                }
-              }}
-              defaultValue=""
-            >
-              <option value="">— select —</option>
-              {HYPOTHESIS_QUERIES.map(q => (
-                <option key={q.label} value={q.label}>{q.label}</option>
-              ))}
-            </select>
-            <span style={S.lbl}>Queries</span>
+          {/* STARTER QUERIES */}
+          <div style={S.starterHead}>
+            <span style={S.starterTitle}>Starter queries</span>
           </div>
-          <div style={S.qscroll}>
+          <div style={S.starterScroll}>
             {STARTER_QUERIES.map((q, i) => (
               <button
                 key={i}
-                className="qbtn-item"
-                style={{ color: q.color, borderLeftColor: q.color }}
+                style={S.starterBtn}
+                onMouseEnter={e => { e.currentTarget.style.color = isLight ? '#0f172a' : '#dde0f0'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.32)' : 'rgba(255,255,255,0.18)' }}
+                onMouseLeave={e => { e.currentTarget.style.color = isLight ? '#334155' : '#5a5e78'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.16)' : 'rgba(255,255,255,0.06)' }}
                 onClick={() => {
                   setSql(q.sql)
                   setResults(null)
                   setError(null)
-                  setActiveTab('sql')
                   textareaRef.current?.focus()
-                  setTimeout(() => runQuery(), 50)
                 }}
               >
                 {q.label}
               </button>
             ))}
           </div>
+
         </div>
 
-        {/* SQL TAB */}
-        {activeTab === 'sql' && (
-          <div style={S.right}>
-            <div style={S.editorWrap}>
-              <span style={S.lbl}>SQL Editor — Ctrl+Enter or ⌘+Enter to run</span>
-              <textarea
-                ref={textareaRef}
-                style={S.textarea}
-                value={sql}
-                onChange={e => setSql(e.target.value)}
-                onKeyDown={handleKeyDown}
-                spellCheck={false}
-                aria-label="SQL editor"
-                placeholder="SELECT * FROM states ORDER BY ratio DESC;"
-              />
-              <div style={S.btnRow}>
-                <button
-                  type="button"
-                  style={S.runBtn}
-                  disabled={!dbReady}
-                  onClick={runQuery}
-                >
-                  {dbReady ? '▶ Run Query' : 'Loading db…'}
-                </button>
-                <button
-                  type="button"
-                  style={S.clearBtn}
-                  onClick={() => { setSql(''); setResults(null); setError(null); textareaRef.current?.focus() }}
-                >
-                  Clear
-                </button>
-                {dbError && <span style={{ fontSize:'10px', color:'#e04040' }}>DB error: {dbError}</span>}
-                <div style={{ marginLeft:'auto' }}>
-                  <button type="button" style={S.iconBtn} onClick={handlePrint} title="Print / save as PDF">
-                    <i className="ti ti-printer" aria-hidden="true" />
+        {/* RIGHT — editor + results */}
+        <div style={S.right}>
+
+          {/* EDITOR */}
+          <div style={S.editorWrap}>
+            <span style={S.editorLabel}>SQL Editor — Ctrl+Enter or ⌘+Enter to run</span>
+            <textarea
+              ref={textareaRef}
+              style={S.textarea}
+              value={sql}
+              onChange={e => setSql(e.target.value)}
+              onKeyDown={handleKeyDown}
+              spellCheck={false}
+              aria-label="SQL editor"
+              placeholder="SELECT * FROM states ORDER BY ratio DESC;"
+            />
+            <div style={S.btnRow}>
+              <button
+                type="button"
+                style={S.runBtn}
+                disabled={!dbReady}
+                onMouseEnter={e => { e.currentTarget.style.background = isLight ? '#5f83b8' : '#8aabda' }}
+                onMouseLeave={e => { e.currentTarget.style.background = '#6c8ebf' }}
+                onClick={runQuery}
+              >
+                {dbReady ? '▶ Run Query' : 'Loading db…'}
+              </button>
+              <button
+                type="button"
+                style={S.clearBtn}
+                onClick={() => { setSql(''); setResults(null); setError(null); textareaRef.current?.focus() }}
+              >
+                Clear
+              </button>
+              {dbError && (
+                <span style={{ fontSize:'10px', color:'#e04040' }}>
+                  DB error: {dbError}
+                </span>
+              )}
+            </div>
+            {error && <div style={S.errorMsg}>⚠ {error}</div>}
+          </div>
+
+          {/* RESULTS */}
+          <div style={S.resultsWrap}>
+            {results === null ? (
+              <div style={S.emptyState}>
+                <span style={S.emptyIcon}>⬡</span>
+                <div style={S.emptyText}>Run a query to see results</div>
+                <div style={S.emptySub}>
+                  Three tables: states · sectors · layers
+                </div>
+              </div>
+            ) : results.empty ? (
+              <div style={S.emptyState}>
+                <span style={S.emptyIcon}>○</span>
+                <div style={S.emptyText}>Query executed — 0 rows returned</div>
+              </div>
+            ) : (
+              <>
+                <div style={S.resultsMeta}>
+                  <span style={S.rowCount}>
+                    {results.rows.length} row{results.rows.length !== 1 ? 's' : ''} returned
+                  </span>
+                  <button
+                    type="button"
+                    style={S.copyBtn}
+                    onMouseEnter={e => { e.currentTarget.style.color = isLight ? '#0f172a' : '#dde0f0'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.32)' : 'rgba(255,255,255,0.18)' }}
+                    onMouseLeave={e => { e.currentTarget.style.color = isLight ? '#334155' : '#3a3e58'; e.currentTarget.style.borderColor = isLight ? 'rgba(15,23,42,0.16)' : 'rgba(255,255,255,0.07)' }}
+                    onClick={copyCSV}
+                  >
+                    {copied ? '✓ Copied' : 'Copy CSV'}
                   </button>
                 </div>
-              </div>
-              {error && <div style={S.errorMsg}>⚠ {error}</div>}
-            </div>
 
-            <div style={S.resultsWrap}>
-              {results === null ? (
-                <div style={S.emptyState}>
-                  <span style={S.emptyIcon}>⬡</span>
-                  <div style={S.emptyText}>Run a query to see results</div>
-                  <div style={S.emptySub}>Three tables: states · sectors · layers</div>
-                </div>
-              ) : results.empty ? (
-                <div style={S.emptyState}>
-                  <span style={S.emptyIcon}>○</span>
-                  <div style={S.emptyText}>Query executed — 0 rows returned</div>
-                </div>
-              ) : (
-                <>
-                  <div style={S.resultsMeta}>
-                    <span style={S.rowCount}>{results.rows.length} row{results.rows.length !== 1 ? 's' : ''} returned</span>
-                    <button type="button" style={S.copyBtn} onClick={copyCSV}>
-                      {copied ? '✓ Copied' : 'Copy CSV'}
-                    </button>
-                  </div>
-                  <table style={S.table}>
-                    <thead>
-                      <tr>{results.columns.map(col => <th key={col} style={S.th}>{col}</th>)}</tr>
-                    </thead>
-                    <tbody>
-                      {results.rows.map((row, ri) => (
-                        <tr key={ri}>
-                          {row.map((val, ci) => {
-                            const num = isNumeric(ci, results.rows)
-                            const hi  = num && isHighPressure(results.columns[ci], val)
-                            return (
-                              <td key={ci} style={hi ? S.tdHi : num ? S.tdNum : S.td}>
-                                {val === null ? <span style={{ color:'var(--text4)' }}>NULL</span> : String(val)}
-                              </td>
-                            )
-                          })}
-                        </tr>
+                <table style={S.table}>
+                  <thead>
+                    <tr>
+                      {results.columns.map(col => (
+                        <th key={col} style={S.th}>{col}</th>
                       ))}
-                    </tbody>
-                  </table>
-                </>
-              )}
-            </div>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {results.rows.map((row, ri) => (
+                      <tr
+                        key={ri}
+                        onMouseEnter={e => { e.currentTarget.style.background = isLight ? 'rgba(15,23,42,0.04)' : 'rgba(255,255,255,0.025)' }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+                      >
+                        {row.map((val, ci) => {
+                          const numeric = isNumeric(ci, results.rows)
+                          return (
+                            <td key={ci} style={numeric ? S.tdNum : S.td}>
+                              {val === null ? <span style={{ color: isLight ? '#94a3b8' : '#252838' }}>NULL</span> : String(val)}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
           </div>
-        )}
 
-        {/* STATE INQUIRY TAB */}
-        {activeTab === 'state' && (
-          <div style={S.right}>
-            <div style={S.statePanel}>
-
-              {/* State selector */}
-              <div style={S.stateRow}>
-                <span style={S.stateLbl}>{selectedState === 'All States' ? 'Scope' : 'State'}</span>
-                <select
-                  style={S.stateSelect}
-                  value={selectedState}
-                  onChange={e => { setSelectedState(e.target.value); setAnswer(null); setResources([]) }}
-                >
-                  <option value="All States">All States</option>
-                  {['Arizona','California','Florida','Georgia','Illinois','Indiana','Iowa','New York','North Carolina','Ohio','Oregon','Pennsylvania','Texas','Virginia','Washington'].map(s => (
-                    <option key={s} value={s}>
-                      {['Georgia','Indiana'].includes(s) ? String.fromCharCode(9733)+' '+s : s}
-                    </option>
-                  ))}
-                </select>
-                {['Georgia','Indiana'].includes(selectedState) && <span style={S.badge}>Full inquiry available</span>}
-              </div>
-
-              {/* Stat cards */}
-              {selectedState !== 'All States' && stateData && (
-                <div style={S.cards}>
-                  <div style={S.card}>
-                    <div style={S.cardLbl}>Operating</div>
-                    <div style={S.cardVal}>{stateData.operating}</div>
-                  </div>
-                  <div style={S.card}>
-                    <div style={S.cardLbl}>Planned</div>
-                    <div style={S.cardVal}>{stateData.planned}</div>
-                  </div>
-                  <div style={S.cardHi}>
-                    <div style={S.cardLbl}>Ratio</div>
-                    <div style={{ ...S.cardVal, color:'var(--gold)' }}>{stateData.ratio.toFixed(2)}</div>
-                  </div>
-                  <div style={S.card}>
-                    <div style={S.cardLbl}>EIA grid demand</div>
-                    <div style={{ ...S.cardVal, color:'var(--green)', fontSize:'13px', paddingTop:'3px' }}>
-                      Live <i className="ti ti-bolt" style={{ fontSize:'13px' }} aria-hidden="true" />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Question box */}
-              <div style={S.askBox}>
-                <span style={{ ...S.lbl, marginBottom:'7px' }}>Ask about {selectedState}</span>
-                <div style={{ display:'flex', gap:'8px' }}>
-                  <input
-                    style={S.askInput}
-                    value={question}
-                    onChange={e => setQuestion(e.target.value)}
-                    onKeyDown={e => { if (e.key === 'Enter') askClaude() }}
-                    {...{placeholder: selectedState === 'All States' ? 'Ask about U.S. hyperscale data center development across all states...' : 'How long does a planned facility take from concept to completion?'}}
-                  />
-                  <button type="button" style={S.askBtn} onClick={askClaude} disabled={asking}>
-                    {asking ? 'Asking…' : 'Ask'}
-                  </button>
-                </div>
-                {askError && <div style={{ ...S.errorMsg, marginTop:'8px' }}>⚠ {askError}</div>}
-              </div>
-
-              {/* Answer */}
-              {(answer || asking) && (
-                <div style={S.answerBox}>
-                  <div style={{ display:'flex', alignItems:'center', marginBottom:'8px' }}>
-                    <span style={{ ...S.lbl, flex:1 }}>Answer</span>
-                    {answer && (
-                      <button type="button" style={S.iconBtn} onClick={handlePrint} title="Print / save as PDF">
-                        <i className="ti ti-printer" aria-hidden="true" />
-                      </button>
-                    )}
-                  </div>
-                  {asking ? (
-                    <div style={{ ...S.answerText, color:'var(--text4)' }}>Searching the web and building your report… this takes 20–30 seconds.</div>
-                  ) : (
-                    <div style={S.answerText} dangerouslySetInnerHTML={{__html: renderMarkdown(answer)}} />
-                  )}
-                  {resources.length > 0 && (
-                    <div style={S.resourcesDivider}>
-                      <span style={S.lbl}>Helpful resources</span>
-                      <span style={S.resourceNote}>Links generated live by web search</span>
-                      {resources.map((r, i) => (
-                        (r.url && (r.url.startsWith('http://') || r.url.startsWith('https://'))) ? <a key={i} href={r.url} target="_blank" rel="noopener noreferrer" style={S.resourceLink}>
-                          <i className="ti ti-external-link" aria-hidden="true" />
-                          {r.title}
-                        </a> : null
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-            </div>
-          </div>
-        )}
-
+        </div>
       </div>
     </div>
   )
