@@ -809,7 +809,7 @@ export default function DataQuery() {
   }
 
   // ── RENDER ─────────────────────────────────────────────────────────────────
-  const stateData = STATE_DATA[selectedState]
+  const stateData = STATES.find(s => s.state === selectedState)
 
   return (
     <div className="data-query-page" style={S.page} role="main" aria-label="Data query workspace">
@@ -1004,26 +1004,28 @@ export default function DataQuery() {
               </div>
 
               {/* Stat cards */}
-              <div style={S.cards}>
-                <div style={S.card}>
-                  <div style={S.cardLbl}>Operating</div>
-                  <div style={S.cardVal}>{stateData.operating}</div>
-                </div>
-                <div style={S.card}>
-                  <div style={S.cardLbl}>Planned</div>
-                  <div style={S.cardVal}>{stateData.planned}</div>
-                </div>
-                <div style={S.cardHi}>
-                  <div style={S.cardLbl}>Ratio</div>
-                  <div style={{ ...S.cardVal, color:'var(--gold)' }}>{stateData.ratio}</div>
-                </div>
-                <div style={S.card}>
-                  <div style={S.cardLbl}>EIA grid demand</div>
-                  <div style={{ ...S.cardVal, color:'var(--green)', fontSize:'13px', paddingTop:'3px' }}>
-                    Live <i className="ti ti-bolt" style={{ fontSize:'13px' }} aria-hidden="true" />
+              {selectedState !== 'All States' && stateData && (
+                <div style={S.cards}>
+                  <div style={S.card}>
+                    <div style={S.cardLbl}>Operating</div>
+                    <div style={S.cardVal}>{stateData.operating}</div>
+                  </div>
+                  <div style={S.card}>
+                    <div style={S.cardLbl}>Planned</div>
+                    <div style={S.cardVal}>{stateData.planned}</div>
+                  </div>
+                  <div style={S.cardHi}>
+                    <div style={S.cardLbl}>Ratio</div>
+                    <div style={{ ...S.cardVal, color:'var(--gold)' }}>{stateData.ratio.toFixed(2)}</div>
+                  </div>
+                  <div style={S.card}>
+                    <div style={S.cardLbl}>EIA grid demand</div>
+                    <div style={{ ...S.cardVal, color:'var(--green)', fontSize:'13px', paddingTop:'3px' }}>
+                      Live <i className="ti ti-bolt" style={{ fontSize:'13px' }} aria-hidden="true" />
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               {/* Question box */}
               <div style={S.askBox}>
