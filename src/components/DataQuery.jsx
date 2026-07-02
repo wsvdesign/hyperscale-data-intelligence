@@ -806,9 +806,6 @@ export default function DataQuery() {
     setAskStage('Searching the web...')
     setTimeout(() => setAskStage('Reading sources...'), 8000)
     setTimeout(() => setAskStage('Writing your report...'), 16000)
-    setAskStage('Searching the web...')
-    setTimeout(() => setAskStage('Reading sources...'), 8000)
-    setTimeout(() => setAskStage('Writing your report...'), 16000)
 
     const stateRecord = STATES.find(s => s.state === selectedState)
     const contextMsg = stateRecord
@@ -1096,7 +1093,7 @@ export default function DataQuery() {
                     value={question}
                     onChange={e => setQuestion(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') askClaude() }}
-                    {...{placeholder: selectedState === 'All States' ? 'Ask about U.S. hyperscale data center development across all states...' : 'How long does a planned facility take from concept to completion?'}}
+                    placeholder={selectedState === 'All States' ? 'Ask about U.S. hyperscale data center development across all states...' : 'How long does a planned facility take from concept to completion?'}
                   />
                   <button type="button" style={S.askBtn} onClick={askClaude} disabled={asking}>
                     {asking ? 'Asking…' : 'Ask'}
