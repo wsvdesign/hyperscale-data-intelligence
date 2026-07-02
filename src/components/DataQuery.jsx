@@ -327,7 +327,7 @@ List every real link retrieved through web search with source name and URL.
 
 SOURCES TO ALWAYS SEARCH: Georgia General Assembly at legis.ga.gov, Indiana General Assembly at iga.in.gov, state Public Service Commission dockets, FERC interconnection queue at ferc.gov, PJM and MISO capacity requests, state circuit court filings, Good Jobs First at goodjobsfirst.org, SEC EDGAR for hyperscaler 10-K filings, county assessor and recorder databases, Secretary of State LLC registration search, city and county council meeting minutes, planning commission hearing records, zoning board decisions, state lobbying registration databases, Data Center Dynamics at datacenterdynamics.com.
 
-TONE: Authoritative specific and actionable. Every bullet point must contain a real specific usable piece of information.
+TONE: Authoritative specific and actionable. Every bullet point must contain a real specific usable piece of information. NEVER use markdown tables with pipe characters. NEVER use --- dividers. Only use ## headers, ### subheaders, and - bullet points.
 
 END every response with:
 RESOURCES_JSON:[{"title":"...","url":"..."},{"title":"...","url":"..."}]`
@@ -795,11 +795,13 @@ export default function DataQuery() {
 
 
   function renderMarkdown(text) {
-    return text.split('\\n').map((line) => {
-      if (line.startsWith('## ')) return '<h3 style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin:14px 0 6px">' + line.slice(3) + '</h3>'
-      if (line.startsWith('- ')) return '<div style="display:flex;gap:8px;margin-bottom:4px"><span style="color:#C8A020;flex-shrink:0">&mdash;</span><span>' + line.slice(2) + '</span></div>'
-      if (line.trim() === '') return '<div style="height:6px"></div>'
-      return '<p style="margin-bottom:6px">' + line + '</p>'
+    return text.split('\n').map((line) => {
+      if (line.startsWith('## ')) return '<h3 style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);margin:16px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(255,255,255,0.07)">' + line.slice(3) + '</h3>'
+      if (line.startsWith('### ')) return '<h4 style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:var(--gold);margin:10px 0 4px">' + line.slice(4) + '</h4>'
+      if (line.startsWith('- ') || line.startsWith('* ')) return '<div style="display:flex;gap:8px;margin-bottom:5px;line-height:1.5"><span style="color:#C8A020;flex-shrink:0;margin-top:1px">-</span><span style="color:var(--text2);">' + line.slice(2) + '</span></div>'
+      if (line.startsWith('|') || line.trim() === '---') return ''
+      if (line.trim() === '') return '<div style="height:8px"></div>'
+      return '<p style="margin-bottom:6px;color:var(--text2);line-height:1.6">' + line + '</p>'
     }).join('')
   }
 
