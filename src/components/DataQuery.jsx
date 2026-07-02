@@ -447,9 +447,9 @@ const makeStyles = (isLight) => ({
   },
   iconBtn: {
     background:'transparent',
-    border:'1px solid var(--border)',
+    border:'1px solid rgba(63,191,106,0.3)',
     borderRadius:'3px', padding:'4px 7px',
-    cursor:'pointer', color:'var(--text4)',
+    cursor:'pointer', color:'var(--green)',
     display:'flex', alignItems:'center', fontSize:'14px',
   },
   errorMsg: {
@@ -601,6 +601,7 @@ const makeStyles = (isLight) => ({
 })
 
 const DATAQUERY_NAV_CSS = `
+@import url('https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css');
 .data-query-page #toolbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:300;background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 18px;gap:10px}
 .data-query-page #toolbar h1{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap;color:#e8e9f0;font-family:'Space Mono',monospace}
 .data-query-page #toolbar h1 span{color:#8792b3;font-weight:400}
@@ -767,15 +768,18 @@ export default function DataQuery() {
         body: JSON.stringify({
           system: SYSTEM_PROMPT,
           messages: [{ role: 'user', content: contextMsg }],
-          max_tokens: 1000,
+          max_tokens: 2000,
           tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         }),
       })
       const data = await response.json()
-      const textBlock = data.content?.find(b => b.type === 'text')
-      if (!textBlock) throw new Error('No response from API')
+      const textBlocks = (data.content || [])
+        .filter(b => b.type === 'text' && typeof b.text === 'string')
+        .map(b => b.text.trim())
+        .filter(Boolean)
+      if (!textBlocks.length) throw new Error('No response from API')
 
-      let rawText = textBlock.text
+      let rawText = textBlocks.join('\n\n')
       let parsedResources = []
 
       const jsonMatch = rawText.match(/RESOURCES_JSON:\[.*?\]/s)
@@ -1000,7 +1004,7 @@ export default function DataQuery() {
                     </option>
                   ))}
                 </select>
-                <span style={S.badge}>Full inquiry available</span>
+                {['Georgia','Indiana'].includes(selectedState) && <span style={S.badge}>Full inquiry available</span>}
               </div>
 
               {/* Stat cards */}
@@ -1057,7 +1061,7 @@ export default function DataQuery() {
                     )}
                   </div>
                   {asking ? (
-                    <div style={{ ...S.answerText, color:'var(--text4)' }}>Searching and reasoning…</div>
+                    <div style={{ ...S.answerText, color:'var(--text4)' }}>Searching the web and building your report… this takes 20–30 seconds.</div>
                   ) : (
                     <div style={S.answerText} dangerouslySetInnerHTML={{__html: renderMarkdown(answer)}} />
                   )}

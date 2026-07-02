@@ -204,3 +204,63 @@ html[data-theme='light'] .theme-toggle:hover {
 body {
   font-size: 16px;
 }
+
+/* Shared top-nav look: keep menu appearance consistent across pages. */
+#toolbar {
+  height: 52px !important;
+  padding: 0 18px !important;
+  gap: 10px !important;
+}
+
+#toolbar h1 {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9.5px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.1em !important;
+  text-transform: uppercase !important;
+}
+
+#toolbar h1 span {
+  font-weight: 400 !important;
+}
+
+.site-nav .sn {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  padding: 4px 9px !important;
+  border-radius: 3px !important;
+}
+
+/* Hard override for route-scoped nav styles (e.g. .data-query-page .sn, .hybrid-map-page .sn). */
+#toolbar .site-nav .sn {
+  font-family: 'Space Mono', monospace !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  padding: 4px 9px !important;
+  border-radius: 3px !important;
+}
+
+#toolbar .site-nav .sn-label {
+  font-size: inherit !important;
+}
+
+@media (max-width: 780px) {
+  #toolbar .site-nav .sn {
+    font-size: 7px !important;
+    padding: 3px 7px !important;
+  }
+}
+
+@media (max-width: 520px) {
+  #toolbar .site-nav .sn-label {
+    display: none !important;
+  }
+
+  #toolbar .site-nav .sn {
+    padding: 4px 7px !important;
+  }
+}
