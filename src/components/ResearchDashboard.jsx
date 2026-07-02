@@ -1,29 +1,19 @@
 import React, { useEffect, useRef } from 'react'
 import Nav from './Nav'
 
-export default function ResearchDashboard() {
+export default function ResearchDashboard({ theme }) {
   const iframeRef = useRef(null)
   const isLight = document.documentElement.getAttribute('data-theme') === 'light'
 
   useEffect(() => {
     const iframe = iframeRef.current
-
-    const sendTheme = () => {
-      const theme = document.documentElement.getAttribute('data-theme') || 'dark'
+    const send = () =>
       iframe?.contentWindow?.postMessage({ type: 'theme', theme }, window.location.origin)
-    }
 
-    iframe?.addEventListener('load', sendTheme)
-
-    const observer = new MutationObserver(sendTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
-    sendTheme()
-
-    return () => {
-      iframe?.removeEventListener('load', sendTheme)
-      observer.disconnect()
-    }
-  }, [])
+    iframe?.addEventListener('load', send)
+    send()
+    return () => iframe?.removeEventListener('load', send)
+  }, [theme])
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: isLight ? '#f3f6fb' : '#07080f' }}>
