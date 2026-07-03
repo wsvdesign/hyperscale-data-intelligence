@@ -897,6 +897,12 @@ html[data-theme='light'] .timeline-page {
   overflow: hidden;
 }
 
+.toolbar-sub-row {
+  position: fixed; top: 52px; left: 0; right: 0; height: 38px; z-index: 299;
+  background: rgba(13,16,32,0.99); border-bottom: 1px solid rgba(255,255,255,0.14);
+  display: flex; align-items: center; padding: 0 18px; gap: 8px;
+}
+html[data-theme='light'] .toolbar-sub-row { background: rgba(255,255,255,0.98); border-bottom: 1px solid rgba(15,23,42,0.14); }
 .toolbar {
   position: fixed; top: 0; left: 0; right: 0; height: 52px; z-index: 300;
   background: rgba(7,8,15,0.98); border-bottom: 1px solid var(--border);
@@ -918,7 +924,7 @@ html[data-theme='light'] .tb-btn:hover { border-color: rgba(15,23,42,0.4); }
 .track-btn {
   font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
   padding: 4px 9px; border-radius: 3px; border: 1px solid transparent; cursor: pointer;
-  transition: all 0.15s; opacity: 0.5; background: transparent;
+  transition: all 0.15s; opacity: 0.8; background: transparent;
 }
 .track-btn.on { opacity: 1; }
 html[data-theme='light'] .track-btn { background: var(--bg); border-color: rgba(15,23,42,0.16) !important; }
@@ -929,7 +935,7 @@ html[data-theme='light'] .track-btn { background: var(--bg); border-color: rgba(
 .track-btn.track-fin { color: var(--c-fin); border-color: rgba(184,79,140,0.18); }
 .track-btn.track-lit { color: var(--c-lit); border-color: rgba(224,64,64,0.18); }
 
-.main-layout { position: fixed; top: 52px; left: 0; right: 0; bottom: 0; display: flex; }
+.main-layout { position: fixed; top: 90px; left: 0; right: 0; bottom: 0; display: flex; }
 
 .rail {
   width: var(--rail-w); flex-shrink: 0;
@@ -969,7 +975,7 @@ html[data-theme='light'] .phase-row { background: rgba(255,255,255,0.97); }
 .track-row { flex: 1; display: flex; align-items: stretch; border-bottom: 1px solid var(--border); transition: opacity 0.2s; }
 .track-row:last-child { flex: 1.5; border-bottom: none; }
 .track-row.dimmed { opacity: 0.2; }
-.track-row.lit-row .cell:not(.empty) { border-top: 1px dashed rgba(224,64,64,0.2); }
+.track-row.lit-row .cell:not(.empty) { border-top: 1px dashed rgba(224,64,64,0.5); }
 
 .cell { min-width: var(--col-w); border-right: 1px solid var(--border); padding: 10px 12px; display: flex; flex-direction: column; justify-content: center; position: relative; cursor: pointer; transition: background 0.15s; }
 .cell:hover { background: rgba(255,255,255,0.025); }
@@ -1001,17 +1007,15 @@ html[data-theme='light'] .node-doc { border-color: rgba(15,23,42,0.16); }
 .ntag-t { background: rgba(100,140,210,0.15); color: #80a8e8; }
 .ntag-risk { background: rgba(150,80,200,0.1); color: #b070d8; font-size: 6.5px; }
 .lit-badge { position: absolute; top: 6px; right: 6px; font-family: var(--mono); font-size: 6.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--c-lit); opacity: 0; transition: opacity 0.3s; }
-.lit-stripe { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.3s; background: repeating-linear-gradient(-45deg, transparent, transparent 8px, rgba(224,64,64,0.03) 8px, rgba(224,64,64,0.03) 9px); }
-.lit-on .lit-badge { opacity: 1; }
-.lit-on .lit-stripe { opacity: 1; }
-
+.lit-on .lit-badge { opacity: 0; display: none; }
+.lit-on 
 .connector { position: absolute; right: -1px; top: 50%; width: 24px; height: 1px; background: rgba(255,255,255,0.12); z-index: 10; }
 .connector-lit { background: rgba(224,64,64,0.5); }
 
 .panel {
   position: fixed; top: 52px; right: -440px; bottom: 0; width: 420px;
   background: #0d1020; border-left: 1px solid var(--border);
-  transition: right 0.3s ease; z-index: 250; display: flex; flex-direction: column; overflow: hidden;
+  transition: right 0.3s ease; z-index: 350; display: flex; flex-direction: column; overflow: hidden;
 }
 html[data-theme='light'] .panel { background: var(--bg); }
 .panel.open { right: 0; }
@@ -1019,7 +1023,7 @@ html[data-theme='light'] .panel { background: var(--bg); }
 .panel-type { font-family: var(--mono); font-size: 8px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; display: block; margin-bottom: 6px; }
 .panel-name { font-size: 15px; font-weight: 600; line-height: 1.35; }
 .panel-sub { font-size: 12px; color: var(--text2); margin-top: 5px; line-height: 1.55; }
-.panel-close { position: absolute; top: 14px; right: 18px; width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 3px; background: transparent; color: var(--text2); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); }
+.panel-close { position: absolute; top: 14px; right: 18px; width: 26px; height: 26px; border: 1px solid var(--border); border-radius: 3px; background: transparent; color: var(--text2); cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); z-index: 400; }
 .panel-close:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
 html[data-theme='light'] .panel-close:hover { border-color: rgba(15,23,42,0.4); }
 .panel-body { flex: 1; overflow-y: auto; padding: 18px 22px; }
@@ -1056,7 +1060,7 @@ html[data-theme='light'] .legend { background: rgba(255,255,255,0.96); }
 .leg-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .leg-diamond { width: 9px; height: 9px; border: 1.5px solid var(--c-gate); transform: rotate(45deg); flex-shrink: 0; }
 .leg-dash { width: 16px; height: 0; border-top: 1.5px dashed var(--c-lit); flex-shrink: 0; }
-.progress { position: fixed; top: 52px; left: var(--rail-w); right: 0; height: 2px; z-index: 200; background: rgba(255,255,255,0.04); }
+.progress { position: fixed; top: 90px; left: var(--rail-w); right: 0; height: 2px; z-index: 200; background: rgba(255,255,255,0.04); }
 .progress-bar { height: 100%; background: rgba(255,255,255,0.12); width: 0%; transition: width 0.1s; }
 html[data-theme='light'] .progress-bar { background: rgba(15,23,42,0.2); }
 
@@ -1296,6 +1300,9 @@ export default function Timeline() {
       <div className="page-shell">
         <div className="toolbar">
           <h1>HYPERSCALE DATA CENTER <span className="toolbar-sub">/ Linear Development &amp; Approval Timeline</span></h1>
+          <Nav />
+        </div>
+        <div className="toolbar-sub-row">
           <div className="track-btns" id="track-btns">
             {trackButtons.map((track) => (
               <button
@@ -1308,9 +1315,6 @@ export default function Timeline() {
               </button>
             ))}
           </div>
-          <button type="button" aria-pressed={litOn} className={`tb-btn ${litOn ? 'lit-on' : ''}`.trim()} onClick={toggleLit}>⬤ Litigation</button>
-          <button type="button" className="tb-btn" onClick={scrollToStart} aria-label="Scroll timeline to start">↤ Start</button>
-          <Nav />
         </div>
 
         <div className="progress"><div ref={progressBarRef} className="progress-bar" /></div>
@@ -1406,7 +1410,6 @@ export default function Timeline() {
                           onClick={isEmpty ? undefined : () => openCellPanel(phase, track.id, phaseData)}
                           onKeyDown={isEmpty ? undefined : (event) => handleKeyActivate(event, () => openCellPanel(phase, track.id, phaseData))}
                         >
-                          <div className="lit-stripe" />
                           {!isEmpty && phaseData.litigation?.length > 0 && <div className="lit-badge">⚠ LIT</div>}
                           {!isEmpty && (
                             <div>
