@@ -1,9 +1,6 @@
 import { NavLink } from 'react-router-dom';
 
-const NAV_LINK_STYLE = {
-  fontSize: '12px',
-  padding: '5px 12px',
-};
+const NAV_LINK_STYLE = {};
 
 const links = [
   { to: '/', icon: '⌂', label: 'Home', className: 'sn-home', end: true },
@@ -23,7 +20,6 @@ export default function Nav() {
           key={link.to}
           to={link.to}
           end={link.end}
-          style={NAV_LINK_STYLE}
           className={({ isActive }) =>
             `sn ${link.className ? link.className : ''} ${isActive ? 'sn-active' : ''}`.trim()
           }

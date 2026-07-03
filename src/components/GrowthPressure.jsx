@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import Nav from './Nav'
 import { Link } from 'react-router-dom';
 import statesData from '../data/states.json';
 
@@ -252,25 +253,9 @@ html[data-theme='light'] .sn.sn-active{background:#e2e8f0;color:#0f172a;border-c
 
       <div id="toolbar">
         <h1>
-          HYPERSCALE DATA CENTER <span>/ Intelligence System</span>
+          HYPERSCALE DATA CENTER <span>/ Growth Pressure</span>
         </h1>
-        <nav className="site-nav">
-          <Link className="sn sn-home" to="/">
-            <span>⌂</span> <span className="sn-label">Home</span>
-          </Link>
-          <Link className="sn" to="/hub-map">
-            <span>①</span> <span className="sn-label">Hub Map</span>
-          </Link>
-          <Link className="sn" to="/hybrid-map">
-            <span>②</span> <span className="sn-label">Hybrid Map</span>
-          </Link>
-          <Link className="sn" to="/timeline">
-            <span>③</span> <span className="sn-label">Timeline</span>
-          </Link>
-          <Link className="sn sn-active" to="/growth-pressure">
-            <span>④</span> <span className="sn-label">Growth Pressure</span>
-          </Link>
-        </nav>
+        <Nav />
       </div>
 
       <div

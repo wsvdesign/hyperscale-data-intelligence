@@ -1299,7 +1299,7 @@ export default function Timeline() {
       <style>{PANEL_STYLE}</style>
       <div className="page-shell">
         <div className="toolbar">
-          <h1>HYPERSCALE DATA CENTER <span className="toolbar-sub">/ Linear Development &amp; Approval Timeline</span></h1>
+          <h1>HYPERSCALE DATA CENTER <span className="toolbar-sub">/ Timeline</span></h1>
           <Nav />
         </div>
         <div className="toolbar-sub-row">
