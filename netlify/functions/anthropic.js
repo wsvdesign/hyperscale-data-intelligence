@@ -14,14 +14,17 @@ export default async (req) => {
   } catch {
     return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400 });
   }
-  const { messages, max_tokens = 2000, system, tools } = body;
+  const { messages, max_tokens: requestedMaxTokens, system, tools } = body;
   if (!Array.isArray(messages)) {
     return new Response(JSON.stringify({ error: "messages array required" }), { status: 400 });
   }
+  // Cap response length so generation finishes faster (Netlify function time limit)
+  const max_tokens = Math.min(requestedMaxTokens || 1200, 1200);
   const payload = { model: "claude-sonnet-4-6", max_tokens, messages };
   if (system) payload.system = system;
-  // Server-side allowlist: only web_search permitted
-  payload.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
+  // Server-side allowlist: only web_search permitted, capped at 3 searches so
+  // the whole request finishes well within Netlify's function timeout
+  payload.tools = [{ type: 'web_search_20250305', name: 'web_search', max_uses: 3 }];
   const upstream = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: {
