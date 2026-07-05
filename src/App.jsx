@@ -11,7 +11,11 @@ import ResearchDashboard from './components/ResearchDashboard';
 export default function App() {
   const [theme, setTheme] = useState(() => {
     const savedTheme = localStorage.getItem('hdi-theme');
-    return savedTheme === 'light' ? 'light' : 'dark';
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+      return savedTheme;
+    }
+
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   });
 
   useEffect(() => {
