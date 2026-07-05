@@ -367,7 +367,7 @@ const SECTORS = [
       {
         id: 'psc',
         label: 'Public Service\nCommission',
-        icon: '⚖',
+        icon: '⚖️',
         tag: 'PUB',
         tagcls: 'tag-p',
         detail:
@@ -688,7 +688,7 @@ const SECTORS = [
   {
     id: 'courts',
     label: 'Courts &\nAdmin Review',
-    icon: '⚖',
+    icon: '⚖️',
     color: '#bf6c6c',
     angle: 324,
     controls:
@@ -726,7 +726,7 @@ const SECTORS = [
       {
         id: 'statecourt',
         label: 'State\nCourts',
-        icon: '⚖',
+        icon: '⚖️',
         tag: 'PUB',
         tagcls: 'tag-p',
         detail:
