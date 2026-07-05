@@ -6,10 +6,14 @@ const HYBRID_MAP_STYLES = `
 .hybrid-map-page{background:#07080f;color:#e8e9f0;font-family:Inter,-apple-system,sans-serif;overflow:hidden;width:100vw;height:100vh}
 :root{--hy-main:#e8e9f0;--hy-sub:#b3bdd8;--hy-muted:#98a3c2;--hy-faint:#8792b3}
 html[data-theme='light'] .hybrid-map-page{background:#f3f6fb;color:#0f172a;--bg:#f3f6fb;--hy-main:#0f172a;--hy-sub:#334155;--hy-muted:#475569;--hy-faint:#64748b}
+#hybrid-sub-row{position:fixed;top:52px;left:0;right:0;height:38px;z-index:299;background:rgba(13,16,32,0.99);border-bottom:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;padding:0 18px;gap:8px;}
+html[data-theme='light'] #hybrid-sub-row{background:rgba(232,237,245,0.99);border-bottom:1px solid rgba(15,23,42,0.14);}
 .hybrid-map-page #toolbar{position:fixed;top:0;left:0;right:0;height:52px;z-index:300;background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07);display:flex;align-items:center;padding:0 18px;gap:10px}
 .hybrid-map-page #toolbar h1{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;flex:1;white-space:nowrap}
 .hybrid-map-page #toolbar h1 span{color:var(--hy-faint)}
-html[data-theme='light'] .hybrid-map-page #toolbar{background:rgba(255,255,255,.98);border-bottom:1px solid rgba(15,23,42,.14)}
+html[data-theme='light'] #hybrid-sub-row{position:fixed;top:52px;left:0;right:0;height:38px;z-index:299;background:rgba(13,16,32,0.99);border-bottom:1px solid rgba(255,255,255,0.12);display:flex;align-items:center;padding:0 18px;gap:8px;}
+html[data-theme='light'] #hybrid-sub-row{background:rgba(232,237,245,0.99);border-bottom:1px solid rgba(15,23,42,0.14);}
+.hybrid-map-page #toolbar{background:rgba(7,8,15,.98);border-bottom:1px solid rgba(255,255,255,.07)}
 .hybrid-map-page .mg{display:flex;border:1px solid rgba(255,255,255,.1);border-radius:5px;overflow:hidden;flex-shrink:0}
 .hybrid-map-page .mb{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 14px;background:transparent;color:var(--hy-sub);cursor:pointer;border:none;border-right:1px solid rgba(255,255,255,.07);transition:all .2s;white-space:nowrap}
 .hybrid-map-page .mb:last-child{border-right:none}
@@ -25,7 +29,7 @@ html[data-theme='light'] .hybrid-map-page .mb:hover:not(.on){color:var(--hy-main
 html[data-theme='light'] .hybrid-map-page .tb{background:var(--bg);border-color:rgba(15,23,42,.22);color:var(--hy-sub)}
 html[data-theme='light'] .hybrid-map-page .tb:hover{border-color:rgba(15,23,42,.4);color:var(--hy-main)}
 .hybrid-map-page #mstrip{position:fixed;top:52px;left:0;right:0;height:3px;z-index:299;transition:background .3s}
-.hybrid-map-page .view{position:fixed;top:55px;left:0;right:0;bottom:0;display:none}
+.hybrid-map-page .view{position:fixed;top:90px;left:0;right:0;bottom:0;display:none}
 .hybrid-map-page .view.on{display:block}
 .hybrid-map-page #vhub,.hybrid-map-page #vcross{background:#07080f;cursor:grab}
 .hybrid-map-page #vhub canvas,.hybrid-map-page #vcross canvas{display:block;width:100%;height:100%}
@@ -1301,6 +1305,9 @@ export default function HybridMap() {
       <style dangerouslySetInnerHTML={{ __html: HYBRID_MAP_STYLES }} />
       <div id="toolbar" role="region" aria-label="Hybrid map controls">
         <h1>HYPERSCALE DATA CENTER <span>/ Hybrid Intelligence Map</span></h1>
+        <Nav />
+      </div>
+      <div id="hybrid-sub-row">
         <div className="mg">
           <button type="button" aria-pressed={mode === 'hub'} className={`mb ${mode === 'hub' ? 'on' : ''}`} id="b1" onClick={() => switchMode('hub')}>① Hub &amp; Spoke</button>
           <button type="button" aria-pressed={mode === 'layers'} className={`mb ${mode === 'layers' ? 'on' : ''}`} id="b2" onClick={() => switchMode('layers')}>② Control Layers A–H</button>
@@ -1308,7 +1315,6 @@ export default function HybridMap() {
         </div>
         <button type="button" ref={litBtnRef} aria-pressed={litOn} className={`tb ${litOn ? 'lit' : ''}`} id="litbtn" onClick={toggleLit}>⬤ Litigation</button>
         <button type="button" className="tb" onClick={resetView} aria-label="Reset map view">↺ Reset</button>
-        <Nav />
       </div>
       <div id="mstrip" style={{ background: STRIP[mode] || 'transparent' }} />
       <div id="vhub" className={`view ${mode === 'hub' ? 'on' : ''}`}><canvas id="c1" ref={hubRef} tabIndex={0} aria-label="Hybrid map hub and spoke view" /></div>

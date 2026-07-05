@@ -226,22 +226,33 @@ body {
 
 .site-nav .sn {
   font-family: 'Space Mono', monospace !important;
-  font-size: 9px !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
-  padding: 4px 9px !important;
   border-radius: 3px !important;
+  border-style: solid !important;
+  border-width: 1px !important;
+  text-decoration: none !important;
+}
+
+.site-nav .sn:link,
+.site-nav .sn:visited,
+.site-nav .sn:hover,
+.site-nav .sn:active,
+.site-nav .sn .sn-label {
+  text-decoration: none !important;
 }
 
 /* Hard override for route-scoped nav styles (e.g. .data-query-page .sn, .hybrid-map-page .sn). */
 #toolbar .site-nav .sn {
   font-family: 'Space Mono', monospace !important;
-  font-size: 9px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
-  padding: 4px 9px !important;
+  padding: 5px 13px !important;
   border-radius: 3px !important;
+  border-style: solid !important;
+  border-width: 1px !important;
 }
 
 #toolbar .site-nav .sn-label {

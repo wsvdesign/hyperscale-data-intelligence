@@ -1,15 +1,13 @@
 import { NavLink } from 'react-router-dom';
 
-const NAV_LINK_STYLE = {};
-
 const links = [
-  { to: '/', icon: '⌂', label: 'Home', className: 'sn-home', end: true },
-  { to: '/hub-map', icon: '①', label: 'Hub Map' },
-  { to: '/hybrid-map', icon: '②', label: 'Hybrid Map' },
-  { to: '/timeline', icon: '③', label: 'Timeline' },
-  { to: '/growth-pressure', icon: '④', label: 'Growth Pressure' },
-  { to: '/data-query', icon: '⑤', label: 'Data Query' },
-  { to: '/research', icon: '⑥', label: 'Research' },
+  { to: '/', label: 'Home', className: 'sn-home', end: true },
+  { to: '/hub-map', label: 'Hub Map' },
+  { to: '/hybrid-map', label: 'Hybrid Map' },
+  { to: '/timeline', label: 'Timeline' },
+  { to: '/growth-pressure', label: 'Growth Pressure' },
+  { to: '/data-query', label: 'Data Query' },
+  { to: '/research', label: 'Research' },
 ];
 
 export default function Nav() {
@@ -24,7 +22,7 @@ export default function Nav() {
             `sn ${link.className ? link.className : ''} ${isActive ? 'sn-active' : ''}`.trim()
           }
         >
-          <span>{link.icon}</span> <span className="sn-label">{link.label}</span>
+          <span className="sn-label">{link.label}</span>
         </NavLink>
       ))}
     </nav>

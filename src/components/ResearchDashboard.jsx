@@ -16,8 +16,9 @@ export default function ResearchDashboard({ theme }) {
   }, [theme])
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: isLight ? '#f3f6fb' : '#07080f' }}>
+    <div className="research-page" style={{ position: 'fixed', inset: 0, background: isLight ? '#f3f6fb' : '#07080f' }}>
       <div
+        id="toolbar"
         style={{
           position: 'fixed',
           top: 0,
