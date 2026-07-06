@@ -20,7 +20,7 @@ export default async (req) => {
   }
   // Cap response length so generation finishes faster (Netlify function time limit)
   const max_tokens = Math.min(requestedMaxTokens || 1200, 1200);
-  const payload = { model: "claude-sonnet-4-6", max_tokens, messages };
+  const payload = { model: "claude-haiku-4-5-20251001", max_tokens, messages };
   if (system) payload.system = system;
   // Server-side allowlist: only web_search permitted, capped at 3 searches so
   // the whole request finishes well within Netlify's function timeout

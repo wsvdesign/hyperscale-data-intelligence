@@ -7,6 +7,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import initSqlJs from 'sql.js'
+import sqlWasmUrl from 'sql.js/dist/sql-wasm.wasm?url'
 import Nav from './Nav'
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
@@ -609,7 +610,7 @@ html[data-theme='light'] .data-query-page #toolbar{background:rgba(243,246,251,.
 html[data-theme='light'] .data-query-page #toolbar h1{color:#0f172a}
 html[data-theme='light'] .data-query-page #toolbar h1 span{color:#64748b}
 .data-query-page .site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
-.data-query-page .sn{font-family:monospace;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:5px 13px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
+.data-query-page .sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
 .data-query-page .sn:hover{border-color:rgba(255,255,255,.25);color:#dde0f0}
 .data-query-page .sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
 .data-query-page .sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
@@ -662,13 +663,7 @@ export default function DataQuery() {
     let cancelled = false
     async function initDb() {
       try {
-        let SQL
-        try {
-          const initSqlAsm = (await import('sql.js/dist/sql-asm.js')).default
-          SQL = await initSqlAsm()
-        } catch {
-          SQL = await initSqlJs({ locateFile: file => `/${file}` })
-        }
+        const SQL = await initSqlJs({ locateFile: () => sqlWasmUrl })
         if (cancelled) return
         const database = new SQL.Database()
         database.run(`
@@ -733,41 +728,6 @@ export default function DataQuery() {
   }
 
   // ── PRINT ──────────────────────────────────────────────────────────────────
-  function drawReportHeader(doc, W) {
-    doc.setFont('helvetica', 'bold')
-    doc.setFontSize(20)
-    doc.setTextColor(20, 20, 20)
-    doc.text('HYPERSCALE DATA CENTER REPORT', W / 2, 16, { align: 'center' })
-    doc.setFont('helvetica', 'normal')
-    doc.setFontSize(14)
-    doc.setTextColor(60, 60, 60)
-    doc.text('Infrastructure, Energy, Water, Incentives, and Community Impact Analysis', W / 2, 24, { align: 'center' })
-    doc.setFontSize(12)
-    doc.setTextColor(30, 90, 200)
-    doc.textWithLink('hyperdataintelligence.netlify.app', W / 2, 31, { align: 'center', url: 'https://hyperdataintelligence.netlify.app' })
-    doc.setDrawColor(200, 160, 32)
-    doc.setLineWidth(0.4)
-    doc.line(15, 36, W - 15, 36)
-    return 44
-  }
-
-  const REPORT_DISCLAIMER = 'Methodology and Data Disclaimer: This report uses SQL, Python, and AI-assisted analysis to examine hyperscale data center activity. Findings are based on the datasets and source materials available at the time of analysis. Results may be affected by missing records, inconsistent definitions, duplicate entries, reporting delays, data-classification errors, or limitations in the analytical methods used. AI-generated content may contain unsupported or inaccurate conclusions and should be independently verified. This report is intended for research and educational purposes and should not be treated as legal, financial, regulatory, or investment advice.'
-
-  function placeReportFooter(doc, yPos) {
-    const W = doc.internal.pageSize.getWidth()
-    doc.setFont('helvetica', 'italic')
-    doc.setFontSize(11)
-    const wrapped = doc.splitTextToSize(REPORT_DISCLAIMER, W - 30)
-    const neededH = wrapped.length * 4 + 10
-    let H = doc.internal.pageSize.getHeight()
-    if (yPos + neededH > H - 8) {
-      doc.addPage()
-      H = doc.internal.pageSize.getHeight()
-    }
-    doc.setTextColor(110, 110, 110)
-    doc.text(wrapped, 15, H - 10 - (wrapped.length * 4))
-  }
-
   function handlePrint() {
     const script = document.createElement('script')
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
@@ -775,46 +735,44 @@ export default function DataQuery() {
       const { jsPDF } = window.jspdf
       const doc = new jsPDF({ unit: 'mm', format: 'a4' })
       const W = doc.internal.pageSize.getWidth()
-      let y = drawReportHeader(doc, W)
+      let y = 20
       doc.setFont('helvetica', 'bold')
-      doc.setFontSize(13)
+      doc.setFontSize(14)
       doc.setTextColor(30, 30, 30)
       doc.text(`${selectedState} — Hyperscale Data Center Inquiry`, 15, y)
       y += 8
       doc.setFont('helvetica', 'normal')
-      doc.setFontSize(12)
+      doc.setFontSize(9)
       doc.setTextColor(80, 80, 80)
       doc.text(`Question: ${question}`, 15, y, { maxWidth: W - 30 })
       y += 12
       const lines = (answer || '').split('\n')
       lines.forEach(line => {
-        if (y > 255) { doc.addPage(); y = drawReportHeader(doc, W) }
+        if (y > 270) { doc.addPage(); y = 20 }
         if (line.startsWith('## ')) {
           doc.setFont('helvetica', 'bold')
-          doc.setFontSize(13)
+          doc.setFontSize(10)
           doc.setTextColor(30, 30, 30)
           doc.text(line.slice(3).toUpperCase(), 15, y)
-          y += 7
+          y += 6
         } else if (line.startsWith('- ')) {
           doc.setFont('helvetica', 'normal')
-          doc.setFontSize(12)
+          doc.setFontSize(9)
           doc.setTextColor(60, 60, 60)
           const wrapped = doc.splitTextToSize('— ' + line.slice(2), W - 30)
           doc.text(wrapped, 15, y)
-          y += wrapped.length * 6
+          y += wrapped.length * 5
         } else if (line.trim()) {
           doc.setFont('helvetica', 'normal')
-          doc.setFontSize(12)
+          doc.setFontSize(9)
           doc.setTextColor(60, 60, 60)
           const wrapped = doc.splitTextToSize(line, W - 30)
           doc.text(wrapped, 15, y)
-          y += wrapped.length * 6
+          y += wrapped.length * 5
         } else {
           y += 3
         }
       })
-      y += 6
-      placeReportFooter(doc, y)
       const date = new Date().toISOString().slice(0, 10)
       doc.save(`${selectedState}_DataCenter_Report_${date}.pdf`)
     }
@@ -822,85 +780,6 @@ export default function DataQuery() {
   }
 
   // ── NUMERIC COLUMN DETECTION ───────────────────────────────────────────────
-  function handlePrintSQL() {
-    if (!results || !results.columns.length) return
-    const script = document.createElement('script')
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-    script.onload = () => {
-      const { jsPDF } = window.jspdf
-      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
-      const W = doc.internal.pageSize.getWidth()
-      let H = doc.internal.pageSize.getHeight()
-      let y = drawReportHeader(doc, W)
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(13)
-      doc.setTextColor(30, 30, 30)
-      doc.text('SQL Query Results', 15, y)
-      y += 6
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      doc.setTextColor(90, 90, 90)
-      const qWrapped = doc.splitTextToSize(sql.trim(), W - 30)
-      doc.text(qWrapped, 15, y)
-      y += qWrapped.length * 4.5 + 6
-
-      const cols = results.columns
-      const rowsData = results.rows
-      const marginX = 15
-      const usableW = W - marginX * 2
-      const colW = usableW / cols.length
-      const lineH = 4.2
-      const cellPad = 2.5
-      const FOOTER_RESERVE = 34
-
-      function drawHeaderRow() {
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(9)
-        doc.setFillColor(20, 20, 20)
-        doc.setTextColor(255, 255, 255)
-        doc.rect(marginX, y - 5, usableW, 7, 'F')
-        cols.forEach((col, i) => { doc.text(String(col), marginX + i * colW + 2, y) })
-        y += 7
-      }
-
-      drawHeaderRow()
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-
-      rowsData.forEach((r, ri) => {
-        const cellWraps = r.map(v => {
-          const text = v === null || v === undefined ? '' : String(v)
-          return doc.splitTextToSize(text, colW - 4)
-        })
-        const maxLines = Math.max(1, ...cellWraps.map(w => w.length))
-        const rowH = maxLines * lineH + cellPad
-
-        if (y + rowH > H - FOOTER_RESERVE) {
-          doc.addPage()
-          y = drawReportHeader(doc, W)
-          drawHeaderRow()
-          H = doc.internal.pageSize.getHeight()
-        }
-
-        if (ri % 2 === 0) {
-          doc.setFillColor(245, 245, 245)
-          doc.rect(marginX, y - 5, usableW, rowH, 'F')
-        }
-        doc.setTextColor(40, 40, 40)
-        cellWraps.forEach((wrap, ci) => {
-          doc.text(wrap, marginX + ci * colW + 2, y)
-        })
-        y += rowH
-      })
-
-      y += 8
-      placeReportFooter(doc, y)
-      const date = new Date().toISOString().slice(0, 10)
-      doc.save(`SQL_DataCenter_Report_${date}.pdf`)
-    }
-    document.head.appendChild(script)
-  }
-
   function isNumeric(col, rows) {
     return rows.every(r => {
       const v = r[col]
@@ -920,8 +799,11 @@ export default function DataQuery() {
     setResources([])
     setAskError(null)
     setAskStage('Searching the web...')
-    setTimeout(() => setAskStage('Reading sources...'), 8000)
-    setTimeout(() => setAskStage('Writing your report...'), 16000)
+    const stageTimers = [
+      setTimeout(() => setAskStage('Reading sources...'), 8000),
+      setTimeout(() => setAskStage('Writing your report...'), 16000),
+      setTimeout(() => setAskStage('Compiling final report...'), 28000),
+    ]
 
     const stateRecord = STATES.find(s => s.state === selectedState)
     const contextMsg = stateRecord
@@ -929,7 +811,7 @@ export default function DataQuery() {
       : `Scope: All U.S. states in dataset. Question: ${question}`
 
     try {
-      const response = await fetch('/.netlify/functions/anthropic', {
+      const startResponse = await fetch('/.netlify/functions/anthropic-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -939,7 +821,49 @@ export default function DataQuery() {
           tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         }),
       })
-      const data = await response.json()
+
+      if (!startResponse.ok) {
+        throw new Error('Could not start inquiry')
+      }
+
+      const { jobId } = await startResponse.json()
+      if (!jobId) {
+        throw new Error('Missing inquiry job id')
+      }
+
+      const pollLimit = 180
+      let attempts = 0
+      let data = null
+
+      while (attempts < pollLimit) {
+        attempts += 1
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+
+        const statusResponse = await fetch(`/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`)
+
+        if (statusResponse.status === 404) {
+          continue
+        }
+
+        if (!statusResponse.ok) {
+          throw new Error('Inquiry status check failed')
+        }
+
+        const statusData = await statusResponse.json()
+        if (statusData.status === 'done') {
+          data = statusData.data
+          break
+        }
+
+        if (statusData.status === 'error') {
+          throw new Error(statusData.message || 'Inquiry failed')
+        }
+      }
+
+      if (!data) {
+        throw new Error('Inquiry timed out before completion')
+      }
+
       const textBlocks = (data.content || [])
         .filter(b => b.type === 'text' && typeof b.text === 'string')
         .map(b => b.text.trim())
@@ -962,8 +886,8 @@ export default function DataQuery() {
     } catch (err) {
       setAskError('Could not get a response. Please try again.')
     } finally {
+      stageTimers.forEach(clearTimeout)
       setAsking(false)
-      setAskStage('Searching the web...')
       setAskStage('Searching the web...')
     }
   }
@@ -1099,7 +1023,7 @@ export default function DataQuery() {
                 </button>
                 {dbError && <span style={{ fontSize:'10px', color:'#e04040' }}>DB error: {dbError}</span>}
                 <div style={{ marginLeft:'auto' }}>
-                  <button type="button" style={S.iconBtn} onClick={handlePrintSQL} title="Print SQL results / save as PDF" disabled={!results || !results.columns.length}>
+                  <button type="button" style={S.iconBtn} onClick={handlePrint} title="Print / save as PDF">
                     <i className="ti ti-printer" aria-hidden="true" />
                   </button>
                 </div>

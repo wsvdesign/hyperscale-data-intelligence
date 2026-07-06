@@ -612,6 +612,9 @@ const SECTORS = [
     id: 'infra',
     label: 'Contractors\n/ Infrastructure',
     icon: '🔩',
+    iconOffsetX: 0,
+    iconOffsetY: 2,
+    labelOffsetY: -2,
     color: '#b8874f',
     angle: 288,
     controls:
@@ -689,6 +692,9 @@ const SECTORS = [
     id: 'courts',
     label: 'Courts &\nAdmin Review',
     icon: '⚖️',
+    iconOffsetX: 0,
+    iconOffsetY: 2,
+    labelOffsetY: -2,
     color: '#bf6c6c',
     angle: 324,
     controls:
@@ -919,14 +925,14 @@ export default function HubMap() {
       });
     }
 
-    function drawEmoji(emoji, wx, wy, offsetY, size) {
+    function drawEmoji(emoji, wx, wy, offsetY, size, offsetX = 0) {
       const [x, y] = toScreen(wx, wy);
       const dpr = window.devicePixelRatio;
       const scale = stateRef.current.scale;
       ctx.font = `${size * scale * dpr}px serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(emoji, x, y + offsetY * scale * dpr);
+      ctx.fillText(emoji, x + offsetX * scale * dpr, y + offsetY * scale * dpr);
     }
 
     function drawTag(text, wx, wy, cls) {
@@ -1063,14 +1069,18 @@ export default function HubMap() {
           isActive ? 2 : 1.5
         );
 
-        drawEmoji(sec.icon, sx, sy, -8, 16);
+        const iconOffsetX = sec.iconOffsetX || 0;
+        const iconOffsetY = -8 + (sec.iconOffsetY || 0);
+        const labelOffsetY = 10 + (sec.labelOffsetY || 0);
+
+        drawEmoji(sec.icon, sx, sy, iconOffsetY, 16, iconOffsetX);
         const lines = sec.label.split('\n');
         lines.forEach((ln, li) => {
           drawText(
             ln,
             sx,
             sy,
-            10 + li * 10,
+            labelOffsetY + li * 10,
             8.5,
             isLight ? '#0f172a' : isActive ? '#ffffff' : 'rgba(255,255,255,0.75)',
             'center',
