@@ -728,14 +728,139 @@ export default function DataQuery() {
   }
 
   // ── PRINT ──────────────────────────────────────────────────────────────────
-  function handlePrint() {
+  function withJsPdf(run) {
     const script = document.createElement('script')
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
     script.onload = () => {
-      const { jsPDF } = window.jspdf
+      run(window.jspdf.jsPDF)
+    }
+    document.head.appendChild(script)
+  }
+
+  function handlePrintSql() {
+    if (!results || results.empty || !results.columns?.length) return
+
+    withJsPdf((jsPDF) => {
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'landscape' })
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const marginLeft = 10
+      const marginRight = 10
+      const marginTop = 12
+      const marginBottom = 10
+      const tableWidth = pageWidth - marginLeft - marginRight
+      const colCount = results.columns.length
+      const maxCharsByCol = results.columns.map((name, i) => {
+        const fromRows = results.rows.reduce((max, row) => {
+          const cell = row?.[i]
+          const text = cell === null || cell === undefined ? 'NULL' : String(cell)
+          return Math.max(max, text.length)
+        }, 0)
+        return Math.min(Math.max(name.length, fromRows), 32)
+      })
+
+      const totalChars = maxCharsByCol.reduce((sum, n) => sum + n, 0) || 1
+      let colWidths = maxCharsByCol.map((n) => Math.max(18, (n / totalChars) * tableWidth))
+      const widthScale = tableWidth / colWidths.reduce((sum, n) => sum + n, 0)
+      colWidths = colWidths.map((w) => w * widthScale)
+
+      const drawTitleBlock = () => {
+        let y = marginTop
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(13)
+        doc.setTextColor(30, 30, 30)
+        doc.text('Hyperscale Data Center SQL Report', marginLeft, y)
+        y += 6
+
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(8)
+        doc.setTextColor(90, 90, 90)
+        doc.text(`Rows: ${results.rows.length} | Exported: ${new Date().toISOString()}`, marginLeft, y)
+        y += 5
+
+        doc.setTextColor(70, 70, 70)
+        const sqlPreview = doc.splitTextToSize(`SQL: ${sql}`, tableWidth)
+        doc.text(sqlPreview, marginLeft, y)
+        return y + sqlPreview.length * 3 + 2
+      }
+
+      const drawHeaderRow = (y) => {
+        doc.setFillColor(236, 240, 247)
+        doc.setDrawColor(185, 192, 204)
+        doc.setTextColor(28, 34, 44)
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(8)
+
+        let x = marginLeft
+        results.columns.forEach((col, i) => {
+          const w = colWidths[i]
+          doc.rect(x, y, w, 7, 'FD')
+          const colText = doc.splitTextToSize(String(col), w - 2)
+          doc.text(colText, x + 1, y + 4)
+          x += w
+        })
+      }
+
+      let y = drawTitleBlock()
+      drawHeaderRow(y)
+      y += 7
+
+      doc.setFont('helvetica', 'normal')
+      doc.setFontSize(8)
+      doc.setTextColor(45, 45, 45)
+
+      results.rows.forEach((row, rowIndex) => {
+        const wrappedByCol = row.map((cell, i) => {
+          const text = cell === null || cell === undefined ? 'NULL' : String(cell)
+          return doc.splitTextToSize(text, colWidths[i] - 2)
+        })
+
+        const maxLineCount = wrappedByCol.reduce((max, lines) => Math.max(max, lines.length), 1)
+        const rowHeight = Math.max(6, maxLineCount * 3.6 + 1.6)
+
+        if (y + rowHeight > pageHeight - marginBottom) {
+          doc.addPage()
+          y = marginTop
+          drawHeaderRow(y)
+          y += 7
+        }
+
+        let x = marginLeft
+        wrappedByCol.forEach((lines, i) => {
+          const w = colWidths[i]
+          doc.setDrawColor(205, 210, 218)
+          if (rowIndex % 2 === 0) {
+            doc.setFillColor(252, 253, 255)
+            doc.rect(x, y, w, rowHeight, 'FD')
+          } else {
+            doc.rect(x, y, w, rowHeight, 'S')
+          }
+          doc.text(lines, x + 1, y + 4)
+          x += w
+        })
+
+        y += rowHeight
+      })
+
+      const date = new Date().toISOString().slice(0, 10)
+      doc.save(`SQL_DataCenter_Report_${date}.pdf`)
+    })
+  }
+
+  function handlePrintAnswer() {
+    if (!answer) return
+
+    withJsPdf((jsPDF) => {
       const doc = new jsPDF({ unit: 'mm', format: 'a4' })
       const W = doc.internal.pageSize.getWidth()
       let y = 20
+
+      doc.setFont('helvetica', 'bold')
+      doc.setFontSize(10)
+      doc.setTextColor(70, 70, 70)
+      doc.text('STATE INQUIRY REPORT', 15, y)
+      y += 7
+
       doc.setFont('helvetica', 'bold')
       doc.setFontSize(14)
       doc.setTextColor(30, 30, 30)
@@ -775,8 +900,7 @@ export default function DataQuery() {
       })
       const date = new Date().toISOString().slice(0, 10)
       doc.save(`${selectedState}_DataCenter_Report_${date}.pdf`)
-    }
-    document.head.appendChild(script)
+    })
   }
 
   // ── NUMERIC COLUMN DETECTION ───────────────────────────────────────────────
@@ -789,6 +913,17 @@ export default function DataQuery() {
 
   function isHighPressure(col, val) {
     return col === 'ratio' && typeof val === 'number' && val >= 1.0
+  }
+
+  async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 15000) {
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await fetch(url, { ...options, signal: controller.signal })
+      return response
+    } finally {
+      clearTimeout(timer)
+    }
   }
 
   // ── ASK CLAUDE ─────────────────────────────────────────────────────────────
@@ -811,7 +946,7 @@ export default function DataQuery() {
       : `Scope: All U.S. states in dataset. Question: ${question}`
 
     try {
-      const startResponse = await fetch('/.netlify/functions/anthropic-start', {
+      const startResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -821,42 +956,62 @@ export default function DataQuery() {
           tools: [{ type: 'web_search_20250305', name: 'web_search' }],
         }),
       })
-
-      if (!startResponse.ok) {
-        throw new Error('Could not start inquiry')
-      }
-
-      const { jobId } = await startResponse.json()
-      if (!jobId) {
-        throw new Error('Missing inquiry job id')
-      }
-
-      const pollLimit = 180
-      let attempts = 0
       let data = null
 
-      while (attempts < pollLimit) {
-        attempts += 1
-        await new Promise((resolve) => setTimeout(resolve, 2000))
+      if (startResponse.status === 404) {
+        // Backward compatibility for environments that only expose the legacy endpoint.
+        const legacyResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system: SYSTEM_PROMPT,
+            messages: [{ role: 'user', content: contextMsg }],
+            max_tokens: 2000,
+            tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+          }),
+        })
 
-        const statusResponse = await fetch(`/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`)
-
-        if (statusResponse.status === 404) {
-          continue
+        if (!legacyResponse.ok) {
+          throw new Error('Could not get a response from inquiry service')
         }
 
-        if (!statusResponse.ok) {
-          throw new Error('Inquiry status check failed')
+        data = await legacyResponse.json()
+      } else {
+        if (!startResponse.ok) {
+          throw new Error('Could not start inquiry')
         }
 
-        const statusData = await statusResponse.json()
-        if (statusData.status === 'done') {
-          data = statusData.data
-          break
+        const { jobId } = await startResponse.json()
+        if (!jobId) {
+          throw new Error('Missing inquiry job id')
         }
 
-        if (statusData.status === 'error') {
-          throw new Error(statusData.message || 'Inquiry failed')
+        const pollLimit = 180
+        let attempts = 0
+
+        while (attempts < pollLimit) {
+          attempts += 1
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+
+          const statusResponse = await fetchJsonWithTimeout(`/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`, {}, 10000)
+
+          if (statusResponse.status === 404) {
+            continue
+          }
+
+          if (!statusResponse.ok) {
+            throw new Error('Inquiry status check failed')
+          }
+
+          const statusData = await statusResponse.json()
+          if (statusData.status === 'done') {
+            data = statusData.data
+            break
+          }
+
+          if (statusData.status === 'error') {
+            throw new Error(statusData.message || 'Inquiry failed')
+          }
         }
       }
 
@@ -1023,7 +1178,7 @@ export default function DataQuery() {
                 </button>
                 {dbError && <span style={{ fontSize:'10px', color:'#e04040' }}>DB error: {dbError}</span>}
                 <div style={{ marginLeft:'auto' }}>
-                  <button type="button" style={S.iconBtn} onClick={handlePrint} title="Print / save as PDF">
+                  <button type="button" style={S.iconBtn} onClick={handlePrintSql} title="Print / save as PDF">
                     <i className="ti ti-printer" aria-hidden="true" />
                   </button>
                 </div>
@@ -1081,6 +1236,7 @@ export default function DataQuery() {
         {activeTab === 'state' && (
           <div style={S.right}>
             <div style={S.statePanel}>
+              <div style={{ ...S.lbl, marginBottom:'10px' }}>State Inquiry</div>
 
               {/* State selector */}
               <div style={S.stateRow}>
@@ -1146,9 +1302,9 @@ export default function DataQuery() {
               {(answer || asking) && (
                 <div style={S.answerBox}>
                   <div style={{ display:'flex', alignItems:'center', marginBottom:'8px' }}>
-                    <span style={{ ...S.lbl, flex:1 }}>Answer</span>
+                    <span style={{ ...S.lbl, flex:1 }}>State Inquiry</span>
                     {answer && (
-                      <button type="button" style={S.iconBtn} onClick={handlePrint} title="Print / save as PDF">
+                      <button type="button" style={S.iconBtn} onClick={handlePrintAnswer} title="Print / save as PDF">
                         <i className="ti ti-printer" aria-hidden="true" />
                       </button>
                     )}
