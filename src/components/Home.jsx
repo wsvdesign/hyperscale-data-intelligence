@@ -1,9 +1,10 @@
-import Nav from './Nav';
+import { NavLink } from 'react-router-dom';
 
 export default function Home() {
   return (
     <>
       <style>{`
+@import url('https://fonts.googleapis.com/css2?family=Jost:wght@100;300;400&family=Cormorant+Garamond:ital,wght@0,300;1,300;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -19,14 +20,37 @@ html[data-theme='light']{
 }
 html,body{width:100%;min-height:100%;background:var(--bg);color:var(--text);font-family:var(--sans)}
 
-#toolbar{
-  position:fixed;top:0;left:0;right:0;height:50px;z-index:200;
-  background:rgba(6,7,14,0.98);border-bottom:1px solid var(--border);
-  display:flex;align-items:center;padding:0 20px;gap:10px;
-}
-html[data-theme='light'] #toolbar{background:rgba(255,255,255,0.98)}
-#toolbar h1{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;flex:1;color:var(--text);white-space:nowrap}
-#toolbar h1 span{color:var(--text3);font-weight:400}
+  .hero{position:relative;height:100vh;width:100%;overflow:hidden;display:flex;flex-direction:column;justify-content:center}
+  .hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.65;filter:grayscale(15%) contrast(1.05)}
+  .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at center, rgba(5,5,5,0) 0%, rgba(5,5,5,0.55) 68%, rgba(5,5,5,0.92) 100%);z-index:1}
+  .hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg, rgba(5,5,5,0.55) 0%, rgba(5,5,5,0.1) 22%, rgba(5,5,5,0.15) 70%, rgba(5,5,5,0.85) 100%);z-index:1}
+
+  .hero-nav{position:fixed;top:0;left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:34px 5vw;background:transparent;font-weight:300}
+  .hero-nav-mark{font-family:'Jost',sans-serif;font-weight:100;font-size:21px;letter-spacing:0.13em;text-transform:uppercase;color:#f4f2ec}
+  .hero-nav-mark span{color:#c9a84c}
+  .hero-nav-links{display:flex;gap:32px;list-style:none;margin:0;padding:0}
+  .hero-nav-links a{color:#f4f2ec;text-decoration:none;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;font-weight:300;opacity:0.82;position:relative;padding-bottom:6px;transition:opacity 0.3s ease}
+  .hero-nav-links a::after{content:'';position:absolute;left:0;bottom:0;width:0%;height:1px;background:#C8A020;transition:width 0.35s ease}
+  .hero-nav-links a:hover{opacity:1}
+  .hero-nav-links a:hover::after{width:100%}
+  .hero-nav-links a.active{opacity:1}
+  .hero-nav-links a.active::after{width:100%}
+
+  .hero-content{position:relative;z-index:5;padding:0 6vw;display:flex;flex-direction:column;align-items:flex-start}
+  .eyebrow-line{display:flex;align-items:center;gap:18px;margin-bottom:16px}
+  .eyebrow-line .rule{width:46px;height:1px;background:#C8A020}
+  .word-intelligence{font-family:'Jost',sans-serif;font-weight:100;font-size:clamp(26px,2.56vw,35px);letter-spacing:0.5em;text-transform:uppercase;color:#c9a84c}
+  .word-system{font-family:'Jost',sans-serif;font-weight:100;font-size:clamp(110px,17.25vw,276px);line-height:0.86;letter-spacing:-0.01em;color:#f4f2ec;margin:6px 0 28px 0;text-transform:uppercase}
+  .gold-rule{width:100%;max-width:560px;height:1px;background:linear-gradient(90deg, #C8A020 0%, rgba(200,160,32,0.15) 100%);margin-bottom:30px}
+  .slogan{font-family:'Cormorant Garamond',serif;font-style:italic;font-weight:300;font-size:clamp(26px,2.86vw,39px);color:#f4f2ec;max-width:640px;line-height:1.4;opacity:0.92}
+
+  @media(max-width:720px){
+    .hero-nav{padding:24px 6vw}
+    .hero-nav-links{display:none}
+    .hero-nav-mark{font-size:18px}
+    .word-system{font-size:clamp(64px,22vw,120px)}
+    .slogan{font-size:18px}
+  }
 
 #page{padding:90px 32px 80px;max-width:900px;margin:0 auto}
 @media(max-width:600px){#page{padding:76px 18px 60px}}
@@ -76,41 +100,44 @@ html[data-theme='light'] .card.c4 .card-title{color:#8B6E1A}
 .hyp-num{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:block}
 .hyp-text{font-size:12px;color:var(--text2);line-height:1.65;font-style:italic}
 
-.site-nav{display:flex;gap:5px;flex-wrap:wrap;align-items:center;flex-shrink:0}
-.sn{font-family:monospace;font-size:8px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 9px;border:1px solid rgba(255,255,255,.08);border-radius:3px;background:transparent;color:#5a5e78;text-decoration:none;white-space:nowrap;transition:all .15s}
-.sn:hover{border-color:rgba(255,255,255,.25);color:#dde0f0}
-.sn.sn-home{border-color:rgba(108,142,191,.3);color:#6c8ebf}
-.sn.sn-home:hover{background:rgba(108,142,191,.08);border-color:#6c8ebf}
-.sn.sn-active{background:rgba(255,255,255,.07);color:#dde0f0;border-color:rgba(255,255,255,.18)}
-html[data-theme='light'] .sn{border-color:rgba(15,23,42,.22);color:#334155;background:#ffffff}
-html[data-theme='light'] .sn:hover{border-color:rgba(15,23,42,.46);color:#0f172a;background:#f8fafc}
-html[data-theme='light'] .sn.sn-home{border-color:rgba(37,99,235,.35);color:#1d4ed8}
-html[data-theme='light'] .sn.sn-home:hover{background:rgba(37,99,235,.08);border-color:#1d4ed8}
-html[data-theme='light'] .sn.sn-active{background:#e2e8f0;color:#0f172a;border-color:rgba(15,23,42,.38)}
-
-.card:focus-visible,.sn:focus-visible{
+  .card:focus-visible,.hero-nav-links a:focus-visible{
   outline:2px solid #1d4ed8;
   outline-offset:2px;
 }
-@media(max-width:780px){.sn{font-size:7px;padding:3px 7px}}
-@media(max-width:520px){.site-nav .sn-label{display:none}.sn{padding:4px 7px}}
       `}</style>
 
-      <div id="toolbar">
-        <h1>
-          HYPERSCALE DATA CENTER <span>/ Intelligence System</span>
-        </h1>
-        <Nav />
-      </div>
+        <section className="hero">
+          <video autoPlay muted loop playsInline>
+            <source src="/Videos/hero-2907.mp4" type="video/mp4" />
+            <source src="/Videos/hero-2930.mp4" type="video/mp4" />
+          </video>
+
+          <nav className="hero-nav">
+            <div className="hero-nav-mark">Hyperscale <span>&mdash;</span> Data Center</div>
+            <ul className="hero-nav-links">
+              <li><NavLink to="/hub-map" className={({ isActive }) => isActive ? 'active' : ''}>Hub Map</NavLink></li>
+              <li><NavLink to="/hybrid-map" className={({ isActive }) => isActive ? 'active' : ''}>Hybrid Map</NavLink></li>
+              <li><NavLink to="/timeline" className={({ isActive }) => isActive ? 'active' : ''}>Timeline</NavLink></li>
+              <li><NavLink to="/growth-pressure" className={({ isActive }) => isActive ? 'active' : ''}>Growth Pressure</NavLink></li>
+              <li><NavLink to="/data-query" className={({ isActive }) => isActive ? 'active' : ''}>Data Query</NavLink></li>
+              <li><NavLink to="/research" className={({ isActive }) => isActive ? 'active' : ''}>Research</NavLink></li>
+            </ul>
+          </nav>
+
+          <div className="hero-content">
+            <div className="eyebrow-line">
+              <div className="rule"></div>
+              <div className="word-intelligence">Intelligence</div>
+            </div>
+            <div className="word-system">System</div>
+            <div className="gold-rule"></div>
+            <p className="slogan">By the time it's public, it's already done.<br />Not anymore.</p>
+          </div>
+        </section>
 
       <div id="page">
         <span className="eyebrow">Pursuit Cycle 2 — Industry Intelligence Project</span>
-        <h2 className="page-title">
-          Hyperscale Data Center
-          <br />
-          Intelligence System
-        </h2>
-        <div className="page-intro">
+          <div className="page-intro">
           <p>
             This project combines four analytical perspectives on the same subject: how hyperscale
             data centers become state-supported developments, who controls the process, how decisions
