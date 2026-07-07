@@ -776,6 +776,14 @@ export default function DataQuery() {
     return y + preview.length * 3 + 2
   }
 
+  function drawStateBrandHeader(doc, marginLeft, y) {
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(13)
+    doc.setTextColor(30, 30, 30)
+    doc.text('HYPERSCALE DATA CENTER', marginLeft, y)
+    return y + 5
+  }
+
   function handlePrintSql() {
     if (!results || results.empty || !results.columns?.length) return
 
@@ -888,18 +896,19 @@ export default function DataQuery() {
         const marginLeft = 15
         const marginTop = 20
         const contentWidth = pageWidth - 30
-        const drawStateHeader = () => (
-          drawReportTitleBlock(
+        const drawStateHeader = () => {
+          const titleStartY = drawStateBrandHeader(doc, marginLeft, marginTop)
+          return drawReportTitleBlock(
             doc,
             marginLeft,
-            marginTop,
+            titleStartY,
             contentWidth,
-            'Hyperscale Data Center State Inquiry Report',
+            'State Inquiry Report',
             `State: ${selectedState} | Exported: ${new Date().toISOString()}`,
             'Question',
             question
           ) + 2
-        )
+        }
         let y = drawStateHeader()
 
         const lines = (answer || '').split('\n')
