@@ -1000,70 +1000,8 @@ export default function DataQuery() {
     }
 
     try {
-      const startResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic-start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestPayload),
-      })
-      let data = null
-
-      if (startResponse.status === 404) {
-        // Backward compatibility for environments that only expose the legacy endpoint.
-        data = await runLegacyInquiry()
-      } else {
-        if (!startResponse.ok) {
-          // If async start is unavailable or rate-limited, retry through legacy endpoint.
-          data = await runLegacyInquiry()
-        } else {
-          const { jobId } = await startResponse.json()
-          if (!jobId) {
-            throw new Error('Missing inquiry job id')
-          }
-
-          const pollLimit = 180
-          let attempts = 0
-          let pendingOrRunningCount = 0
-          let missingCount = 0
-
-          while (attempts < pollLimit) {
-            attempts += 1
-            await new Promise((resolve) => setTimeout(resolve, 2000))
-
-            const statusResponse = await fetchJsonWithTimeout(`/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`, {}, 10000)
-
-            if (statusResponse.status === 404) {
-              missingCount += 1
-              if (missingCount >= 5) {
-                data = await runLegacyInquiry()
-                break
-              }
-              continue
-            }
-
-            if (!statusResponse.ok) {
-              throw new Error('Inquiry status check failed')
-            }
-
-            const statusData = await statusResponse.json()
-            if (statusData.status === 'done') {
-              data = statusData.data
-              break
-            }
-
-            if (statusData.status === 'error') {
-              throw new Error(statusData.message || 'Inquiry failed')
-            }
-
-            if (statusData.status === 'pending' || statusData.status === 'running') {
-              pendingOrRunningCount += 1
-              if (pendingOrRunningCount >= 20) {
-                data = await runLegacyInquiry()
-                break
-              }
-            }
-          }
-        }
-      }
+      // Use the synchronous legacy endpoint for reliability during live demos.
+      const data = await runLegacyInquiry()
 
       if (!data) {
         throw new Error('Inquiry timed out before completion')
@@ -1089,7 +1027,7 @@ export default function DataQuery() {
       setAnswer(rawText)
       setResources(parsedResources)
     } catch (err) {
-      setAskError('Could not get a response. Please try again.')
+      setAskError(err?.message || 'Could not get a response. Please try again.')
     } finally {
       stageTimers.forEach(clearTimeout)
       setAsking(false)
