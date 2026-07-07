@@ -884,24 +884,31 @@ export default function DataQuery() {
       try {
         const doc = new jsPDF({ unit: 'mm', format: 'a4' })
         const pageWidth = doc.internal.pageSize.getWidth()
+        const pageHeight = doc.internal.pageSize.getHeight()
         const marginLeft = 15
         const marginTop = 20
         const contentWidth = pageWidth - 30
-        let y = drawReportTitleBlock(
-          doc,
-          marginLeft,
-          marginTop,
-          contentWidth,
-          'Hyperscale Data Center State Inquiry Report',
-          `State: ${selectedState} | Exported: ${new Date().toISOString()}`,
-          'Question',
-          question
-        ) + 2
+        const drawStateHeader = () => (
+          drawReportTitleBlock(
+            doc,
+            marginLeft,
+            marginTop,
+            contentWidth,
+            'Hyperscale Data Center State Inquiry Report',
+            `State: ${selectedState} | Exported: ${new Date().toISOString()}`,
+            'Question',
+            question
+          ) + 2
+        )
+        let y = drawStateHeader()
 
         const lines = (answer || '').split('\n')
         lines.forEach((line) => {
           const safeLine = sanitizePdfText(line)
-          if (y > 270) { doc.addPage(); y = marginTop }
+          if (y > pageHeight - 20) {
+            doc.addPage()
+            y = drawStateHeader()
+          }
 
           if (safeLine.startsWith('## ')) {
             doc.setFont('helvetica', 'bold')
