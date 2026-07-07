@@ -986,17 +986,28 @@ export default function DataQuery() {
     }
 
     const runLegacyInquiry = async () => {
-      const legacyResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestPayload),
-      })
+      const requestOnce = async (timeoutMs) => {
+        const legacyResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestPayload),
+        }, timeoutMs)
 
-      if (!legacyResponse.ok) {
-        throw new Error('Could not get a response from inquiry service')
+        if (!legacyResponse.ok) {
+          throw new Error('Could not get a response from inquiry service')
+        }
+
+        return legacyResponse.json()
       }
 
-      return legacyResponse.json()
+      try {
+        return await requestOnce(90000)
+      } catch (error) {
+        if (error?.name === 'AbortError') {
+          return requestOnce(120000)
+        }
+        throw error
+      }
     }
 
     try {
@@ -1027,7 +1038,11 @@ export default function DataQuery() {
       setAnswer(rawText)
       setResources(parsedResources)
     } catch (err) {
-      setAskError(err?.message || 'Could not get a response. Please try again.')
+      if (err?.name === 'AbortError') {
+        setAskError('Inquiry request timed out. Please try again.')
+      } else {
+        setAskError(err?.message || 'Could not get a response. Please try again.')
+      }
     } finally {
       stageTimers.forEach(clearTimeout)
       setAsking(false)
