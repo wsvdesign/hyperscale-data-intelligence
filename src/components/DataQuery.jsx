@@ -978,72 +978,89 @@ export default function DataQuery() {
       ? `State: ${selectedState}. Operating: ${stateRecord.operating}. Planned: ${stateRecord.planned}. Ratio: ${stateRecord.ratio.toFixed(2)}. Party: ${stateRecord.party}. Question: ${question}`
       : `Scope: All U.S. states in dataset. Question: ${question}`
 
+    const requestPayload = {
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: contextMsg }],
+      max_tokens: 2000,
+      tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+    }
+
+    const runLegacyInquiry = async () => {
+      const legacyResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestPayload),
+      })
+
+      if (!legacyResponse.ok) {
+        throw new Error('Could not get a response from inquiry service')
+      }
+
+      return legacyResponse.json()
+    }
+
     try {
       const startResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic-start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: contextMsg }],
-          max_tokens: 2000,
-          tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        }),
+        body: JSON.stringify(requestPayload),
       })
       let data = null
 
       if (startResponse.status === 404) {
         // Backward compatibility for environments that only expose the legacy endpoint.
-        const legacyResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system: SYSTEM_PROMPT,
-            messages: [{ role: 'user', content: contextMsg }],
-            max_tokens: 2000,
-            tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-          }),
-        })
-
-        if (!legacyResponse.ok) {
-          throw new Error('Could not get a response from inquiry service')
-        }
-
-        data = await legacyResponse.json()
+        data = await runLegacyInquiry()
       } else {
         if (!startResponse.ok) {
-          throw new Error('Could not start inquiry')
-        }
-
-        const { jobId } = await startResponse.json()
-        if (!jobId) {
-          throw new Error('Missing inquiry job id')
-        }
-
-        const pollLimit = 180
-        let attempts = 0
-
-        while (attempts < pollLimit) {
-          attempts += 1
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-
-          const statusResponse = await fetchJsonWithTimeout(`/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`, {}, 10000)
-
-          if (statusResponse.status === 404) {
-            continue
+          // If async start is unavailable or rate-limited, retry through legacy endpoint.
+          data = await runLegacyInquiry()
+        } else {
+          const { jobId } = await startResponse.json()
+          if (!jobId) {
+            throw new Error('Missing inquiry job id')
           }
 
-          if (!statusResponse.ok) {
-            throw new Error('Inquiry status check failed')
-          }
+          const pollLimit = 180
+          let attempts = 0
+          let pendingOrRunningCount = 0
+          let missingCount = 0
 
-          const statusData = await statusResponse.json()
-          if (statusData.status === 'done') {
-            data = statusData.data
-            break
-          }
+          while (attempts < pollLimit) {
+            attempts += 1
+            await new Promise((resolve) => setTimeout(resolve, 2000))
 
-          if (statusData.status === 'error') {
-            throw new Error(statusData.message || 'Inquiry failed')
+            const statusResponse = await fetchJsonWithTimeout(`/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`, {}, 10000)
+
+            if (statusResponse.status === 404) {
+              missingCount += 1
+              if (missingCount >= 5) {
+                data = await runLegacyInquiry()
+                break
+              }
+              continue
+            }
+
+            if (!statusResponse.ok) {
+              throw new Error('Inquiry status check failed')
+            }
+
+            const statusData = await statusResponse.json()
+            if (statusData.status === 'done') {
+              data = statusData.data
+              break
+            }
+
+            if (statusData.status === 'error') {
+              throw new Error(statusData.message || 'Inquiry failed')
+            }
+
+            if (statusData.status === 'pending' || statusData.status === 'running') {
+              pendingOrRunningCount += 1
+              if (pendingOrRunningCount >= 20) {
+                data = await runLegacyInquiry()
+                break
+              }
+            }
           }
         }
       }
