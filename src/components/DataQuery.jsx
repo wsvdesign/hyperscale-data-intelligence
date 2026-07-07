@@ -755,6 +755,27 @@ export default function DataQuery() {
       .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '')
   }
 
+  function drawReportTitleBlock(doc, marginLeft, marginTop, contentWidth, title, meta, previewLabel, previewText) {
+    let y = marginTop
+
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(13)
+    doc.setTextColor(30, 30, 30)
+    doc.text(sanitizePdfText(title), marginLeft, y)
+    y += 6
+
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
+    doc.setTextColor(90, 90, 90)
+    doc.text(sanitizePdfText(meta), marginLeft, y)
+    y += 5
+
+    doc.setTextColor(70, 70, 70)
+    const preview = doc.splitTextToSize(sanitizePdfText(`${previewLabel}: ${previewText}`), contentWidth)
+    doc.text(preview, marginLeft, y)
+    return y + preview.length * 3 + 2
+  }
+
   function handlePrintSql() {
     if (!results || results.empty || !results.columns?.length) return
 
@@ -782,25 +803,16 @@ export default function DataQuery() {
       const widthScale = tableWidth / colWidths.reduce((sum, n) => sum + n, 0)
       colWidths = colWidths.map((w) => w * widthScale)
 
-      const drawTitleBlock = () => {
-        let y = marginTop
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(13)
-        doc.setTextColor(30, 30, 30)
-        doc.text('Hyperscale Data Center SQL Report', marginLeft, y)
-        y += 6
-
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(8)
-        doc.setTextColor(90, 90, 90)
-        doc.text(`Rows: ${results.rows.length} | Exported: ${new Date().toISOString()}`, marginLeft, y)
-        y += 5
-
-        doc.setTextColor(70, 70, 70)
-        const sqlPreview = doc.splitTextToSize(`SQL: ${sql}`, tableWidth)
-        doc.text(sqlPreview, marginLeft, y)
-        return y + sqlPreview.length * 3 + 2
-      }
+      const drawTitleBlock = () => drawReportTitleBlock(
+        doc,
+        marginLeft,
+        marginTop,
+        tableWidth,
+        'Hyperscale Data Center SQL Report',
+        `Rows: ${results.rows.length} | Exported: ${new Date().toISOString()}`,
+        'SQL',
+        sql
+      )
 
       const drawHeaderRow = (y) => {
         doc.setFillColor(236, 240, 247)
@@ -871,51 +883,45 @@ export default function DataQuery() {
     withJsPdf((jsPDF) => {
       try {
         const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-        const W = doc.internal.pageSize.getWidth()
-        let y = 20
-
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(10)
-        doc.setTextColor(70, 70, 70)
-        doc.text('STATE INQUIRY REPORT', 15, y)
-        y += 7
-
-        doc.setFont('helvetica', 'bold')
-        doc.setFontSize(14)
-        doc.setTextColor(30, 30, 30)
-        doc.text(sanitizePdfText(`${selectedState} - Hyperscale Data Center Inquiry`), 15, y)
-        y += 8
-
-        doc.setFont('helvetica', 'normal')
-        doc.setFontSize(9)
-        doc.setTextColor(80, 80, 80)
-        doc.text(sanitizePdfText(`Question: ${question}`), 15, y, { maxWidth: W - 30 })
-        y += 12
+        const pageWidth = doc.internal.pageSize.getWidth()
+        const marginLeft = 15
+        const marginTop = 20
+        const contentWidth = pageWidth - 30
+        let y = drawReportTitleBlock(
+          doc,
+          marginLeft,
+          marginTop,
+          contentWidth,
+          'Hyperscale Data Center State Inquiry Report',
+          `State: ${selectedState} | Exported: ${new Date().toISOString()}`,
+          'Question',
+          question
+        ) + 2
 
         const lines = (answer || '').split('\n')
         lines.forEach((line) => {
           const safeLine = sanitizePdfText(line)
-          if (y > 270) { doc.addPage(); y = 20 }
+          if (y > 270) { doc.addPage(); y = marginTop }
 
           if (safeLine.startsWith('## ')) {
             doc.setFont('helvetica', 'bold')
             doc.setFontSize(10)
             doc.setTextColor(30, 30, 30)
-            doc.text(sanitizePdfText(safeLine.slice(3).toUpperCase()), 15, y)
+            doc.text(sanitizePdfText(safeLine.slice(3).toUpperCase()), marginLeft, y)
             y += 6
           } else if (safeLine.startsWith('- ')) {
             doc.setFont('helvetica', 'normal')
             doc.setFontSize(9)
             doc.setTextColor(60, 60, 60)
-            const wrapped = doc.splitTextToSize(`- ${safeLine.slice(2)}`, W - 30)
-            doc.text(wrapped, 15, y)
+            const wrapped = doc.splitTextToSize(`- ${safeLine.slice(2)}`, contentWidth)
+            doc.text(wrapped, marginLeft, y)
             y += wrapped.length * 5
           } else if (safeLine.trim()) {
             doc.setFont('helvetica', 'normal')
             doc.setFontSize(9)
             doc.setTextColor(60, 60, 60)
-            const wrapped = doc.splitTextToSize(safeLine, W - 30)
-            doc.text(wrapped, 15, y)
+            const wrapped = doc.splitTextToSize(safeLine, contentWidth)
+            doc.text(wrapped, marginLeft, y)
             y += wrapped.length * 5
           } else {
             y += 3
