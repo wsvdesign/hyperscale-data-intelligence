@@ -986,6 +986,8 @@ export default function DataQuery() {
     }
 
     const runLegacyInquiry = async () => {
+      const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
       const requestOnce = async (timeoutMs) => {
         const legacyResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic', {
           method: 'POST',
@@ -993,26 +995,109 @@ export default function DataQuery() {
           body: JSON.stringify(requestPayload),
         }, timeoutMs)
 
+        const payload = await legacyResponse.json().catch(() => null)
+
         if (!legacyResponse.ok) {
-          throw new Error('Could not get a response from inquiry service')
+          const upstreamMessage = payload?.error?.message || payload?.error || payload?.message
+          const err = new Error(upstreamMessage || 'Could not get a response from inquiry service')
+          err.status = legacyResponse.status
+          throw err
         }
 
-        return legacyResponse.json()
+        return payload
       }
 
-      try {
-        return await requestOnce(90000)
-      } catch (error) {
-        if (error?.name === 'AbortError') {
-          return requestOnce(120000)
+      const retryableStatuses = new Set([408, 429, 500, 502, 503, 504, 529])
+      const attempts = [90000, 120000, 120000]
+      let lastError = null
+
+      for (let i = 0; i < attempts.length; i += 1) {
+        try {
+          return await requestOnce(attempts[i])
+        } catch (error) {
+          lastError = error
+          const isAbort = error?.name === 'AbortError'
+          const isRetryable = isAbort || retryableStatuses.has(error?.status)
+          if (!isRetryable || i === attempts.length - 1) {
+            throw error
+          }
+          await wait(1000 * (i + 1))
         }
-        throw error
       }
+
+      throw lastError || new Error('Could not get a response from inquiry service')
     }
 
     try {
-      // Use the synchronous legacy endpoint for reliability during live demos.
-      const data = await runLegacyInquiry()
+      let data = null
+
+      const startResponse = await fetchJsonWithTimeout('/.netlify/functions/anthropic-start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestPayload),
+      }, 15000)
+
+      if (!startResponse.ok) {
+        data = await runLegacyInquiry()
+      } else {
+        const { jobId } = await startResponse.json()
+        if (!jobId) {
+          data = await runLegacyInquiry()
+        } else {
+          let attempts = 0
+          let missingCount = 0
+          let pendingCount = 0
+          const pollLimit = 90
+
+          while (attempts < pollLimit) {
+            attempts += 1
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            const statusResponse = await fetchJsonWithTimeout(
+              `/.netlify/functions/anthropic-status?jobId=${encodeURIComponent(jobId)}`,
+              {},
+              10000
+            )
+
+            if (statusResponse.status === 404) {
+              missingCount += 1
+              if (missingCount >= 5) {
+                data = await runLegacyInquiry()
+                break
+              }
+              continue
+            }
+
+            if (!statusResponse.ok) {
+              data = await runLegacyInquiry()
+              break
+            }
+
+            const statusData = await statusResponse.json()
+
+            if (statusData.status === 'done') {
+              data = statusData.data
+              break
+            }
+
+            if (statusData.status === 'error') {
+              throw new Error(statusData.message || 'Inquiry failed')
+            }
+
+            if (statusData.status === 'pending' || statusData.status === 'running') {
+              pendingCount += 1
+              if (pendingCount >= 25) {
+                data = await runLegacyInquiry()
+                break
+              }
+            }
+          }
+        }
+      }
+
+      if (!data) {
+        data = await runLegacyInquiry()
+      }
 
       if (!data) {
         throw new Error('Inquiry timed out before completion')
@@ -1040,6 +1125,8 @@ export default function DataQuery() {
     } catch (err) {
       if (err?.name === 'AbortError') {
         setAskError('Inquiry request timed out. Please try again.')
+      } else if (err?.status === 429 || err?.status === 529) {
+        setAskError('Inquiry service is busy right now. Please retry in a moment.')
       } else {
         setAskError(err?.message || 'Could not get a response. Please try again.')
       }

@@ -3,7 +3,7 @@ import { getStore } from '@netlify/blobs';
 
 const JOB_TTL_SECONDS = 60 * 60;
 
-export default async (req) => {
+export default async (req, context) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
   }
@@ -28,13 +28,25 @@ export default async (req) => {
   );
 
   const origin = new URL(req.url).origin;
-  fetch(`${origin}/.netlify/functions/anthropic-run-background`, {
+  const dispatchPromise = fetch(`${origin}/.netlify/functions/anthropic-run-background`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ jobId, ...body }),
-  }).catch(() => {
-    // Background dispatch failures are reflected by job timeout in the poller.
+  }).catch(async () => {
+    await store.set(
+      jobId,
+      JSON.stringify({
+        status: 'error',
+        message: 'Failed to start inquiry job',
+        finishedAt: Date.now(),
+      }),
+      { expirationTtl: JOB_TTL_SECONDS }
+    );
   });
+
+  if (typeof context?.waitUntil === 'function') {
+    context.waitUntil(dispatchPromise);
+  }
 
   return new Response(JSON.stringify({ jobId }), {
     status: 202,
