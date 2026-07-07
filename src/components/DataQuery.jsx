@@ -729,12 +729,30 @@ export default function DataQuery() {
 
   // ── PRINT ──────────────────────────────────────────────────────────────────
   function withJsPdf(run) {
+    if (window.jspdf?.jsPDF) {
+      run(window.jspdf.jsPDF)
+      return
+    }
+
     const script = document.createElement('script')
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
     script.onload = () => {
       run(window.jspdf.jsPDF)
     }
+    script.onerror = () => {
+      console.error('Failed to load jsPDF library')
+    }
     document.head.appendChild(script)
+  }
+
+  function sanitizePdfText(value) {
+    return String(value ?? '')
+      .replace(/[\u2018\u2019]/g, "'")
+      .replace(/[\u201C\u201D]/g, '"')
+      .replace(/[\u2013\u2014]/g, '-')
+      .replace(/\u2026/g, '...')
+      .replace(/\u00A0/g, ' ')
+      .replace(/[^\x09\x0A\x0D\x20-\x7E]/g, '')
   }
 
   function handlePrintSql() {
@@ -851,55 +869,64 @@ export default function DataQuery() {
     if (!answer) return
 
     withJsPdf((jsPDF) => {
-      const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-      const W = doc.internal.pageSize.getWidth()
-      let y = 20
+      try {
+        const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+        const W = doc.internal.pageSize.getWidth()
+        let y = 20
 
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(10)
-      doc.setTextColor(70, 70, 70)
-      doc.text('STATE INQUIRY REPORT', 15, y)
-      y += 7
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(10)
+        doc.setTextColor(70, 70, 70)
+        doc.text('STATE INQUIRY REPORT', 15, y)
+        y += 7
 
-      doc.setFont('helvetica', 'bold')
-      doc.setFontSize(14)
-      doc.setTextColor(30, 30, 30)
-      doc.text(`${selectedState} — Hyperscale Data Center Inquiry`, 15, y)
-      y += 8
-      doc.setFont('helvetica', 'normal')
-      doc.setFontSize(9)
-      doc.setTextColor(80, 80, 80)
-      doc.text(`Question: ${question}`, 15, y, { maxWidth: W - 30 })
-      y += 12
-      const lines = (answer || '').split('\n')
-      lines.forEach(line => {
-        if (y > 270) { doc.addPage(); y = 20 }
-        if (line.startsWith('## ')) {
-          doc.setFont('helvetica', 'bold')
-          doc.setFontSize(10)
-          doc.setTextColor(30, 30, 30)
-          doc.text(line.slice(3).toUpperCase(), 15, y)
-          y += 6
-        } else if (line.startsWith('- ')) {
-          doc.setFont('helvetica', 'normal')
-          doc.setFontSize(9)
-          doc.setTextColor(60, 60, 60)
-          const wrapped = doc.splitTextToSize('— ' + line.slice(2), W - 30)
-          doc.text(wrapped, 15, y)
-          y += wrapped.length * 5
-        } else if (line.trim()) {
-          doc.setFont('helvetica', 'normal')
-          doc.setFontSize(9)
-          doc.setTextColor(60, 60, 60)
-          const wrapped = doc.splitTextToSize(line, W - 30)
-          doc.text(wrapped, 15, y)
-          y += wrapped.length * 5
-        } else {
-          y += 3
-        }
-      })
-      const date = new Date().toISOString().slice(0, 10)
-      doc.save(`${selectedState}_DataCenter_Report_${date}.pdf`)
+        doc.setFont('helvetica', 'bold')
+        doc.setFontSize(14)
+        doc.setTextColor(30, 30, 30)
+        doc.text(sanitizePdfText(`${selectedState} - Hyperscale Data Center Inquiry`), 15, y)
+        y += 8
+
+        doc.setFont('helvetica', 'normal')
+        doc.setFontSize(9)
+        doc.setTextColor(80, 80, 80)
+        doc.text(sanitizePdfText(`Question: ${question}`), 15, y, { maxWidth: W - 30 })
+        y += 12
+
+        const lines = (answer || '').split('\n')
+        lines.forEach((line) => {
+          const safeLine = sanitizePdfText(line)
+          if (y > 270) { doc.addPage(); y = 20 }
+
+          if (safeLine.startsWith('## ')) {
+            doc.setFont('helvetica', 'bold')
+            doc.setFontSize(10)
+            doc.setTextColor(30, 30, 30)
+            doc.text(sanitizePdfText(safeLine.slice(3).toUpperCase()), 15, y)
+            y += 6
+          } else if (safeLine.startsWith('- ')) {
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(9)
+            doc.setTextColor(60, 60, 60)
+            const wrapped = doc.splitTextToSize(`- ${safeLine.slice(2)}`, W - 30)
+            doc.text(wrapped, 15, y)
+            y += wrapped.length * 5
+          } else if (safeLine.trim()) {
+            doc.setFont('helvetica', 'normal')
+            doc.setFontSize(9)
+            doc.setTextColor(60, 60, 60)
+            const wrapped = doc.splitTextToSize(safeLine, W - 30)
+            doc.text(wrapped, 15, y)
+            y += wrapped.length * 5
+          } else {
+            y += 3
+          }
+        })
+
+        const date = new Date().toISOString().slice(0, 10)
+        doc.save(`${sanitizePdfText(selectedState).replace(/\s+/g, '_')}_DataCenter_Report_${date}.pdf`)
+      } catch (error) {
+        console.error('State Inquiry PDF generation failed:', error)
+      }
     })
   }
 
